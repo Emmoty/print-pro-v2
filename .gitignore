@@ -1,0 +1,23 @@
+# Dependency directories
+node_modules/
+agent/node_modules/
+
+# Environment configuration
+.env
+agent/.env
+
+# Temporary and spool files
+storage/vault/*
+!storage/vault/.gitkeep
+agent/temp_spool/*
+!agent/temp_spool/.gitkeep
+data/backups/*
+!data/backups/.gitkeep
+
+# Logs and runtime data
+*.log
+npm-debug.log*
+
+# OS metadata
+.DS_Store
+Thumbs.db
