@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CloudPrint Pro - Professional Printing. Simplified.</title>
+  <meta name="description" content="Fast, reliable online document printing in Kenya. Upload documents, pay securely with M-Pesa, and collect your prints instantly.">
+  
+  <!-- Google Fonts: Outfit & Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- Main Stylesheet -->
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <!-- Ambient background glow elements -->
+  <div class="ambient-bg">
+    <div class="ambient-glow-1"></div>
+    <div class="ambient-glow-2"></div>
+  </div>
+
+  <div class="app-container">
+    <!-- Top Showcase Header -->
+    <header class="showcase-header">
+      <div class="showcase-brand">
+        <i data-lucide="printer" class="logo-icon"></i>
+        <span>CloudPrint Pro</span>
+      </div>
+
+      <!-- View Switcher (Mobile Mockup vs Fluid Desktop View) -->
+      <div class="view-mode-controls">
+        <button id="viewMobileBtn" class="mode-btn active" title="Mobile App Mockup">
+          <i data-lucide="smartphone" style="width: 15px; height: 15px;"></i>
+          <span>Mobile</span>
+        </button>
+        <button id="viewFluidBtn" class="mode-btn" title="Expanded Responsive View">
+          <i data-lucide="monitor" style="width: 15px; height: 15px;"></i>
+          <span>Expanded</span>
+        </button>
+      </div>
+
+      <!-- Quick action buttons -->
+      <div class="header-actions">
+        <a href="admin.html" class="btn-pill-action" style="background: rgba(245, 158, 11, 0.12); color: var(--primary-gold); border-color: rgba(245, 158, 11, 0.35); text-decoration: none;">
+          <i data-lucide="shield" style="width: 14px; height: 14px;"></i>
+          <span>Admin Portal</span>
+        </a>
+        <button id="openHistoryBtn" class="btn-pill-action">
+          <i data-lucide="history" style="width: 14px; height: 14px;"></i>
+          <span>My Orders</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Main Device Wrapper Frame -->
+    <main class="device-frame-wrapper mobile-mode" id="deviceFrameWrapper">
+      <div class="phone-mockup">
+        <!-- Phone hardware notch -->
+        <div class="phone-notch">
+          <div class="phone-speaker"></div>
+          <div class="phone-camera"></div>
+        </div>
+
+        <div class="phone-screen">
+          <!-- Inner App Header (Matches reference image) -->
+          <div class="app-header">
+            <a href="javascript:void(0)" class="app-brand" id="brandHomeBtn">
+              <div class="brand-icon-wrapper">
+                <i data-lucide="printer" style="width: 22px; height: 22px;"></i>
+              </div>
+              <span class="brand-name">CloudPrint Pro</span>
+            </a>
+
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <div class="mpesa-badge">
+                <span>M-Pesa Payments</span>
+              </div>
+              <button class="btn-icon" id="openMenuBtn" aria-label="Open Menu">
+                <i data-lucide="menu" style="width: 22px; height: 22px;"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- Step Progression Header (Visible during Steps 1 - 4) -->
+          <div class="flow-stepper-header" id="flowStepper" style="display: none;">
+            <button class="flow-nav-back" id="flowBackBtn">
+              <i data-lucide="arrow-left" style="width: 16px; height: 16px;"></i>
+              <span>Back</span>
+            </button>
+            <div style="display: flex; gap: 12px; align-items: center;">
+              <div class="step-indicator-item" id="stepPill1">
+                <span class="step-num">1</span>
+                <span>Upload</span>
+              </div>
+              <div class="step-indicator-item" id="stepPill2">
+                <span class="step-num">2</span>
+                <span>Review</span>
+              </div>
+              <div class="step-indicator-item" id="stepPill3">
+                <span class="step-num">3</span>
+                <span>Process</span>
+              </div>
+              <div class="step-indicator-item" id="stepPill4">
+                <span class="step-num">4</span>
+                <span>Done</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- ==========================================
+               SCREEN 0: HOME / LANDING (Screenshot 1)
+               ========================================== -->
+          <div class="view-screen active" id="screenHome">
+            <div class="hero-badge-tag">
+              <i data-lucide="sparkles" style="width: 13px; height: 13px;"></i>
+              <span>Secure • Fast • Reliable</span>
+            </div>
+
+            <h1 class="hero-title">
+              Professional<br>
+              printing.<br>
+              <span class="highlight">Simplified.</span>
+            </h1>
+
+            <p class="hero-subtitle">
+              Upload your documents. Pay with M-Pesa. We'll take care of the rest.
+            </p>
+
+            <!-- Standard Rates Header -->
+            <div class="pricing-header-row">
+              <span class="pricing-section-title">Standard Rates</span>
+            </div>
+
+            <!-- GROUPED BY PAPER SIZE -->
+            <div class="grouped-pricing-container" id="groupedPricingView">
+              <!-- A4 Group -->
+              <div class="paper-group-card">
+                <div class="paper-group-header">
+                  <div class="paper-group-title">
+                    <i data-lucide="file-text" style="width: 16px; height: 16px; color: var(--primary-gold);"></i>
+                    <span>A4 Standard</span>
+                  </div>
+                  <span class="paper-dimension-badge">210 × 297 mm</span>
+                </div>
+                <div class="paper-options-grid">
+                  <div class="paper-option-cell">
+                    <div class="option-name-tag">B&amp;W</div>
+                    <div class="option-price-tag" id="landingRateA4Bw">KES 1 <span class="per-unit">/page</span></div>
+                  </div>
+                  <div class="paper-option-cell highlight">
+                    <div class="option-name-tag">Colour</div>
+                    <div class="option-price-tag" id="landingRateA4Colour">KES 3 <span class="per-unit">/page</span></div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- A3 Group -->
+              <div class="paper-group-card">
+                <div class="paper-group-header">
+                  <div class="paper-group-title">
+                    <i data-lucide="layers" style="width: 16px; height: 16px; color: var(--primary-gold);"></i>
+                    <span>A3 Large Format</span>
+                  </div>
+                  <span class="paper-dimension-badge">297 × 420 mm</span>
+                </div>
+                <div class="paper-options-grid">
+                  <div class="paper-option-cell">
+                    <div class="option-name-tag">B&amp;W</div>
+                    <div class="option-price-tag" id="landingRateA3Bw">KES 2 <span class="per-unit">/page</span></div>
+                  </div>
+                  <div class="paper-option-cell highlight">
+                    <div class="option-name-tag">Colour</div>
+                    <div class="option-price-tag" id="landingRateA3Colour">KES 5 <span class="per-unit">/page</span></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Landing Call to Action Buttons -->
+            <div class="landing-actions">
+              <button class="btn-primary-gold" id="startPrintingBtn">
+                <span>Start printing</span>
+              </button>
+              <button class="btn-secondary-dark" id="trackJobHomeBtn">
+                <span>Track an existing job</span>
+              </button>
+            </div>
+
+            <div class="accepted-files-note">
+              Accepted files: PDF, DOC, DOCX, PPT, PPTX, XLS, XLSX, JPG, PNG, WEBP, HEIC, TXT • Up to 25 MB each
+            </div>
+          </div>
+
+          <!-- ==========================================
+               SCREEN 1: UPLOAD (Screenshot 2 - Step 1)
+               ========================================== -->
+          <div class="view-screen" id="screenUpload">
+            <h2 class="screen-title">Upload your documents</h2>
+
+            <div class="dropzone-container" id="dropzoneBox">
+              <div class="dropzone-icon-box">
+                <i data-lucide="cloud-upload"></i>
+              </div>
+              <div class="dropzone-text-main">
+                Drag &amp; drop your files here
+              </div>
+              <div style="color: var(--text-muted); font-size: 0.82rem; margin-bottom: 12px;">or</div>
+              <button type="button" class="btn-choose-file" id="chooseFileBtn">
+                <i data-lucide="file-plus" style="width: 16px; height: 16px;"></i>
+                <span>Choose files (multiple supported)</span>
+              </button>
+              <input type="file" id="fileInputElement" multiple accept=".pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.rtf,.txt,.csv,.jpg,.jpeg,.png,.webp,.heic,.bmp,.tiff,.svg,.ai,.psd" style="display: none;">
+            </div>
+
+            <!-- Uploaded Files Staging Queue in Step 1 -->
+            <div id="uploadStagingQueue" style="display: none; margin-bottom: 18px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                <span class="section-label" style="margin-bottom: 0;">Selected Files (<span id="uploadQueueCount">0</span>)</span>
+                <button type="button" class="btn-add-more-files" id="addMoreFilesBtn">
+                  <i data-lucide="plus" style="width: 13px; height: 13px;"></i>
+                  <span>Add more</span>
+                </button>
+              </div>
+              <div class="uploaded-files-list" id="uploadStagingList">
+                <!-- Populated dynamically via JS -->
+              </div>
+            </div>
+
+            <div class="accepted-files-note" style="margin-top: 10px; margin-bottom: 20px;">
+              Accepted files: PDF, DOC, DOCX, PPT, PPTX, XLS, XLSX, JPG, PNG, WEBP, HEIC, TXT<br>Max size: 25 MB per file • Multi-file batch printing supported
+            </div>
+
+            <div style="margin-top: auto;">
+              <button class="btn-primary-gold" id="uploadNextBtn">
+                <span id="uploadNextBtnText">Next</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- ==========================================
+               SCREEN 2: REVIEW & PAY (Screenshot 2 - Step 2)
+               ========================================== -->
+          <div class="view-screen" id="screenReview">
+            <!-- Batch Header & File List -->
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+              <div class="section-label" style="margin-bottom: 0;">Files to Print (<span id="reviewFilesCount">1</span>)</div>
+              <button type="button" class="btn-add-more-link" id="reviewAddMoreFilesBtn">
+                <i data-lucide="plus-circle" style="width: 14px; height: 14px;"></i>
+                <span>Add files</span>
+              </button>
+            </div>
+
+            <!-- Scrollable List of Uploaded Files with Per-File Page Count -->
+            <div class="review-files-container" id="reviewFilesContainer">
+              <!-- Dynamically populated via JS -->
+            </div>
+
+            <!-- Batch Summary Banner -->
+            <div class="batch-summary-pill" id="batchSummaryPill">
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <i data-lucide="layers" style="width: 16px; height: 16px; color: var(--primary-gold);"></i>
+                <span style="font-weight: 700; font-size: 0.88rem; color: #ffffff;" id="batchPagesTotalText">10 total pages across 1 file</span>
+              </div>
+              <span class="mpesa-badge" style="font-size: 0.68rem; padding: 2px 8px;">Auto-counted</span>
+            </div>
+
+            <!-- Paper Size Dropdown -->
+            <div class="config-group">
+              <div class="section-label">Paper Size</div>
+              <div class="dropdown-wrapper">
+                <button type="button" class="custom-select-box" id="paperSizeSelectBox">
+                  <div style="display: flex; align-items: center; gap: 8px;">
+                    <i data-lucide="file-text" style="width: 16px; height: 16px; color: var(--primary-gold);"></i>
+                    <span class="select-service-val" id="selectedPaperSizeText">A4 Standard (210×297mm)</span>
+                  </div>
+                  <i data-lucide="chevron-down" class="dropdown-chevron" id="paperSizeChevron" style="width: 18px; height: 18px;"></i>
+                </button>
+                
+                <div class="service-dropdown-options" id="paperSizeDropdownList" style="display: none;">
+                  <div class="service-option-item selected" data-size="a4">
+                    <div style="display: flex; flex-direction: column;">
+                      <span style="font-weight: 600; color: #ffffff;">A4 Standard</span>
+                      <span style="font-size: 0.72rem; color: var(--text-muted);">210 × 297 mm</span>
+                    </div>
+                    <span class="dropdown-check-badge"><i data-lucide="check" style="width: 14px; height: 14px;"></i></span>
+                  </div>
+                  <div class="service-option-item" data-size="a3">
+                    <div style="display: flex; flex-direction: column;">
+                      <span style="font-weight: 600; color: #ffffff;">A3 Large Format</span>
+                      <span style="font-size: 0.72rem; color: var(--text-muted);">297 × 420 mm</span>
+                    </div>
+                    <span class="dropdown-check-badge"><i data-lucide="check" style="width: 14px; height: 14px;"></i></span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Color Dropdown -->
+            <div class="config-group">
+              <div class="section-label">Color</div>
+              <div class="dropdown-wrapper">
+                <button type="button" class="custom-select-box" id="colorSelectBox">
+                  <div style="display: flex; align-items: center; gap: 8px;">
+                    <div class="color-indicator-dot colour" id="selectedColorDot"></div>
+                    <span class="select-service-val" id="selectedColorText">Full Colour</span>
+                  </div>
+                  <div style="display: flex; align-items: center; gap: 8px;">
+                    <span class="select-service-rate" id="selectedColorRate">KES 3 <span style="font-size: 0.8rem; color: var(--text-secondary); font-weight: 500;">/page</span></span>
+                    <i data-lucide="chevron-down" class="dropdown-chevron" id="colorChevron" style="width: 18px; height: 18px;"></i>
+                  </div>
+                </button>
+                
+                <div class="service-dropdown-options" id="colorDropdownList" style="display: none;">
+                  <div class="service-option-item" data-color="bw">
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                      <div class="color-indicator-dot bw"></div>
+                      <div style="display: flex; flex-direction: column;">
+                        <span style="font-weight: 600; color: #ffffff;">Black &amp; White</span>
+                        <span style="font-size: 0.72rem; color: var(--text-muted);">Mono print</span>
+                      </div>
+                    </div>
+                    <span style="color: var(--primary-gold); font-weight: 700;" id="bwDropdownRateText">KES 1 /page</span>
+                  </div>
+                  <div class="service-option-item selected" data-color="colour">
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                      <div class="color-indicator-dot colour"></div>
+                      <div style="display: flex; flex-direction: column;">
+                        <span style="font-weight: 600; color: #ffffff;">Full Colour</span>
+                        <span style="font-size: 0.72rem; color: var(--text-muted);">Vibrant rich colour</span>
+                      </div>
+                    </div>
+                    <span style="color: var(--primary-gold); font-weight: 700;" id="colourDropdownRateText">KES 3 /page</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Pages Selection (All Pages vs Custom Page Numbers) -->
+            <div class="config-group">
+              <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 8px;">
+                <div class="section-label" style="margin-bottom: 0;">Pages to Print</div>
+                <span style="font-size: 0.76rem; color: var(--primary-gold); font-weight: 700;" id="pagesSummaryBadge">10 pages selected</span>
+              </div>
+
+              <!-- Mode Toggle: All Pages vs Custom -->
+              <div class="page-mode-tabs">
+                <button type="button" class="page-mode-tab active" id="pageModeAllBtn">
+                  <i data-lucide="layers" style="width: 14px; height: 14px;"></i>
+                  <span>All Pages (<span id="totalDocPagesText">10</span>)</span>
+                </button>
+                <button type="button" class="page-mode-tab" id="pageModeCustomBtn">
+                  <i data-lucide="edit-3" style="width: 14px; height: 14px;"></i>
+                  <span>Custom Range</span>
+                </button>
+              </div>
+
+              <!-- Custom Page Range Input Box (Revealed when Custom is active) -->
+              <div class="custom-page-box" id="customPageRangeBox" style="display: none;">
+                <div class="range-inputs-row">
+                  <div class="range-input-col">
+                    <label class="range-mini-label">From Page</label>
+                    <input type="number" id="pageFromInput" class="range-mini-input" value="1" min="1" max="10">
+                  </div>
+                  <span style="color: var(--text-muted); font-weight: 700; align-self: flex-end; padding-bottom: 8px;">to</span>
+                  <div class="range-input-col">
+                    <label class="range-mini-label">To Page</label>
+                    <input type="number" id="pageToInput" class="range-mini-input" value="5" min="1" max="10">
+                  </div>
+                </div>
+
+                <div style="margin-top: 10px;">
+                  <label class="range-mini-label">Or enter custom page list (e.g. 1, 3, 5-8):</label>
+                  <input type="text" id="customPageListInput" class="custom-pages-text-input" placeholder="e.g. 1-3, 5, 7">
+                </div>
+              </div>
+            </div>
+
+            <!-- Copies & Double-sided Row -->
+            <div class="options-grid">
+              <!-- Copies Stepper -->
+              <div class="option-toggle-card" style="cursor: default;">
+                <div>
+                  <div style="font-weight: 600;">Copies</div>
+                  <div style="font-size: 0.72rem; color: var(--text-muted);">Number of sets</div>
+                </div>
+                <div class="mini-stepper">
+                  <button type="button" class="btn-mini-counter" id="copiesMinusBtn">-</button>
+                  <span class="mini-counter-val" id="copiesCountVal">1</span>
+                  <button type="button" class="btn-mini-counter" id="copiesPlusBtn">+</button>
+                </div>
+              </div>
+
+              <!-- Double-Sided Toggle -->
+              <div class="option-toggle-card" id="doubleSidedToggle">
+                <div>
+                  <div style="font-weight: 600;">Double-sided</div>
+                  <div style="font-size: 0.72rem; color: var(--text-muted);">Duplex print</div>
+                </div>
+                <input type="checkbox" id="doubleSidedCheck" style="accent-color: var(--primary-gold);">
+              </div>
+            </div>
+
+            <!-- M-Pesa Phone Number Input -->
+            <div class="config-group">
+              <div class="section-label">M-Pesa Phone Number</div>
+              <div class="phone-input-group">
+                <span class="phone-prefix">+254</span>
+                <input type="tel" id="mpesaPhoneInput" class="phone-input" placeholder="712345678" value="712345678" maxlength="10">
+              </div>
+            </div>
+
+            <!-- Total Price Summary -->
+            <div class="total-summary-row">
+              <span class="total-label">Total</span>
+              <span class="total-amount" id="reviewTotalAmount">KES 30</span>
+            </div>
+
+            <!-- Pay with M-Pesa Button -->
+            <button class="btn-mpesa-pay" id="payMpesaBtn">
+              <i data-lucide="smartphone-charging" style="width: 20px; height: 20px;"></i>
+              <span>Pay with M-Pesa</span>
+            </button>
+
+            <div class="secure-payment-badge">
+              <i data-lucide="lock" style="width: 13px; height: 13px;"></i>
+              <span>Secure payment</span>
+            </div>
+          </div>
+
+          <!-- ==========================================
+               SCREEN 3: PROCESSING (Screenshot 2 - Step 3)
+               ========================================== -->
+          <div class="view-screen" id="screenProcessing">
+            <div class="processing-view-wrapper">
+              <!-- Circular Progress Ring -->
+              <div class="progress-ring-container">
+                <svg class="progress-ring-svg" viewBox="0 0 160 160">
+                  <circle class="ring-bg" cx="80" cy="80" r="70"></circle>
+                  <circle class="ring-progress" id="processingRingCircle" cx="80" cy="80" r="70"></circle>
+                </svg>
+                <div class="ring-center-content">
+                  <div class="printer-icon-glow">
+                    <i data-lucide="printer" style="width: 48px; height: 48px; color: #ffffff;"></i>
+                  </div>
+                </div>
+              </div>
+
+              <h2 class="processing-heading">Processing your job</h2>
+              <p class="processing-subtext" id="processingStatusText">Please wait while we prepare your document...</p>
+
+              <!-- Step Checklist -->
+              <div class="processing-checklist">
+                <!-- Uploading -->
+                <div class="check-item completed" id="chkUploading">
+                  <div class="check-item-left">
+                    <div class="check-icon-state"><i data-lucide="check" style="width: 12px; height: 12px;"></i></div>
+                    <span>Uploading</span>
+                  </div>
+                  <div class="check-item-status-pill">Done</div>
+                </div>
+
+                <!-- Processing -->
+                <div class="check-item completed" id="chkProcessing">
+                  <div class="check-item-left">
+                    <div class="check-icon-state"><i data-lucide="check" style="width: 12px; height: 12px;"></i></div>
+                    <span>Processing</span>
+                  </div>
+                  <div class="check-item-status-pill">Done</div>
+                </div>
+
+                <!-- Printing -->
+                <div class="check-item active" id="chkPrinting">
+                  <div class="check-item-left">
+                    <div class="check-icon-state">
+                      <div class="active-pulse-dot"></div>
+                    </div>
+                    <span>Printing</span>
+                  </div>
+                  <div class="check-item-status-pill" style="color: var(--primary-gold);">In progress</div>
+                </div>
+
+                <!-- Preparing output -->
+                <div class="check-item pending" id="chkPreparing">
+                  <div class="check-item-left">
+                    <div class="check-icon-state"></div>
+                    <span>Preparing output</span>
+                  </div>
+                  <div class="check-item-status-pill">Queued</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ==========================================
+               SCREEN 4: COMPLETED (Screenshot 2 - Step 4)
+               ========================================== -->
+          <div class="view-screen" id="screenCompleted">
+            <div class="completed-view-wrapper">
+              <div class="success-check-badge">
+                <i data-lucide="check"></i>
+              </div>
+
+              <h2 class="completed-heading">Job completed!</h2>
+              <p class="completed-message">
+                Your document has been sent to the printer and is ready for pickup.
+              </p>
+
+              <!-- Simple Receipt Card -->
+              <div class="screen-receipt-card" id="screenReceiptCard">
+                <div class="receipt-card-header">
+                  <div style="display: flex; align-items: center; gap: 6px;">
+                    <i data-lucide="printer" style="width: 15px; height: 15px; color: var(--primary-gold);"></i>
+                    <span style="font-weight: 800; font-size: 0.86rem; letter-spacing: 0.5px; color: #ffffff;">CloudPrint Pro</span>
+                  </div>
+                  <span class="receipt-status-pill">PAID</span>
+                </div>
+
+                <div class="receipt-divider"></div>
+
+                <div class="receipt-rows-container">
+                  <div class="receipt-row">
+                    <span class="receipt-row-label">Job ID</span>
+                    <span class="receipt-row-value gold" id="receiptJobIdVal">#CP123456</span>
+                  </div>
+                  <div class="receipt-row">
+                    <span class="receipt-row-label">Documents</span>
+                    <span class="receipt-row-value" id="receiptDocNamesVal" title="Document.pdf">Document.pdf</span>
+                  </div>
+                  <div class="receipt-row">
+                    <span class="receipt-row-label">Paper &amp; Color</span>
+                    <span class="receipt-row-value" id="receiptConfigVal">A4 • Full Colour</span>
+                  </div>
+                  <div class="receipt-row">
+                    <span class="receipt-row-label">Pages / Copies</span>
+                    <span class="receipt-row-value" id="receiptPagesVal">10 pgs (1 copy)</span>
+                  </div>
+                  <div class="receipt-row">
+                    <span class="receipt-row-label">M-Pesa Ref</span>
+                    <span class="receipt-row-value" id="receiptMpesaCodeVal">QJ83910249</span>
+                  </div>
+                </div>
+
+                <div class="receipt-divider dashed"></div>
+
+                <div class="receipt-row total-row">
+                  <span style="font-weight: 700; color: var(--text-secondary); font-size: 0.88rem;">Total Paid</span>
+                  <span style="font-family: var(--font-heading); font-weight: 800; color: var(--primary-gold); font-size: 1.15rem;" id="receiptTotalVal">KES 30.00</span>
+                </div>
+
+                <div class="receipt-card-footer">
+                  <i data-lucide="check-circle-2" style="width: 13px; height: 13px; color: var(--mpesa-green);"></i>
+                  <span>Verified &amp; Sent to printer</span>
+                </div>
+              </div>
+
+              <!-- Privacy & Zero-Retention Security Badge -->
+              <div class="privacy-purge-badge" style="margin-top: 14px; margin-bottom: 4px; display: flex; align-items: center; justify-content: center; gap: 7px; background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.25); border-radius: var(--radius-pill); padding: 6px 14px; font-size: 0.73rem; color: var(--mpesa-green); max-width: 330px; width: 100%; text-align: center;">
+                <i data-lucide="shield-check" style="width: 15px; height: 15px; flex-shrink: 0;"></i>
+                <span><strong>Zero-Data Retention:</strong> Document files permanently shredded &amp; purged from memory.</span>
+              </div>
+
+              <!-- Completed Action Buttons (Below Receipt) -->
+              <div class="completed-actions" style="margin-top: 14px; width: 100%; max-width: 320px;">
+                <button class="btn-whatsapp" id="whatsappReceiptBtn" style="margin-bottom: 8px;">
+                  <i data-lucide="message-circle" style="width: 17px; height: 17px;"></i>
+                  <span>Send receipt to WhatsApp</span>
+                </button>
+                <button class="btn-primary-gold" id="startNewPrintBtn">
+                  <i data-lucide="plus-circle" style="width: 17px; height: 17px;"></i>
+                  <span>Start a new print</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+        </div> <!-- /.phone-screen -->
+      </div> <!-- /.phone-mockup -->
+    </main>
+  </div>
+
+  <!-- ==========================================
+       MODAL 1: SAFARICOM M-PESA STK PUSH STATUS
+       ========================================== -->
+  <div class="modal-backdrop" id="mpesaStkModal">
+    <div class="modal-sheet">
+      <div class="modal-header">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <div style="width: 10px; height: 10px; border-radius: 50%; background: var(--mpesa-green); box-shadow: 0 0 10px var(--mpesa-green);"></div>
+          <span class="modal-title">Safaricom M-Pesa STK Push</span>
+        </div>
+        <button class="btn-icon" id="closeStkModalBtn"><i data-lucide="x" style="width: 18px; height: 18px;"></i></button>
+      </div>
+      <div class="modal-body">
+        <div class="stk-phone-screen" style="text-align: center; padding: 24px 16px;">
+          <div style="display: flex; justify-content: center; margin-bottom: 14px;">
+            <div style="width: 56px; height: 56px; border-radius: 50%; background: rgba(16, 185, 129, 0.15); border: 2px solid var(--mpesa-green); display: flex; align-items: center; justify-content: center; color: var(--mpesa-green);">
+              <i data-lucide="smartphone" style="width: 28px; height: 28px;"></i>
+            </div>
+          </div>
+
+          <h3 style="font-size: 1.15rem; font-weight: 800; color: #ffffff; margin-bottom: 6px;">Prompt Sent to Your Phone!</h3>
+          <p class="stk-prompt-msg" id="stkPromptMessage" style="font-size: 0.86rem; line-height: 1.5; color: var(--text-secondary); margin-bottom: 18px;">
+            Please unlock your phone, enter your M-Pesa PIN to authorize payment of <strong style="color: #ffffff;" id="stkAmountDisplay">KES 30.00</strong> to <strong>CloudPrint Pro</strong>.
+          </p>
+
+          <div style="display: flex; align-items: center; justify-content: center; gap: 10px; padding: 12px; background: rgba(0, 0, 0, 0.35); border-radius: 8px; border: 1px solid var(--border-subtle); margin-bottom: 16px;">
+            <div class="active-pulse-dot" style="width: 12px; height: 12px; background: var(--primary-gold);"></div>
+            <span id="stkStatusIndicatorText" style="font-size: 0.82rem; font-weight: 700; color: var(--primary-gold);">Waiting for M-Pesa PIN authorization...</span>
+          </div>
+
+          <div style="font-size: 0.74rem; color: var(--text-muted);">
+            Time remaining: <span id="stkCountdown" style="color: var(--primary-gold); font-weight: 800;">60</span>s
+          </div>
+        </div>
+
+        <div style="display: flex; gap: 10px;">
+          <button class="btn-secondary-dark" id="cancelStkBtn" style="flex: 1; padding: 11px;">Cancel</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==========================================
+       MODAL 2: TRACK AN EXISTING JOB
+       ========================================== -->
+  <div class="modal-backdrop" id="trackJobModal">
+    <div class="modal-sheet">
+      <div class="modal-header">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <i data-lucide="search" style="color: var(--primary-gold); width: 18px; height: 18px;"></i>
+          <span class="modal-title">Track Print Job</span>
+        </div>
+        <button class="btn-icon" id="closeTrackModalBtn"><i data-lucide="x" style="width: 18px; height: 18px;"></i></button>
+      </div>
+      <div class="modal-body">
+        <div class="track-search-input-group">
+          <input type="text" id="trackJobInput" class="track-input" placeholder="e.g. #CP123456 or #CP-849201" value="#CP123456">
+          <button class="btn-track-submit" id="searchJobBtn">Track</button>
+        </div>
+
+        <div id="trackResultContainer">
+          <!-- Populated dynamically via JS -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==========================================
+       MODAL 3: ORDER HISTORY & QUICK MENU
+       ========================================== -->
+  <div class="modal-backdrop" id="menuDrawerModal">
+    <div class="modal-sheet">
+      <div class="modal-header">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <i data-lucide="printer" style="color: var(--primary-gold); width: 18px; height: 18px;"></i>
+          <span class="modal-title">CloudPrint Pro Menu</span>
+        </div>
+        <button class="btn-icon" id="closeMenuModalBtn"><i data-lucide="x" style="width: 18px; height: 18px;"></i></button>
+      </div>
+      <div class="modal-body">
+        <div style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px;">
+          <button class="btn-secondary-dark" id="menuTrackJobBtn" style="justify-content: flex-start;">
+            <i data-lucide="search" style="width: 18px; height: 18px; color: var(--primary-gold);"></i>
+            <span>Track Print Job</span>
+          </button>
+          <button class="btn-secondary-dark" id="menuNewPrintBtn" style="justify-content: flex-start;">
+            <i data-lucide="plus-circle" style="width: 18px; height: 18px; color: var(--mpesa-green);"></i>
+            <span>New Print Order</span>
+          </button>
+          <a href="admin.html" class="btn-secondary-dark" style="justify-content: flex-start; text-decoration: none; border-color: rgba(245, 158, 11, 0.3); background: rgba(245, 158, 11, 0.08);">
+            <i data-lucide="shield" style="width: 18px; height: 18px; color: var(--primary-gold);"></i>
+            <span>Admin Control Center</span>
+          </a>
+        </div>
+
+        <div class="section-label" style="margin-top: 10px;">Recent Print Orders</div>
+        <div id="ordersHistoryList" style="display: flex; flex-direction: column; gap: 8px; max-height: 240px; overflow-y: auto;">
+          <!-- Dynamically populated from localStorage -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==========================================
+       HIDDEN PRINTABLE RECEIPT TEMPLATE
+       ========================================== -->
+  <div id="printableReceiptArea" style="display: none;">
+    <div style="font-family: monospace; max-width: 380px; margin: 0 auto; padding: 20px; border: 1px dashed #000;">
+      <h2 style="text-align: center; margin-bottom: 4px;">CLOUDPRINT PRO</h2>
+      <p style="text-align: center; font-size: 12px; margin-bottom: 12px;">Fast &amp; Reliable Digital Printing</p>
+      <hr style="border: 0.5px dashed #000; margin-bottom: 12px;">
+      
+      <p><strong>Job ID:</strong> <span id="recJobId">#CP123456</span></p>
+      <p><strong>Date:</strong> <span id="recDate"></span></p>
+      <p><strong>Document:</strong> <span id="recDoc">Document.pdf</span></p>
+      <p><strong>Service:</strong> <span id="recService">A4 Colour</span></p>
+      <p><strong>Pages:</strong> <span id="recPages">10</span></p>
+      <p><strong>Payment:</strong> M-Pesa Paid (<span id="recPhone">+254 712345678</span>)</p>
+      <p><strong>M-Pesa Ref:</strong> <span id="recMpesaRef">SJK940281</span></p>
+      <hr style="border: 0.5px dashed #000; margin: 12px 0;">
+      
+      <h3 style="display: flex; justify-content: space-between;">
+        <span>TOTAL PAID:</span>
+        <span id="recTotal">KES 30.00</span>
+      </h3>
+      <div style="text-align: center; margin-top: 20px;">
+        <p style="font-size: 11px;">Present this receipt or scan code at the pickup counter.</p>
+        <p style="font-size: 11px; margin-top: 6px;">Thank you for printing with CloudPrint Pro!</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification System -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- Application Logic -->
+  <script src="app.js"></script>
+</body>
+</html>

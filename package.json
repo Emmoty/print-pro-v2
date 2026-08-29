@@ -1,0 +1,36 @@
+{
+  "name": "cloudprint-pro",
+  "version": "2.0.0",
+  "description": "Production-grade, internet-facing secure printing web application and management platform",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js",
+    "test": "node run_tests.js",
+    "migrate": "node scripts/migrate.js",
+    "backup": "node scripts/backup.js",
+    "restore": "node scripts/restore.js"
+  },
+  "keywords": [
+    "printing",
+    "kiosk",
+    "mpesa",
+    "daraja",
+    "spooler",
+    "security"
+  ],
+  "author": "CloudPrint Pro Engineering Team",
+  "license": "UNLICENSED",
+  "private": true,
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "express-rate-limit": "^7.5.0",
+    "helmet": "^8.0.0",
+    "jsonwebtoken": "^9.0.2",
+    "multer": "^1.4.5-lts.1",
+    "pg": "^8.23.0"
+  }
+}

@@ -1,0 +1,45 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: cloudprint-app
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - HOST=0.0.0.0
+      - JWT_SECRET=${JWT_SECRET:-cloudprint_production_secure_jwt_secret_key_2026}
+      - ALLOWED_ORIGINS=${ALLOWED_ORIGINS:-http://localhost:3000,https://printpro.ke}
+      - MPESA_CALLBACK_SECRET=${MPESA_CALLBACK_SECRET:-cloudprint_daraja_callback_secret_2026}
+      - PRINT_AGENT_SECRET_KEY=${PRINT_AGENT_SECRET_KEY:-cloudprint_agent_secret_key_01}
+    ports:
+      - "3000:3000"
+    volumes:
+      - app_data:/app/data
+      - app_storage:/app/storage
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 1024M
+        reservations:
+          cpus: '0.25'
+          memory: 256M
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "20m"
+        max-file: "5"
+    networks:
+      - cloudprint-net
+
+networks:
+  cloudprint-net:
+    driver: bridge
+
+volumes:
+  app_data:
+  app_storage:
