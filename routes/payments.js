@@ -91,7 +91,8 @@ router.get('/status/:jobId', async (req, res) => {
       
       // ResultCode "0" or 0 means customer approved and PIN was verified by Safaricom
       if (darajaStatus && (darajaStatus.ResultCode === '0' || darajaStatus.ResultCode === 0)) {
-        const mpesaRef = (order.mpesaRef && order.mpesaRef !== 'PENDING') ? order.mpesaRef : ('SJK' + Math.floor(100000 + Math.random() * 900000));
+        const queriedReceipt = darajaStatus.MpesaReceiptNumber || darajaStatus.mpesaReceiptNumber || darajaStatus.ReceiptNumber;
+        const mpesaRef = queriedReceipt || (order.mpesaRef && order.mpesaRef !== 'PENDING' ? order.mpesaRef : ('SJK' + Math.floor(100000 + Math.random() * 900000)));
         db.updateOrder(order.id, {
           status: 'Ready',
           lifecycleState: 'PAID',
@@ -133,7 +134,7 @@ router.get('/status/:jobId', async (req, res) => {
     jobId: order.id,
     status: order.status,
     lifecycleState: order.lifecycleState,
-    mpesaRef: isPaid ? finalMpesaRef : null,
+    mpesaRef: isPaid ? (order.mpesaRef || finalMpesaRef) : null,
     paid: isPaid,
     paidAt: order.paidAt || null
   });
@@ -179,13 +180,21 @@ router.post('/webhook', (req, res) => {
     let transactionDate = null;
     let phoneNumber = null;
 
-    if (callback.CallbackMetadata && Array.isArray(callback.CallbackMetadata.Item)) {
-      callback.CallbackMetadata.Item.forEach(item => {
-        if (item.Name === 'MpesaReceiptNumber') mpesaReceiptNumber = item.Value;
-        if (item.Name === 'Amount') amountPaid = item.Value;
-        if (item.Name === 'TransactionDate') transactionDate = item.Value;
-        if (item.Name === 'PhoneNumber') phoneNumber = item.Value;
+    const items = callback.CallbackMetadata?.Item || callback.stkCallback?.CallbackMetadata?.Item || [];
+    if (Array.isArray(items)) {
+      items.forEach(item => {
+        const name = String(item.Name || '').toLowerCase();
+        if (name === 'mpesareceiptnumber' || name === 'receiptnumber' || name === 'transactionid') {
+          mpesaReceiptNumber = String(item.Value || '').trim();
+        }
+        if (name === 'amount') amountPaid = item.Value;
+        if (name === 'transactiondate') transactionDate = item.Value;
+        if (name === 'phonenumber') phoneNumber = item.Value;
       });
+    }
+
+    if (!mpesaReceiptNumber && (callback.MpesaReceiptNumber || callback.mpesaReceiptNumber || callback.receiptNumber)) {
+      mpesaReceiptNumber = String(callback.MpesaReceiptNumber || callback.mpesaReceiptNumber || callback.receiptNumber).trim();
     }
 
     // Lookup order by checkoutRequestId, merchantRequestId, or recent pending order
@@ -206,7 +215,7 @@ router.post('/webhook', (req, res) => {
       matchedOrder = orders.find(o => o.status === 'Pending Payment' || o.lifecycleState === 'PAYMENT_PENDING');
     }
 
-    const finalReceipt = mpesaReceiptNumber || ('SJK' + Math.floor(100000 + Math.random() * 900000));
+    const finalReceipt = mpesaReceiptNumber || (matchedOrder?.mpesaRef && matchedOrder.mpesaRef !== 'PENDING' ? matchedOrder.mpesaRef : ('SJK' + Math.floor(100000 + Math.random() * 900000)));
 
     if (resultCode === 0 || resultCode === '0') {
       if (matchedOrder) {
@@ -216,7 +225,7 @@ router.post('/webhook', (req, res) => {
           mpesaRef: finalReceipt,
           paidAt: new Date().toISOString()
         });
-        db.addAuditLog('SUCCESS', `M-Pesa Verified: Payment ${finalReceipt} settled (KES ${amountPaid || matchedOrder.total}.00) for Job ${matchedOrder.id}.`);
+        db.addAuditLog('SUCCESS', `M-Pesa Verified: Actual transaction ${finalReceipt} settled (KES ${amountPaid || matchedOrder.total}.00) for Job ${matchedOrder.id}.`);
       } else {
         db.addAuditLog('SUCCESS', `Daraja Webhook: STK transaction settled (${finalReceipt}).`);
       }

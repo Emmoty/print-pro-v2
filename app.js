@@ -1730,23 +1730,9 @@ function closeModal(modalEl) {
   if (state.stkCountdownTimer) clearInterval(state.stkCountdownTimer);
 }
 
-// Toast Notifications
+// Toast Notifications (Disabled for silent clean experience)
 function showToast(message, type = 'info') {
-  if (!elements.toastContainer) return;
-  const toast = document.createElement('div');
-  toast.className = `toast ${type}`;
-  toast.innerHTML = `
-    <i data-lucide="${type === 'success' ? 'check-circle' : 'info'}" style="width: 16px; height: 16px;"></i>
-    <span>${escapeHtml(message)}</span>
-  `;
-  elements.toastContainer.appendChild(toast);
-  if (window.lucide) lucide.createIcons();
-
-  setTimeout(() => {
-    toast.style.opacity = '0';
-    toast.style.transform = 'translateY(10px)';
-    setTimeout(() => toast.remove(), 300);
-  }, 3200);
+  // Silent - No popups
 }
 
 // View Mode (Mobile Phone vs Fluid Desktop)
@@ -1768,31 +1754,7 @@ function setViewMode(mode, isManual = false) {
   }
 }
 
-// Web Audio API Synthesizer for pleasant M-Pesa payment chime
+// Animation Sound (Disabled for clean, silent experience)
 function playSuccessSound() {
-  try {
-    const AudioContext = window.AudioContext || window.webkitAudioContext;
-    if (!AudioContext) return;
-    const ctx = new AudioContext();
-
-    const playTone = (freq, start, duration) => {
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-      osc.type = 'sine';
-      osc.frequency.setValueAtTime(freq, ctx.currentTime + start);
-      gain.gain.setValueAtTime(0.12, ctx.currentTime + start);
-      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + start + duration);
-      osc.connect(gain);
-      gain.connect(ctx.destination);
-      osc.start(ctx.currentTime + start);
-      osc.stop(ctx.currentTime + start + duration);
-    };
-
-    // Upward 3-chord major arpeggio
-    playTone(523.25, 0, 0.15); // C5
-    playTone(659.25, 0.12, 0.18); // E5
-    playTone(783.99, 0.24, 0.35); // G5
-  } catch (e) {
-    // Audio synthesis not permitted without prior user gesture in some browsers
-  }
+  // Silent - No audio chimes
 }
