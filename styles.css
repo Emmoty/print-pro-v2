@@ -2127,52 +2127,16 @@ html, body {
   color: #ffffff;
 }
 
-/* Toast Notifications */
-.toast-container {
-  position: fixed;
-  bottom: 24px;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 2000;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  pointer-events: none;
-}
-
+/* Toast Notifications (Disabled) */
+.toast-container,
 .toast {
-  background: var(--bg-card);
-  border: 1px solid var(--border-medium);
-  color: #ffffff;
-  padding: 10px 18px;
-  border-radius: var(--radius-pill);
-  box-shadow: var(--shadow-md);
-  font-size: 0.86rem;
-  font-weight: 600;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  animation: toastPop 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-  pointer-events: auto;
-}
-
-.toast.success {
-  border-color: rgba(16, 185, 129, 0.4);
-}
-
-.toast.success svg {
-  color: var(--mpesa-green);
-}
-
-@keyframes toastPop {
-  from {
-    transform: translateY(20px) scale(0.9);
-    opacity: 0;
-  }
-  to {
-    transform: translateY(0) scale(1);
-    opacity: 1;
-  }
+  display: none !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+  height: 0 !important;
+  width: 0 !important;
+  overflow: hidden !important;
 }
 
 /* Keyframes */

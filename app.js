@@ -3,6 +3,17 @@
  * Premium Multi-File Document Printing & M-Pesa Payment Simulation
  */
 
+// Complete Audio & Sound Silencing Overrides (Zero sound output)
+if (typeof window !== 'undefined') {
+  try {
+    window.Audio = function () {
+      return { play: () => Promise.resolve(), pause: () => {}, addEventListener: () => {} };
+    };
+    window.playSuccessSound = function () {};
+    window.showToast = function () {};
+  } catch (e) {}
+}
+
 // Security & Sanitization Helper Functions
 function escapeHtml(str) {
   if (str === null || str === undefined) return '';
@@ -174,6 +185,7 @@ const elements = {
   openHistoryBtn: document.getElementById('openHistoryBtn'),
   menuTrackJobBtn: document.getElementById('menuTrackJobBtn'),
   menuNewPrintBtn: document.getElementById('menuNewPrintBtn'),
+  clearHistoryBtn: document.getElementById('clearHistoryBtn'),
   ordersHistoryList: document.getElementById('ordersHistoryList'),
 
   // Printable receipt
@@ -525,6 +537,9 @@ function setupEventListeners() {
       closeModal(elements.menuDrawerModal);
       navigateTo('upload');
     });
+  }
+  if (elements.clearHistoryBtn) {
+    elements.clearHistoryBtn.addEventListener('click', clearOrdersHistory);
   }
 
   // Global escape key to close modals
@@ -1605,6 +1620,13 @@ function saveOrderToHistory(job) {
   renderOrdersHistory();
 }
 
+function clearOrdersHistory() {
+  try {
+    localStorage.removeItem('cloudprint_orders');
+  } catch (e) {}
+  renderOrdersHistory();
+}
+
 function renderOrdersHistory() {
   let orders = [];
   try {
@@ -1613,20 +1635,21 @@ function renderOrdersHistory() {
     orders = [];
   }
 
-  if (orders.length === 0) {
-    orders = [{
-      id: '#CP123456',
-      fileName: 'Document.pdf',
-      fileSize: '2.4 MB',
-      serviceName: 'A4 Colour',
-      pages: 10,
-      total: 30,
-      timestamp: new Date().toISOString(),
-      status: 'Ready for pickup'
-    }];
+  if (elements.clearHistoryBtn) {
+    elements.clearHistoryBtn.style.display = orders.length > 0 ? 'inline-flex' : 'none';
   }
 
-  if (elements.ordersHistoryList) {
+  if (!elements.ordersHistoryList) return;
+
+  if (orders.length === 0) {
+    elements.ordersHistoryList.innerHTML = `
+      <div style="text-align: center; padding: 26px 14px; color: var(--text-muted); font-size: 0.84rem; background: rgba(255, 255, 255, 0.02); border: 1px dashed rgba(255, 255, 255, 0.08); border-radius: 12px; margin-top: 4px;">
+        <i data-lucide="inbox" style="width: 28px; height: 28px; color: var(--text-muted); opacity: 0.5; margin-bottom: 6px;"></i>
+        <div style="font-weight: 600; color: var(--text-secondary); margin-bottom: 2px;">No print order history</div>
+        <div style="font-size: 0.74rem; color: var(--text-muted);">Completed print jobs will be listed here.</div>
+      </div>
+    `;
+  } else {
     elements.ordersHistoryList.innerHTML = orders.map(order => {
       const escapedId = escapeHtml(order.id);
       const escapedName = escapeHtml(order.fileName || (order.files ? order.files.length + ' files' : 'Document'));

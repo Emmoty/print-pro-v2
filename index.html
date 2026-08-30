@@ -3,6 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
   <title>CloudPrint Pro - Professional Printing. Simplified.</title>
   <meta name="description" content="Fast, reliable online document printing in Kenya. Upload documents, pay securely with M-Pesa, and collect your prints instantly.">
   
@@ -14,8 +17,8 @@
   <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest"></script>
 
-  <!-- Main Stylesheet -->
-  <link rel="stylesheet" href="styles.css">
+  <!-- Main Stylesheet (Cache-Busted) -->
+  <link rel="stylesheet" href="styles.css?v=2.2.0">
 </head>
 <body>
   <!-- Ambient background glow elements -->
@@ -637,9 +640,13 @@
             <i data-lucide="plus-circle" style="width: 18px; height: 18px; color: var(--mpesa-green);"></i>
             <span>New Print Order</span>
           </button>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 14px; margin-bottom: 8px;">
+          <div class="section-label" style="margin: 0;">Recent Print Orders</div>
+          <button id="clearHistoryBtn" style="font-size: 0.75rem; color: var(--text-muted); background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.08); cursor: pointer; display: flex; align-items: center; gap: 4px; padding: 4px 9px; border-radius: 6px; transition: all 0.2s ease;">
+            <i data-lucide="trash-2" style="width: 12px; height: 12px; color: var(--text-muted);"></i>
+            <span>Clear History</span>
+          </button>
         </div>
-
-        <div class="section-label" style="margin-top: 10px;">Recent Print Orders</div>
         <div id="ordersHistoryList" style="display: flex; flex-direction: column; gap: 8px; max-height: 240px; overflow-y: auto;">
           <!-- Dynamically populated from localStorage -->
         </div>
@@ -676,7 +683,7 @@
     </div>
   </div>
 
-  <!-- Application Logic -->
-  <script src="app.js"></script>
+  <!-- Application Logic (Cache-Busted) -->
+  <script src="app.js?v=2.2.0"></script>
 </body>
 </html>

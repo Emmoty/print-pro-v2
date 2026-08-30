@@ -139,20 +139,28 @@ app.use('/api/payments', paymentRoutes);
 app.use('/api/print', printRoutes);
 app.use('/api/admin', adminRoutes);
 
-// 9. Static Frontend Web Application Assets
+// 9. Static Frontend Web Application Assets (No-Cache for Instant Mobile Updates)
 app.use(express.static(path.join(__dirname), {
   dotfiles: 'ignore',
-  etag: true,
-  maxAge: process.env.NODE_ENV === 'production' ? '1h' : '0'
+  etag: false,
+  maxAge: 0,
+  setHeaders: (res, filePath) => {
+    res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
+    res.setHeader('Surrogate-Control', 'no-store');
+  }
 }));
 
 // Fallback to customer app
 app.get('/', (req, res) => {
+  res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate');
   res.sendFile(path.join(__dirname, 'index.html'));
 });
 
 // Fallback to admin portal
 app.get('/admin', (req, res) => {
+  res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate');
   res.sendFile(path.join(__dirname, 'admin.html'));
 });
 
