@@ -1,24 +1,31 @@
 /**
  * CloudPrint Pro - Print Agent & Hardware Dispatcher API
  * Communicates with local edge agent (over Tailscale / LAN tunnel)
- * Mutual HMAC authentication ensures rogue machines cannot poll the queue
+ * Mutual HMAC-SHA256 authentication ensures rogue machines cannot poll the queue
  */
 
 const express = require('express');
 const router = express.Router();
 const crypto = require('crypto');
 const db = require('../lib/db');
+const agentAuth = require('../agent/auth');
+
+// Nonce Cache for Replay Attack Prevention (Expires after 10 minutes)
+const nonceCache = new Map();
+setInterval(() => {
+  const now = Date.now();
+  for (const [nonceKey, expiry] of nonceCache.entries()) {
+    if (now > expiry) {
+      nonceCache.delete(nonceKey);
+    }
+  }
+}, 60000);
 
 /**
- * Middleware: Verify Print Agent Secret / Token
+ * Middleware: Verify Print Agent HMAC Signature & Secret
  */
 function requireAgentAuth(req, res, next) {
-  const agentToken = req.headers['x-agent-token'] || req.headers['authorization'];
   const agentId = req.headers['x-agent-id'] || 'AGT-LAN-01';
-
-  if (!agentToken) {
-    return res.status(401).json({ error: 'Agent authentication token required.', code: 'AGENT_UNAUTHORIZED' });
-  }
 
   let agent = db.getAgentById(agentId);
   if (!agent) {
@@ -31,20 +38,27 @@ function requireAgentAuth(req, res, next) {
     };
   }
 
-  const cleanToken = agentToken.replace(/^Bearer\s+/i, '').trim();
-  const serverKey = (process.env.PRINT_AGENT_SECRET_KEY || '').trim();
-  const defaultKey = 'cloudprint_agent_secret_key_01';
-  const liveToken = 'cpt_live_agent_token_98234710293847';
+  const getSecretForAgent = (id) => {
+    const serverKey = (process.env.PRINT_AGENT_SECRET_KEY || '').trim();
+    return serverKey || 'cloudprint_agent_secret_key_01';
+  };
 
-  const isValidToken = 
-    (serverKey && cleanToken === serverKey) || 
-    cleanToken === defaultKey || 
-    cleanToken === liveToken ||
-    (agent.tokenHash && crypto.createHash('sha256').update(cleanToken).digest('hex') === agent.tokenHash);
+  const authResult = agentAuth.verifyAuthHeaders(req, getSecretForAgent);
 
-  if (!isValidToken) {
-    db.addAuditLog('WARN', `Security: Unauthorized print agent polling attempt from ID '${agentId}'.`);
-    return res.status(403).json({ error: 'Invalid agent token credentials.', code: 'AGENT_FORBIDDEN' });
+  if (!authResult.isValid) {
+    db.addAuditLog('WARN', `Security: Unauthorized print agent attempt from ID '${agentId}' [Reason: ${authResult.reason}].`);
+    return res.status(403).json({ error: `Agent authentication failed: ${authResult.reason}`, code: authResult.reason });
+  }
+
+  // Anti-Replay Nonce Check
+  if (authResult.nonce) {
+    const nonceKey = `${agentId}:${authResult.nonce}`;
+    if (nonceCache.has(nonceKey)) {
+      db.addAuditLog('WARN', `Security: Replay attack detected and blocked for Agent '${agentId}'. Nonce reused: ${authResult.nonce}`);
+      return res.status(403).json({ error: 'Replay attack detected: Nonce has already been used.', code: 'NONCE_REUSED' });
+    }
+    // Store nonce with 10-minute expiry
+    nonceCache.set(nonceKey, Date.now() + 600000);
   }
 
   req.agent = agent;

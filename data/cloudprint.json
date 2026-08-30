@@ -11,7 +11,7 @@
       "passwordHash": "c96590d28ac2ee23408d1b5b001a0253:0f9ed167583b23f1dbe40241a152112de253c0560a2bd952220556464fdabf9f4eae0050b67ed7d4fec5bdfac6d75e8690abc574c2cebb2681e553a7d5fa80aa",
       "status": "active",
       "mfaEnabled": true,
-      "lastLogin": "2026-08-30T10:56:30.609Z",
+      "lastLogin": "2026-08-30T11:26:22.473Z",
       "createdAt": "2026-08-29T22:25:26.671Z",
       "updatedAt": "2026-08-29T22:47:29.132Z"
     },
@@ -57,7 +57,7 @@
   ],
   "orders": [
     {
-      "id": "#CP528503",
+      "id": "#CP511940",
       "customer": "Customer 5678",
       "phone": "0712345678",
       "fileName": "Project_Design.pdf",
@@ -77,42 +77,42 @@
       "status": "Printing",
       "lifecycleState": "PRINTING",
       "mpesaRef": "SJK492019",
-      "timestamp": "2026-08-30T10:56:30.619Z",
+      "timestamp": "2026-08-30T11:26:22.480Z",
       "filePurged": false,
-      "checkoutRequestId": "ws_CO_20260830135630_5706",
-      "merchantRequestId": "29103-99210-1788087390631",
-      "paidAt": "2026-08-30T10:56:30.639Z",
-      "spoolStartedAt": "2026-08-30T10:56:30.659Z",
+      "checkoutRequestId": "ws_CO_20260830142622_6829",
+      "merchantRequestId": "29103-99210-1788089182495",
+      "paidAt": "2026-08-30T11:26:22.508Z",
+      "spoolStartedAt": "2026-08-30T11:26:22.519Z",
       "dispatchedToAgent": "AGT-LAN-01"
     },
     {
-      "id": "#CP213972",
-      "customer": "Customer 5678",
-      "phone": "0712345678",
-      "fileName": "Project_Design.pdf",
+      "id": "#CP450050",
+      "customer": "Customer 4383",
+      "phone": "0720874383",
+      "fileName": "ChatGPT Image Aug 29, 2026, 02_49_36 AM4.png",
       "files": [
         {
-          "name": "Project_Design.pdf",
-          "pages": 10
+          "name": "ChatGPT Image Aug 29, 2026, 02_49_36 AM4.png",
+          "pages": 1,
+          "size": "0.3 MB",
+          "fileId": "ae497744-bc4f-4255-977f-13c1faed561d"
         }
       ],
-      "serviceName": "A4 Full Colour",
+      "serviceName": "A4 Black & White",
       "paperSize": "a4",
-      "colorMode": "colour",
-      "ratePerPage": 3,
-      "pages": 10,
-      "copies": 2,
-      "total": 60,
+      "colorMode": "bw",
+      "ratePerPage": 1,
+      "pages": 1,
+      "copies": 1,
+      "total": 1,
       "status": "Ready",
       "lifecycleState": "PAID",
-      "mpesaRef": "SJK492019",
-      "timestamp": "2026-08-30T10:39:33.310Z",
+      "mpesaRef": "SJK129103",
+      "timestamp": "2026-08-30T11:04:27.539Z",
       "filePurged": false,
-      "checkoutRequestId": "ws_CO_20260830133933_9457",
-      "merchantRequestId": "29103-99210-1788086373331",
-      "paidAt": "2026-08-30T10:39:33.340Z",
-      "spoolStartedAt": "2026-08-30T10:39:33.349Z",
-      "dispatchedToAgent": "AGT-LAN-01"
+      "checkoutRequestId": "ws_CO_20260830140427_6511",
+      "merchantRequestId": "29103-99210-1788087867556",
+      "paidAt": "2026-08-30T11:04:28.344Z"
     },
     {
       "id": "#CP944051",
@@ -1408,74 +1408,67 @@
   ],
   "audit_logs": [
     {
-      "id": 197,
-      "level": "INFO",
-      "message": "Print Spooler: Job #CP528503 dispatched to Agent 'Shop Floor Primary Gateway' for hardware processing.",
-      "meta": {},
-      "timestamp": "2026-08-30T10:56:30.662Z"
-    },
-    {
       "id": 196,
-      "level": "SUCCESS",
-      "message": "M-Pesa Verified: Actual transaction SJK492019 settled (KES 60.00) for Job #CP528503.",
+      "level": "INFO",
+      "message": "Print Spooler: Job #CP511940 dispatched to Agent 'Shop Floor Primary Gateway' for hardware processing.",
       "meta": {},
-      "timestamp": "2026-08-30T10:56:30.641Z"
+      "timestamp": "2026-08-30T11:26:22.521Z"
     },
     {
       "id": 195,
-      "level": "INFO",
-      "message": "M-Pesa: STK Push prompt initiated for Job #CP528503 to 254712345678 (KES 60.00). CheckoutRequestID: ws_CO_20260830135630_5706",
+      "level": "SUCCESS",
+      "message": "M-Pesa Verified: Actual transaction SJK492019 settled (KES 60.00) for Job #CP511940.",
       "meta": {},
-      "timestamp": "2026-08-30T10:56:30.633Z"
+      "timestamp": "2026-08-30T11:26:22.510Z"
     },
     {
       "id": 194,
       "level": "INFO",
-      "message": "Order Created: Job #CP528503 registered for 0712345678 (KES 60.00).",
+      "message": "M-Pesa: STK Push prompt initiated for Job #CP511940 to 254712345678 (KES 60.00). CheckoutRequestID: ws_CO_20260830142622_6829",
       "meta": {},
-      "timestamp": "2026-08-30T10:56:30.621Z"
+      "timestamp": "2026-08-30T11:26:22.497Z"
     },
     {
       "id": 193,
-      "level": "SUCCESS",
-      "message": "User 'Sarah Kimani' (Super Admin) logged in successfully from IP ::1.",
+      "level": "INFO",
+      "message": "Order Created: Job #CP511940 registered for 0712345678 (KES 60.00).",
       "meta": {},
-      "timestamp": "2026-08-30T10:56:30.612Z"
+      "timestamp": "2026-08-30T11:26:22.482Z"
     },
     {
       "id": 192,
-      "level": "INFO",
-      "message": "Print Spooler: Job #CP213972 dispatched to Agent 'Shop Floor Primary Gateway' for hardware processing.",
+      "level": "SUCCESS",
+      "message": "User 'Sarah Kimani' (Super Admin) logged in successfully from IP ::1.",
       "meta": {},
-      "timestamp": "2026-08-30T10:39:33.351Z"
+      "timestamp": "2026-08-30T11:26:22.474Z"
     },
     {
       "id": 191,
-      "level": "SUCCESS",
-      "message": "M-Pesa Verified: Actual transaction SJK492019 settled (KES 60.00) for Job #CP213972.",
+      "level": "INFO",
+      "message": "Privacy Engine: Shredded expired document payload from vault (ae497744-bc4f-4255-977f-13c1faed561d.png).",
       "meta": {},
-      "timestamp": "2026-08-30T10:39:33.342Z"
+      "timestamp": "2026-08-30T11:24:39.516Z"
     },
     {
       "id": 190,
-      "level": "INFO",
-      "message": "M-Pesa: STK Push prompt initiated for Job #CP213972 to 254712345678 (KES 60.00). CheckoutRequestID: ws_CO_20260830133933_9457",
+      "level": "SUCCESS",
+      "message": "Daraja Query Confirmed: STK Payment approved on phone for Job #CP450050 (Receipt SJK129103).",
       "meta": {},
-      "timestamp": "2026-08-30T10:39:33.333Z"
+      "timestamp": "2026-08-30T11:04:28.346Z"
     },
     {
       "id": 189,
       "level": "INFO",
-      "message": "Order Created: Job #CP213972 registered for 0712345678 (KES 60.00).",
+      "message": "M-Pesa: STK Push prompt initiated for Job #CP450050 to 254720874383 (KES 1.00). CheckoutRequestID: ws_CO_20260830140427_6511",
       "meta": {},
-      "timestamp": "2026-08-30T10:39:33.311Z"
+      "timestamp": "2026-08-30T11:04:27.558Z"
     },
     {
       "id": 188,
-      "level": "SUCCESS",
-      "message": "User 'Sarah Kimani' (Super Admin) logged in successfully from IP ::1.",
+      "level": "INFO",
+      "message": "Order Created: Job #CP450050 registered for 0720874383 (KES 1.00).",
       "meta": {},
-      "timestamp": "2026-08-30T10:39:33.304Z"
+      "timestamp": "2026-08-30T11:04:27.542Z"
     },
     {
       "id": 187,
@@ -4433,19 +4426,64 @@
       "createdAt": 1788062738509,
       "expiresAt": 1788149138509
     },
-    "idemp_test_key_1788086373151": {
+    "ord_1788087867522_08b6xr": {
+      "data": {
+        "message": "Print job registered successfully.",
+        "order": {
+          "id": "#CP450050",
+          "customer": "Customer 4383",
+          "phone": "0720874383",
+          "fileName": "ChatGPT Image Aug 29, 2026, 02_49_36 AM4.png",
+          "files": [
+            {
+              "name": "ChatGPT Image Aug 29, 2026, 02_49_36 AM4.png",
+              "pages": 1,
+              "size": "0.3 MB",
+              "fileId": "ae497744-bc4f-4255-977f-13c1faed561d"
+            }
+          ],
+          "serviceName": "A4 Black & White",
+          "paperSize": "a4",
+          "colorMode": "bw",
+          "ratePerPage": 1,
+          "pages": 1,
+          "copies": 1,
+          "total": 1,
+          "status": "Ready",
+          "lifecycleState": "PAYMENT_PENDING",
+          "mpesaRef": "PENDING",
+          "timestamp": "2026-08-30T11:04:27.539Z",
+          "filePurged": false
+        }
+      },
+      "createdAt": 1788087867545,
+      "expiresAt": 1788174267545
+    },
+    "stk_#CP450050": {
+      "data": {
+        "message": "Success. Request accepted for processing",
+        "jobId": "#CP450050",
+        "checkoutRequestId": "ws_CO_20260830140427_6511",
+        "phone": "254720874383",
+        "amount": 1,
+        "status": "PENDING_PIN"
+      },
+      "createdAt": 1788087867561,
+      "expiresAt": 1788174267561
+    },
+    "idemp_test_key_1788089182318": {
       "data": {
         "success": true,
         "orderId": "#CP999999"
       },
-      "createdAt": 1788086373151,
-      "expiresAt": 1788172773151
+      "createdAt": 1788089182318,
+      "expiresAt": 1788175582318
     },
-    "test_order_1788086373308": {
+    "test_order_1788089182477": {
       "data": {
         "message": "Print job registered successfully.",
         "order": {
-          "id": "#CP213972",
+          "id": "#CP511940",
           "customer": "Customer 5678",
           "phone": "0712345678",
           "fileName": "Project_Design.pdf",
@@ -4465,69 +4503,21 @@
           "status": "Ready",
           "lifecycleState": "PAYMENT_PENDING",
           "mpesaRef": "PENDING",
-          "timestamp": "2026-08-30T10:39:33.310Z",
+          "timestamp": "2026-08-30T11:26:22.480Z",
           "filePurged": false
         }
       },
-      "createdAt": 1788086373313,
-      "expiresAt": 1788172773313
+      "createdAt": 1788089182483,
+      "expiresAt": 1788175582483
     },
-    "webhook_daraja_ws_CO_20260830133933_9457": {
+    "webhook_daraja_ws_CO_20260830142622_6829": {
       "data": {
-        "processedAt": 1788086373344,
+        "processedAt": 1788089182511,
         "status": "SUCCESS",
         "receipt": "SJK492019"
       },
-      "createdAt": 1788086373344,
-      "expiresAt": 1788172773344
-    },
-    "idemp_test_key_1788087390437": {
-      "data": {
-        "success": true,
-        "orderId": "#CP999999"
-      },
-      "createdAt": 1788087390437,
-      "expiresAt": 1788173790437
-    },
-    "test_order_1788087390616": {
-      "data": {
-        "message": "Print job registered successfully.",
-        "order": {
-          "id": "#CP528503",
-          "customer": "Customer 5678",
-          "phone": "0712345678",
-          "fileName": "Project_Design.pdf",
-          "files": [
-            {
-              "name": "Project_Design.pdf",
-              "pages": 10
-            }
-          ],
-          "serviceName": "A4 Full Colour",
-          "paperSize": "a4",
-          "colorMode": "colour",
-          "ratePerPage": 3,
-          "pages": 10,
-          "copies": 2,
-          "total": 60,
-          "status": "Ready",
-          "lifecycleState": "PAYMENT_PENDING",
-          "mpesaRef": "PENDING",
-          "timestamp": "2026-08-30T10:56:30.619Z",
-          "filePurged": false
-        }
-      },
-      "createdAt": 1788087390622,
-      "expiresAt": 1788173790622
-    },
-    "webhook_daraja_ws_CO_20260830135630_5706": {
-      "data": {
-        "processedAt": 1788087390644,
-        "status": "SUCCESS",
-        "receipt": "SJK492019"
-      },
-      "createdAt": 1788087390644,
-      "expiresAt": 1788173790644
+      "createdAt": 1788089182511,
+      "expiresAt": 1788175582511
     }
   }
 }
