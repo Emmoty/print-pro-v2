@@ -1403,7 +1403,7 @@ async function triggerMpesaSTKPush() {
             if (data && (data.paid || data.status === 'PAID') && receipt && receipt !== 'PENDING') {
               handleSuccess(receipt);
             } else if (data && (data.status === 'RECONCILING')) {
-              if (indicatorText) indicatorText.textContent = data.message || 'Payment authorized on phone! Finalizing receipt...';
+              // Handled silently in background
             } else if (data && (data.cancelled || data.status === 'Payment Failed' || data.status === 'FAILED' || data.status === 'CANCELLED')) {
               handleFailure();
             }
@@ -1442,7 +1442,7 @@ async function triggerMpesaSTKPush() {
               handleSuccess(receipt);
               return;
             } else if (statusData.status === 'RECONCILING') {
-              if (indicatorText) indicatorText.textContent = statusData.message || 'Payment authorized on phone! Finalizing receipt...';
+              // Handled silently in background
             } else if (statusData.cancelled || statusData.lifecycleState === 'FAILED' || statusData.lifecycleState === 'CANCELLED' || statusData.status === 'FAILED') {
               handleFailure();
               return;

@@ -176,7 +176,7 @@ const handlePaymentStatus = (req, res) => {
       payment_method: 'mpesa',
       paid: false,
       jobId: order.id,
-      message: 'Payment authorized on phone! Finalizing receipt from Safaricom...'
+      message: 'Waiting for M-Pesa PIN authorization...'
     });
   }
 
@@ -199,12 +199,12 @@ const handlePaymentStatus = (req, res) => {
             if (freshOrder && freshOrder.lifecycleState !== 'PAID') {
               db.updateOrder(order.id, {
                 lifecycleState: 'RECONCILING',
-                status: 'Payment Authorized'
+                status: 'Payment Pending Webhook'
               });
               paymentEvents.emit(`payment_${order.id}`, { 
                 paid: false, 
                 status: 'RECONCILING', 
-                message: 'Payment authorized on phone! Finalizing receipt...', 
+                message: 'Waiting for M-Pesa PIN authorization...', 
                 jobId: order.id 
               });
             }
