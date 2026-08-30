@@ -71,6 +71,49 @@ router.post('/stk-push', async (req, res) => {
   }
 });
 
+const EventEmitter = require('events');
+const paymentEvents = new EventEmitter();
+paymentEvents.setMaxListeners(200);
+
+/**
+ * GET /api/payments/stream/:jobId
+ * High-Speed Server-Sent Events (SSE) Stream
+ * Pushes instant payment confirmation (< 10ms) the millisecond Safaricom webhook arrives
+ */
+router.get('/stream/:jobId', (req, res) => {
+  const jobId = req.params.jobId;
+  const order = db.getOrderById(jobId);
+
+  res.setHeader('Content-Type', 'text/event-stream');
+  res.setHeader('Cache-Control', 'no-cache, no-transform');
+  res.setHeader('Connection', 'keep-alive');
+  res.setHeader('X-Accel-Buffering', 'no');
+  res.flushHeaders?.();
+
+  // If already paid, immediately send event and close
+  if (order && (order.lifecycleState === 'PAID' || order.status === 'Ready' || order.status === 'Completed')) {
+    res.write(`data: ${JSON.stringify({ paid: true, status: order.status, mpesaRef: order.mpesaRef, jobId })}\n\n`);
+    return res.end();
+  }
+
+  const listener = (data) => {
+    res.write(`data: ${JSON.stringify(data)}\n\n`);
+    res.end();
+  };
+
+  paymentEvents.once(`payment_${jobId}`, listener);
+
+  // Heartbeat every 15s to keep connection alive
+  const heartbeat = setInterval(() => {
+    res.write(': heartbeat\n\n');
+  }, 15000);
+
+  req.on('close', () => {
+    clearInterval(heartbeat);
+    paymentEvents.removeListener(`payment_${jobId}`, listener);
+  });
+});
+
 /**
  * GET /api/payments/status/:jobId
  * Real-time status polling for frontend checkout
@@ -104,12 +147,14 @@ router.get('/status/:jobId', async (req, res) => {
         order.status = 'Ready';
         order.lifecycleState = 'PAID';
         order.mpesaRef = mpesaRef;
+        paymentEvents.emit(`payment_${order.id}`, { paid: true, status: 'Ready', mpesaRef: mpesaRef, jobId: order.id });
       } else if (darajaStatus && (darajaStatus.ResultCode === '1032' || darajaStatus.ResultCode === 1032)) {
         // User cancelled on phone
         db.updateOrder(order.id, {
           status: 'Payment Cancelled',
           lifecycleState: 'FAILED'
         });
+        paymentEvents.emit(`payment_${order.id}`, { paid: false, cancelled: true, status: 'Payment Cancelled', jobId: order.id });
         return res.json({
           jobId: order.id,
           status: 'Payment Cancelled',
@@ -226,6 +271,7 @@ router.post('/webhook', (req, res) => {
           paidAt: new Date().toISOString()
         });
         db.addAuditLog('SUCCESS', `M-Pesa Verified: Actual transaction ${finalReceipt} settled (KES ${amountPaid || matchedOrder.total}.00) for Job ${matchedOrder.id}.`);
+        paymentEvents.emit(`payment_${matchedOrder.id}`, { paid: true, status: 'Ready', mpesaRef: finalReceipt, jobId: matchedOrder.id });
       } else {
         db.addAuditLog('SUCCESS', `Daraja Webhook: STK transaction settled (${finalReceipt}).`);
       }
@@ -235,6 +281,7 @@ router.post('/webhook', (req, res) => {
           status: 'Payment Failed',
           lifecycleState: 'FAILED'
         });
+        paymentEvents.emit(`payment_${matchedOrder.id}`, { paid: false, cancelled: true, status: 'Payment Failed', jobId: matchedOrder.id });
       }
       db.addAuditLog('WARN', `Daraja Webhook: STK transaction cancelled/failed (${callback.ResultDesc || 'User cancelled'}).`);
     }

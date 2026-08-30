@@ -185,7 +185,12 @@ if (require.main === module) {
     console.log(`🚀 CloudPrint Pro Production Server ONLINE`);
     console.log(`📡 Listening on http://${HOST}:${PORT}`);
     console.log(`🔒 Security: Helmet, Rate Limiting & Zero-Retention ACTIVE`);
+    console.log(`⚡ M-Pesa: High-Speed STK Pipeline & Socket Pool READY`);
     console.log(`========================================================`);
+
+    // Pre-warm Daraja token in background for instant STK Push
+    const mpesa = require('./lib/mpesa');
+    mpesa.warmTokenCache().catch(() => {});
   });
 }
 

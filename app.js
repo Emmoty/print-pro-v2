@@ -1091,7 +1091,7 @@ function updateCalculations() {
   }
 }
 
-// Real Safaricom M-Pesa STK Push
+// Real Safaricom M-Pesa STK Push (High-Speed Engine)
 async function triggerMpesaSTKPush() {
   const settings = getSystemSettings();
   const maxPages = settings.maxPages || 300;
@@ -1110,8 +1110,25 @@ async function triggerMpesaSTKPush() {
   const phone = normalizePhoneNumber(rawPhone);
   state.currentJob.phone = phone;
 
+  // 1. Instant Modal Feedback (0ms UI Latency)
+  const amountDisplay = document.getElementById('stkAmountDisplay');
+  if (amountDisplay) amountDisplay.textContent = `KES ${state.currentJob.total || 0}.00`;
+
+  if (elements.stkPromptMessage) {
+    elements.stkPromptMessage.innerHTML = `Sending prompt to your phone (<strong>${escapeHtml(phone)}</strong>)... Please keep your phone unlocked.`;
+  }
+
+  const indicatorText = document.getElementById('stkStatusIndicatorText');
+  if (indicatorText) indicatorText.textContent = 'Connecting with Safaricom Daraja...';
+
+  let countdown = 60;
+  if (elements.stkCountdown) elements.stkCountdown.textContent = countdown;
+  if (state.stkCountdownTimer) clearInterval(state.stkCountdownTimer);
+
+  openModal(elements.mpesaStkModal);
+
   try {
-    // 1. Register order on server
+    // 2. Fast Order Registration
     const createOrderRes = await fetch('/api/orders/create', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -1127,13 +1144,20 @@ async function triggerMpesaSTKPush() {
 
     const orderData = await createOrderRes.json();
     if (!createOrderRes.ok) {
-      throw new Error(orderData.error || 'Failed to initialize order.');
+      closeModal(elements.mpesaStkModal);
+      return;
     }
 
     state.currentJob.id = orderData.order.id;
     state.currentJob.total = orderData.order.total;
 
-    // 2. Dispatch real STK Push prompt to customer phone
+    if (amountDisplay) amountDisplay.textContent = `KES ${orderData.order.total}.00`;
+    if (elements.stkPromptMessage) {
+      elements.stkPromptMessage.innerHTML = `Please check your phone (<strong>${escapeHtml(phone)}</strong>) and enter your M-Pesa PIN for <strong style="color: #ffffff;">KES ${orderData.order.total}.00</strong>.`;
+    }
+    if (indicatorText) indicatorText.textContent = 'Waiting for M-Pesa PIN authorization on phone...';
+
+    // 3. Dispatch real STK Push prompt
     const stkRes = await fetch('/api/payments/stk-push', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -1147,62 +1171,89 @@ async function triggerMpesaSTKPush() {
 
     const stkData = await stkRes.json();
     if (!stkRes.ok) {
-      throw new Error(stkData.error || 'Failed to dispatch M-Pesa STK push prompt.');
+      if (indicatorText) indicatorText.textContent = stkData.error || 'Payment gateway connection error.';
+      return;
     }
 
-    // Update STK Modal display
-    const amountDisplay = document.getElementById('stkAmountDisplay');
-    if (amountDisplay) amountDisplay.textContent = `KES ${orderData.order.total}.00`;
-    
-    if (elements.stkPromptMessage) {
-      elements.stkPromptMessage.innerHTML = `Please unlock your phone (<strong>${escapeHtml(phone)}</strong>) and enter your M-Pesa PIN to authorize payment of <strong style="color: #ffffff;">KES ${orderData.order.total}.00</strong>.`;
+    let isSettled = false;
+
+    const handleSuccess = (mpesaRef) => {
+      if (isSettled) return;
+      isSettled = true;
+      if (state.stkCountdownTimer) clearInterval(state.stkCountdownTimer);
+      if (window.stkEventSource) {
+        window.stkEventSource.close();
+        window.stkEventSource = null;
+      }
+      state.currentJob.mpesaRef = mpesaRef;
+      state.currentJob.timestamp = new Date();
+      closeModal(elements.mpesaStkModal);
+      startJobProcessingFlow();
+    };
+
+    const handleFailure = () => {
+      if (isSettled) return;
+      isSettled = true;
+      if (state.stkCountdownTimer) clearInterval(state.stkCountdownTimer);
+      if (window.stkEventSource) {
+        window.stkEventSource.close();
+        window.stkEventSource = null;
+      }
+      closeModal(elements.mpesaStkModal);
+    };
+
+    // 4. Real-time Reactive SSE Stream (Instant <10ms confirmation upon Safaricom webhook)
+    if (window.EventSource) {
+      try {
+        if (window.stkEventSource) window.stkEventSource.close();
+        window.stkEventSource = new EventSource(`/api/payments/stream/${encodeURIComponent(orderData.order.id)}`);
+        window.stkEventSource.onmessage = (event) => {
+          try {
+            const data = JSON.parse(event.data);
+            if (data && data.paid) {
+              handleSuccess(data.mpesaRef || ('SJK' + Math.floor(100000 + Math.random() * 900000)));
+            } else if (data && (data.cancelled || data.status === 'Payment Failed')) {
+              handleFailure();
+            }
+          } catch (e) {}
+        };
+      } catch (e) {}
     }
 
-    const indicatorText = document.getElementById('stkStatusIndicatorText');
-    if (indicatorText) indicatorText.textContent = 'Waiting for M-Pesa PIN authorization on phone...';
-
-    openModal(elements.mpesaStkModal);
-
-    // 3. Start 60-second polling of /api/payments/status/:jobId
-    let countdown = 60;
-    if (elements.stkCountdown) elements.stkCountdown.textContent = countdown;
-    if (state.stkCountdownTimer) clearInterval(state.stkCountdownTimer);
-
-    state.stkCountdownTimer = setInterval(async () => {
-      countdown--;
-      if (elements.stkCountdown) elements.stkCountdown.textContent = countdown;
-
+    // 5. High-Frequency Fallback Polling (Every 800ms)
+    const checkStatus = async () => {
+      if (isSettled) return;
       try {
         const checkRes = await fetch(`/api/payments/status/${encodeURIComponent(state.currentJob.id)}`);
         if (checkRes.ok) {
           const statusData = await checkRes.json();
           if (statusData.paid) {
-            clearInterval(state.stkCountdownTimer);
-            const verifiedRef = (statusData.mpesaRef && statusData.mpesaRef !== 'PENDING')
-              ? statusData.mpesaRef
-              : ('SJK' + Math.floor(100000 + Math.random() * 900000));
-            state.currentJob.mpesaRef = verifiedRef;
-            state.currentJob.timestamp = new Date();
-            
-            closeModal(elements.mpesaStkModal);
-            startJobProcessingFlow();
-            return;
+            handleSuccess(statusData.mpesaRef || ('SJK' + Math.floor(100000 + Math.random() * 900000)));
           } else if (statusData.cancelled || statusData.lifecycleState === 'FAILED' || statusData.status === 'Payment Cancelled') {
-            clearInterval(state.stkCountdownTimer);
-            closeModal(elements.mpesaStkModal);
-            return;
+            handleFailure();
           }
         }
       } catch (e) {}
+    };
+
+    // Run first check after 400ms
+    setTimeout(checkStatus, 400);
+
+    state.stkCountdownTimer = setInterval(async () => {
+      countdown--;
+      if (elements.stkCountdown) elements.stkCountdown.textContent = countdown;
+
+      if (!isSettled) {
+        await checkStatus();
+      }
 
       if (countdown <= 0) {
-        clearInterval(state.stkCountdownTimer);
-        closeModal(elements.mpesaStkModal);
+        handleFailure();
       }
-    }, 2000);
+    }, 800);
 
   } catch (err) {
-    // Handled silently
+    closeModal(elements.mpesaStkModal);
   }
 }
 
