@@ -106,7 +106,8 @@ router.get('/poll-queue', requireAgentAuth, (req, res) => {
   const nextJob = orders.find(o => {
     const s = (o.status || '').toLowerCase();
     const state = (o.lifecycleState || '').toUpperCase();
-    return s === 'ready' || s === 'queued' || (state === 'PAID' && s !== 'completed' && s !== 'printing');
+    const hasValidMpesa = Boolean(o.mpesaRef && o.mpesaRef !== 'PENDING');
+    return (state === 'PAID' || s === 'ready') && hasValidMpesa && s !== 'completed' && s !== 'printing' && s !== 'failed';
   });
 
   if (!nextJob) {

@@ -212,7 +212,9 @@ async function runAllTests() {
       }
     });
     assert.strictEqual(agentPoll.status, 200);
-    console.log('  ✔ Authenticated print agent polled queue successfully.');
+    assert.ok(agentPoll.data.job, 'Paid job must be returned in queue for printing');
+    assert.strictEqual(agentPoll.data.job.mpesaRef, 'UHUFN4R0HB', 'Agent must receive order with verified M-Pesa transaction code');
+    console.log(`  ✔ Authenticated print agent polled queue successfully and received Job ${agentPoll.data.job.id} (M-Pesa: ${agentPoll.data.job.mpesaRef}).`);
 
     // 15. Admin Overview
     console.log('\n🧪 Test 15: Admin Overview API (/api/admin/overview)');

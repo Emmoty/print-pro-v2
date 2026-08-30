@@ -119,7 +119,7 @@ router.post('/create', (req, res) => {
       pages: totalPages,
       copies: calculated.copies,
       total: calculated.totalAmount,
-      status: 'Ready',
+      status: 'Pending Payment',
       lifecycleState: 'PAYMENT_PENDING',
       mpesaRef: 'PENDING',
       timestamp: new Date().toISOString(),
