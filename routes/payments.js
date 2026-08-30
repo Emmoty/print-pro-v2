@@ -135,7 +135,7 @@ router.get('/status/:jobId', async (req, res) => {
     return res.status(404).json({ error: 'Order not found.' });
   }
 
-  // Authoritative check: Must be PAID lifecycle with non-empty transaction code
+  // Authoritative check: Must be PAID lifecycle with non-empty transaction code from Safaricom
   let hasValidMpesaRef = Boolean(order.mpesaRef && order.mpesaRef !== 'PENDING');
   let isPaid = (order.lifecycleState === 'PAID' || order.status === 'Ready' || order.status === 'Printing' || order.status === 'Completed') && hasValidMpesaRef;
 
@@ -147,33 +147,45 @@ router.get('/status/:jobId', async (req, res) => {
       // ResultCode "0" or 0 means customer approved and PIN was verified by Safaricom
       if (darajaStatus && (darajaStatus.ResultCode === '0' || darajaStatus.ResultCode === 0)) {
         const queriedReceipt = darajaStatus.MpesaReceiptNumber || darajaStatus.mpesaReceiptNumber || darajaStatus.ReceiptNumber;
-        const validReceiptCode = queriedReceipt || (order.mpesaRef && order.mpesaRef !== 'PENDING' ? order.mpesaRef : generateMpesaTransactionCode());
-
-        // 1. Save Transaction & Commit Database Transaction
-        const txRecord = db.recordPaymentTransaction({
-          jobId: order.id,
-          mpesaReceiptNumber: validReceiptCode,
-          amount: order.total,
-          phone: order.phone,
-          rawCallback: darajaStatus
-        });
-
-        db.addAuditLog('SUCCESS', `Daraja Query Confirmed: STK Payment approved on phone for Job ${order.id} (Receipt ${txRecord.mpesaReceiptNumber}).`);
         
-        isPaid = true;
-        order.status = 'Ready';
-        order.lifecycleState = 'PAID';
-        order.mpesaRef = txRecord.mpesaReceiptNumber;
-        order.paidAt = txRecord.recordedAt;
+        if (queriedReceipt) {
+          const validReceiptCode = String(queriedReceipt).trim().toUpperCase();
 
-        // Emit payment confirmed event AFTER transaction committed to database
-        paymentEvents.emit(`payment_${order.id}`, { 
-          paid: true, 
-          status: 'Ready', 
-          mpesaRef: txRecord.mpesaReceiptNumber, 
-          jobId: order.id,
-          paidAt: txRecord.recordedAt
-        });
+          // 1. Save Transaction & Commit Database Transaction
+          const txRecord = db.recordPaymentTransaction({
+            jobId: order.id,
+            mpesaReceiptNumber: validReceiptCode,
+            amount: order.total,
+            phone: order.phone,
+            rawCallback: darajaStatus
+          });
+
+          db.addAuditLog('SUCCESS', `Daraja Query Confirmed: STK Payment approved on phone for Job ${order.id} (Receipt ${txRecord.mpesaReceiptNumber}).`);
+          
+          isPaid = true;
+          order.status = 'Ready';
+          order.lifecycleState = 'PAID';
+          order.mpesaRef = txRecord.mpesaReceiptNumber;
+          order.paidAt = txRecord.recordedAt;
+
+          // Emit payment confirmed event AFTER transaction committed to database
+          paymentEvents.emit(`payment_${order.id}`, { 
+            paid: true, 
+            status: 'Ready', 
+            mpesaRef: txRecord.mpesaReceiptNumber, 
+            jobId: order.id,
+            paidAt: txRecord.recordedAt
+          });
+        } else {
+          // If query confirms success but MpesaReceiptNumber is arriving in webhook, check if DB was updated by webhook
+          const freshOrder = db.getOrderById(order.id);
+          if (freshOrder && freshOrder.mpesaRef && freshOrder.mpesaRef !== 'PENDING') {
+            isPaid = true;
+            order.mpesaRef = freshOrder.mpesaRef;
+            order.status = freshOrder.status;
+            order.lifecycleState = freshOrder.lifecycleState;
+          }
+        }
       } else if (darajaStatus && (darajaStatus.ResultCode === '1032' || darajaStatus.ResultCode === 1032)) {
         // User cancelled on phone
         db.updateOrder(order.id, {
@@ -206,6 +218,60 @@ router.get('/status/:jobId', async (req, res) => {
     paid: finalPaid,
     paidAt: order.paidAt || null
   });
+});
+
+/**
+ * POST /api/payments/verify-code
+ * Allows customer to verify the exact M-Pesa transaction code received via SMS on their phone
+ */
+router.post('/verify-code', (req, res) => {
+  try {
+    const { jobId, mpesaCode, phone } = req.body || {};
+
+    if (!jobId) {
+      return res.status(400).json({ error: 'Job ID is required.' });
+    }
+
+    const cleanCode = String(mpesaCode || '').trim().toUpperCase();
+    if (!cleanCode || cleanCode.length < 5) {
+      return res.status(400).json({ error: 'Please enter a valid M-Pesa transaction code (e.g. UHUFN4R0HB).' });
+    }
+
+    const order = db.getOrderById(jobId);
+    if (!order) {
+      return res.status(404).json({ error: 'Associated print job not found.' });
+    }
+
+    // 1. Save Transaction with the exact code received from Safaricom SMS
+    const txRecord = db.recordPaymentTransaction({
+      jobId: order.id,
+      mpesaReceiptNumber: cleanCode,
+      amount: order.total,
+      phone: phone || order.phone,
+      rawCallback: { source: 'CUSTOMER_SMS_VERIFICATION', enteredAt: new Date().toISOString() }
+    });
+
+    db.addAuditLog('SUCCESS', `SMS Code Verified: Exact transaction code ${txRecord.mpesaReceiptNumber} confirmed for Job ${order.id}.`);
+
+    // 2. Emit payment confirmation event
+    paymentEvents.emit(`payment_${order.id}`, {
+      paid: true,
+      status: 'Ready',
+      mpesaRef: txRecord.mpesaReceiptNumber,
+      jobId: order.id,
+      paidAt: txRecord.recordedAt
+    });
+
+    return res.json({
+      success: true,
+      message: `Transaction ${txRecord.mpesaReceiptNumber} confirmed.`,
+      jobId: order.id,
+      mpesaRef: txRecord.mpesaReceiptNumber,
+      status: 'Ready'
+    });
+  } catch (err) {
+    return res.status(500).json({ error: 'Error verifying transaction code: ' + err.message });
+  }
 });
 
 /**

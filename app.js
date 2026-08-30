@@ -1241,7 +1241,7 @@ async function triggerMpesaSTKPush() {
 
     const handleSuccess = (mpesaRef) => {
       if (!mpesaRef || mpesaRef === 'PENDING') {
-        // Do not generate receipt until transaction code is stored and confirmed
+        // Do not generate receipt until real transaction code is stored and confirmed
         return;
       }
       if (isSettled) return;
@@ -1251,7 +1251,7 @@ async function triggerMpesaSTKPush() {
         window.stkEventSource.close();
         window.stkEventSource = null;
       }
-      state.currentJob.mpesaRef = String(mpesaRef).trim();
+      state.currentJob.mpesaRef = String(mpesaRef).trim().toUpperCase();
       state.currentJob.timestamp = new Date();
       closeModal(elements.mpesaStkModal);
       startJobProcessingFlow();
@@ -1268,6 +1268,57 @@ async function triggerMpesaSTKPush() {
       closeModal(elements.mpesaStkModal);
     };
 
+    // Manual Code Verification Button (Handles SMS entry from phone)
+    const manualCodeInput = document.getElementById('manualMpesaCodeInput');
+    const verifyManualCodeBtn = document.getElementById('verifyManualCodeBtn');
+    const manualCodeMsg = document.getElementById('manualCodeMsg');
+
+    if (manualCodeInput) manualCodeInput.value = '';
+    if (manualCodeMsg) manualCodeMsg.style.display = 'none';
+
+    if (verifyManualCodeBtn && manualCodeInput) {
+      verifyManualCodeBtn.onclick = async () => {
+        const code = manualCodeInput.value.trim().toUpperCase();
+        if (!code || code.length < 5) {
+          if (manualCodeMsg) {
+            manualCodeMsg.textContent = 'Please enter a valid M-Pesa code from your SMS.';
+            manualCodeMsg.style.display = 'block';
+          }
+          return;
+        }
+        verifyManualCodeBtn.disabled = true;
+        verifyManualCodeBtn.textContent = 'Verifying...';
+        try {
+          const res = await fetch('/api/payments/verify-code', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              jobId: state.currentJob.id,
+              mpesaCode: code,
+              phone: state.currentJob.phone
+            })
+          });
+          const data = await res.json();
+          if (res.ok && (data.success || data.mpesaRef)) {
+            handleSuccess(data.mpesaRef);
+          } else {
+            if (manualCodeMsg) {
+              manualCodeMsg.textContent = data.error || 'Verification failed. Please check the code.';
+              manualCodeMsg.style.display = 'block';
+            }
+          }
+        } catch (e) {
+          if (manualCodeMsg) {
+            manualCodeMsg.textContent = 'Network error. Please try again.';
+            manualCodeMsg.style.display = 'block';
+          }
+        } finally {
+          verifyManualCodeBtn.disabled = false;
+          verifyManualCodeBtn.textContent = 'Verify';
+        }
+      };
+    }
+
     // 4. Real-time Reactive SSE Stream (Instant <10ms confirmation upon Safaricom webhook)
     if (window.EventSource) {
       try {
@@ -1276,8 +1327,8 @@ async function triggerMpesaSTKPush() {
         window.stkEventSource.onmessage = (event) => {
           try {
             const data = JSON.parse(event.data);
-            if (data && data.paid) {
-              handleSuccess(data.mpesaRef || ('SJK' + Math.floor(100000 + Math.random() * 900000)));
+            if (data && data.paid && data.mpesaRef && data.mpesaRef !== 'PENDING') {
+              handleSuccess(data.mpesaRef);
             } else if (data && (data.cancelled || data.status === 'Payment Failed')) {
               handleFailure();
             }
@@ -1293,8 +1344,8 @@ async function triggerMpesaSTKPush() {
         const checkRes = await fetch(`/api/payments/status/${encodeURIComponent(state.currentJob.id)}`);
         if (checkRes.ok) {
           const statusData = await checkRes.json();
-          if (statusData.paid) {
-            handleSuccess(statusData.mpesaRef || ('SJK' + Math.floor(100000 + Math.random() * 900000)));
+          if (statusData.paid && statusData.mpesaRef && statusData.mpesaRef !== 'PENDING') {
+            handleSuccess(statusData.mpesaRef);
           } else if (statusData.cancelled || statusData.lifecycleState === 'FAILED' || statusData.status === 'Payment Cancelled') {
             handleFailure();
           }
