@@ -11,7 +11,7 @@
       "passwordHash": "c96590d28ac2ee23408d1b5b001a0253:0f9ed167583b23f1dbe40241a152112de253c0560a2bd952220556464fdabf9f4eae0050b67ed7d4fec5bdfac6d75e8690abc574c2cebb2681e553a7d5fa80aa",
       "status": "active",
       "mfaEnabled": true,
-      "lastLogin": "2026-08-30T14:05:17.541Z",
+      "lastLogin": "2026-08-30T14:12:57.527Z",
       "createdAt": "2026-08-29T22:25:26.671Z",
       "updatedAt": "2026-08-29T22:47:29.132Z"
     },
@@ -57,7 +57,7 @@
   ],
   "orders": [
     {
-      "id": "#CP521364",
+      "id": "#CP346397",
       "customer": "Customer 5678",
       "phone": "0712345678",
       "fileName": "Project_Design.pdf",
@@ -76,6 +76,36 @@
       "total": 60,
       "status": "Printing",
       "lifecycleState": "PRINTING",
+      "mpesaRef": "UHUFWR4OHB",
+      "timestamp": "2026-08-30T14:12:57.547Z",
+      "filePurged": false,
+      "mpesa_receipt_number": "UHUFWR4OHB",
+      "checkoutRequestId": "ws_CO_20260830171257_4169",
+      "merchantRequestId": "29103-99210-1788099177570",
+      "paidAt": "2026-08-30T14:12:57.588Z",
+      "spoolStartedAt": "2026-08-30T14:12:57.625Z",
+      "dispatchedToAgent": "AGT-LAN-01"
+    },
+    {
+      "id": "#CP521364",
+      "customer": "Customer 5678",
+      "phone": "0712345678",
+      "fileName": "Project_Design.pdf",
+      "files": [
+        {
+          "name": "Project_Design.pdf",
+          "pages": 10
+        }
+      ],
+      "serviceName": "A4 Full Colour",
+      "paperSize": "a4",
+      "colorMode": "colour",
+      "ratePerPage": 3,
+      "pages": 10,
+      "copies": 2,
+      "total": 60,
+      "status": "Ready",
+      "lifecycleState": "PAID",
       "mpesaRef": "UHUFWR4OHB",
       "timestamp": "2026-08-30T14:05:17.558Z",
       "filePurged": false,
@@ -2018,6 +2048,41 @@
     }
   ],
   "audit_logs": [
+    {
+      "id": 275,
+      "level": "INFO",
+      "message": "Print Spooler: Job #CP346397 dispatched to Agent 'Shop Floor Primary Gateway' for hardware processing.",
+      "meta": {},
+      "timestamp": "2026-08-30T14:12:57.628Z"
+    },
+    {
+      "id": 274,
+      "level": "SUCCESS",
+      "message": "Safaricom Callback Processed: Transaction code UHUFWR4OHB extracted from JSON and committed to DB for Job #CP346397.",
+      "meta": {},
+      "timestamp": "2026-08-30T14:12:57.591Z"
+    },
+    {
+      "id": 273,
+      "level": "INFO",
+      "message": "M-Pesa: STK Push prompt initiated for Job #CP346397 to 254712345678 (KES 60.00). CallbackURL: http://localhost:3456/api/payments/webhook. CheckoutRequestID: ws_CO_20260830171257_4169",
+      "meta": {},
+      "timestamp": "2026-08-30T14:12:57.574Z"
+    },
+    {
+      "id": 272,
+      "level": "INFO",
+      "message": "Order Created: Job #CP346397 registered for 0712345678 (KES 60.00).",
+      "meta": {},
+      "timestamp": "2026-08-30T14:12:57.551Z"
+    },
+    {
+      "id": 271,
+      "level": "SUCCESS",
+      "message": "User 'Sarah Kimani' (Super Admin) logged in successfully from IP ::1.",
+      "meta": {},
+      "timestamp": "2026-08-30T14:12:57.536Z"
+    },
     {
       "id": 270,
       "level": "INFO",
@@ -6399,9 +6464,91 @@
       },
       "createdAt": 1788098717617,
       "expiresAt": 1788185117617
+    },
+    "idemp_test_key_1788099177211": {
+      "data": {
+        "success": true,
+        "orderId": "#CP999999"
+      },
+      "createdAt": 1788099177211,
+      "expiresAt": 1788185577211
+    },
+    "test_order_1788099177542": {
+      "data": {
+        "message": "Print job registered successfully.",
+        "order": {
+          "id": "#CP346397",
+          "customer": "Customer 5678",
+          "phone": "0712345678",
+          "fileName": "Project_Design.pdf",
+          "files": [
+            {
+              "name": "Project_Design.pdf",
+              "pages": 10
+            }
+          ],
+          "serviceName": "A4 Full Colour",
+          "paperSize": "a4",
+          "colorMode": "colour",
+          "ratePerPage": 3,
+          "pages": 10,
+          "copies": 2,
+          "total": 60,
+          "status": "Pending Payment",
+          "lifecycleState": "PAYMENT_PENDING",
+          "mpesaRef": "PENDING",
+          "timestamp": "2026-08-30T14:12:57.547Z",
+          "filePurged": false
+        }
+      },
+      "createdAt": 1788099177555,
+      "expiresAt": 1788185577555
+    },
+    "webhook_daraja_ws_CO_20260830171257_4169": {
+      "data": {
+        "processedAt": 1788099177594,
+        "status": "SUCCESS",
+        "receipt": "UHUFWR4OHB"
+      },
+      "createdAt": 1788099177594,
+      "expiresAt": 1788185577594
     }
   },
   "transactions": [
+    {
+      "id": "TXN_1788099177588_ZAF5L9",
+      "jobId": "#CP346397",
+      "mpesa_receipt_number": "UHUFWR4OHB",
+      "mpesaReceiptNumber": "UHUFWR4OHB",
+      "amount": 60,
+      "phone": "254712345678",
+      "recordedAt": "2026-08-30T14:12:57.588Z",
+      "status": "SETTLED",
+      "rawCallback": {
+        "Body": {
+          "stkCallback": {
+            "ResultCode": 0,
+            "CheckoutRequestID": "ws_CO_20260830171257_4169",
+            "CallbackMetadata": {
+              "Item": [
+                {
+                  "Name": "MpesaReceiptNumber",
+                  "Value": "UHUFWR4OHB"
+                },
+                {
+                  "Name": "Amount",
+                  "Value": 60
+                },
+                {
+                  "Name": "PhoneNumber",
+                  "Value": 254712345678
+                }
+              ]
+            }
+          }
+        }
+      }
+    },
     {
       "id": "TXN_1788098717604_GDBXBY",
       "jobId": "#CP521364",
