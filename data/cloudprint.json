@@ -11,7 +11,7 @@
       "passwordHash": "c96590d28ac2ee23408d1b5b001a0253:0f9ed167583b23f1dbe40241a152112de253c0560a2bd952220556464fdabf9f4eae0050b67ed7d4fec5bdfac6d75e8690abc574c2cebb2681e553a7d5fa80aa",
       "status": "active",
       "mfaEnabled": true,
-      "lastLogin": "2026-08-30T00:51:39.421Z",
+      "lastLogin": "2026-08-30T02:17:07.033Z",
       "createdAt": "2026-08-29T22:25:26.671Z",
       "updatedAt": "2026-08-29T22:47:29.132Z"
     },
@@ -56,6 +56,209 @@
     }
   ],
   "orders": [
+    {
+      "id": "#CP755454",
+      "customer": "Customer 5678",
+      "phone": "0712345678",
+      "fileName": "Project_Design.pdf",
+      "files": [
+        {
+          "name": "Project_Design.pdf",
+          "pages": 10
+        }
+      ],
+      "serviceName": "A4 Full Colour",
+      "paperSize": "a4",
+      "colorMode": "colour",
+      "ratePerPage": 3,
+      "pages": 10,
+      "copies": 2,
+      "total": 60,
+      "status": "Printing",
+      "lifecycleState": "PRINTING",
+      "mpesaRef": "SJK492019",
+      "timestamp": "2026-08-30T02:17:07.043Z",
+      "filePurged": false,
+      "checkoutRequestId": "ws_CO_20260830051707_9149",
+      "merchantRequestId": "29103-99210-1788056227052",
+      "paidAt": "2026-08-30T02:17:07.066Z",
+      "spoolStartedAt": "2026-08-30T02:17:07.073Z",
+      "dispatchedToAgent": "AGT-LAN-01"
+    },
+    {
+      "id": "#CP929361",
+      "customer": "Customer 5678",
+      "phone": "0712345678",
+      "fileName": "Project_Design.pdf",
+      "files": [
+        {
+          "name": "Project_Design.pdf",
+          "pages": 10
+        }
+      ],
+      "serviceName": "A4 Full Colour",
+      "paperSize": "a4",
+      "colorMode": "colour",
+      "ratePerPage": 3,
+      "pages": 10,
+      "copies": 2,
+      "total": 60,
+      "status": "Printing",
+      "lifecycleState": "PRINTING",
+      "mpesaRef": "SJK492019",
+      "timestamp": "2026-08-30T02:09:09.978Z",
+      "filePurged": false,
+      "checkoutRequestId": "ws_CO_20260830050909_1510",
+      "merchantRequestId": "29103-99210-1788055749989",
+      "paidAt": "2026-08-30T02:09:09.996Z",
+      "spoolStartedAt": "2026-08-30T02:09:10.008Z",
+      "dispatchedToAgent": "AGT-LAN-01"
+    },
+    {
+      "id": "#CP932151",
+      "customer": "Customer 5678",
+      "phone": "0712345678",
+      "fileName": "Project_Design.pdf",
+      "files": [
+        {
+          "name": "Project_Design.pdf",
+          "pages": 10
+        }
+      ],
+      "serviceName": "A4 Full Colour",
+      "paperSize": "a4",
+      "colorMode": "colour",
+      "ratePerPage": 3,
+      "pages": 10,
+      "copies": 2,
+      "total": 60,
+      "status": "Printing",
+      "lifecycleState": "PRINTING",
+      "mpesaRef": "SJK492019",
+      "timestamp": "2026-08-30T02:00:06.447Z",
+      "filePurged": false,
+      "checkoutRequestId": "ws_CO_20260830050006_8293",
+      "merchantRequestId": "29103-99210-1788055206458",
+      "paidAt": "2026-08-30T02:00:06.466Z",
+      "spoolStartedAt": "2026-08-30T02:00:06.479Z",
+      "dispatchedToAgent": "AGT-LAN-01"
+    },
+    {
+      "id": "#CP804893",
+      "customer": "Customer 5678",
+      "phone": "0712345678",
+      "fileName": "Project_Design.pdf",
+      "files": [
+        {
+          "name": "Project_Design.pdf",
+          "pages": 10
+        }
+      ],
+      "serviceName": "A4 Full Colour",
+      "paperSize": "a4",
+      "colorMode": "colour",
+      "ratePerPage": 3,
+      "pages": 10,
+      "copies": 2,
+      "total": 60,
+      "status": "Printing",
+      "lifecycleState": "PRINTING",
+      "mpesaRef": "SJK492019",
+      "timestamp": "2026-08-30T01:45:22.201Z",
+      "filePurged": false,
+      "checkoutRequestId": "ws_CO_20260830044522_4930",
+      "merchantRequestId": "29103-99210-1788054322210",
+      "paidAt": "2026-08-30T01:45:22.227Z",
+      "spoolStartedAt": "2026-08-30T01:45:22.237Z",
+      "dispatchedToAgent": "AGT-LAN-01"
+    },
+    {
+      "id": "#CP104765",
+      "customer": "Customer 5678",
+      "phone": "0712345678",
+      "fileName": "Project_Design.pdf",
+      "files": [
+        {
+          "name": "Project_Design.pdf",
+          "pages": 10
+        }
+      ],
+      "serviceName": "A4 Full Colour",
+      "paperSize": "a4",
+      "colorMode": "colour",
+      "ratePerPage": 3,
+      "pages": 10,
+      "copies": 2,
+      "total": 60,
+      "status": "Printing",
+      "lifecycleState": "PRINTING",
+      "mpesaRef": "SJK492019",
+      "timestamp": "2026-08-30T01:22:13.382Z",
+      "filePurged": false,
+      "checkoutRequestId": "ws_CO_20260830042213_1043",
+      "merchantRequestId": "29103-99210-1788052933392",
+      "paidAt": "2026-08-30T01:22:13.401Z",
+      "spoolStartedAt": "2026-08-30T01:22:13.412Z",
+      "dispatchedToAgent": "AGT-LAN-01"
+    },
+    {
+      "id": "#CP186422",
+      "customer": "Customer 5678",
+      "phone": "0712345678",
+      "fileName": "Project_Design.pdf",
+      "files": [
+        {
+          "name": "Project_Design.pdf",
+          "pages": 10
+        }
+      ],
+      "serviceName": "A4 Full Colour",
+      "paperSize": "a4",
+      "colorMode": "colour",
+      "ratePerPage": 3,
+      "pages": 10,
+      "copies": 2,
+      "total": 60,
+      "status": "Printing",
+      "lifecycleState": "PRINTING",
+      "mpesaRef": "SJK492019",
+      "timestamp": "2026-08-30T01:07:24.049Z",
+      "filePurged": false,
+      "checkoutRequestId": "ws_CO_20260830040724_4292",
+      "merchantRequestId": "29103-99210-1788052044057",
+      "paidAt": "2026-08-30T01:07:24.064Z",
+      "spoolStartedAt": "2026-08-30T01:07:24.071Z",
+      "dispatchedToAgent": "AGT-LAN-01"
+    },
+    {
+      "id": "#CP560555",
+      "customer": "Customer 5678",
+      "phone": "0712345678",
+      "fileName": "Project_Design.pdf",
+      "files": [
+        {
+          "name": "Project_Design.pdf",
+          "pages": 10
+        }
+      ],
+      "serviceName": "A4 Full Colour",
+      "paperSize": "a4",
+      "colorMode": "colour",
+      "ratePerPage": 3,
+      "pages": 10,
+      "copies": 2,
+      "total": 60,
+      "status": "Printing",
+      "lifecycleState": "PRINTING",
+      "mpesaRef": "SJK492019",
+      "timestamp": "2026-08-30T00:56:09.227Z",
+      "filePurged": false,
+      "checkoutRequestId": "ws_CO_20260830035609_3335",
+      "merchantRequestId": "29103-99210-1788051369236",
+      "paidAt": "2026-08-30T00:56:09.243Z",
+      "spoolStartedAt": "2026-08-30T00:56:09.254Z",
+      "dispatchedToAgent": "AGT-LAN-01"
+    },
     {
       "id": "#CP658782",
       "customer": "Customer 5678",
@@ -688,6 +891,272 @@
     }
   ],
   "audit_logs": [
+    {
+      "id": 125,
+      "level": "INFO",
+      "message": "Print Spooler: Job #CP755454 dispatched to Agent 'Shop Floor Primary Gateway' for hardware processing.",
+      "meta": {},
+      "timestamp": "2026-08-30T02:17:07.075Z"
+    },
+    {
+      "id": 124,
+      "level": "SUCCESS",
+      "message": "M-Pesa Verified: Payment SJK492019 settled (KES 60.00) for Job #CP755454.",
+      "meta": {},
+      "timestamp": "2026-08-30T02:17:07.067Z"
+    },
+    {
+      "id": 123,
+      "level": "INFO",
+      "message": "M-Pesa: STK Push prompt initiated for Job #CP755454 to 254712345678 (KES 60.00). CheckoutRequestID: ws_CO_20260830051707_9149",
+      "meta": {},
+      "timestamp": "2026-08-30T02:17:07.054Z"
+    },
+    {
+      "id": 122,
+      "level": "INFO",
+      "message": "Order Created: Job #CP755454 registered for 0712345678 (KES 60.00).",
+      "meta": {},
+      "timestamp": "2026-08-30T02:17:07.044Z"
+    },
+    {
+      "id": 121,
+      "level": "SUCCESS",
+      "message": "User 'Sarah Kimani' (Super Admin) logged in successfully from IP ::1.",
+      "meta": {},
+      "timestamp": "2026-08-30T02:17:07.035Z"
+    },
+    {
+      "id": 120,
+      "level": "INFO",
+      "message": "Print Spooler: Job #CP929361 dispatched to Agent 'Shop Floor Primary Gateway' for hardware processing.",
+      "meta": {},
+      "timestamp": "2026-08-30T02:09:10.009Z"
+    },
+    {
+      "id": 119,
+      "level": "SUCCESS",
+      "message": "M-Pesa Verified: Payment SJK492019 settled (KES 60.00) for Job #CP929361.",
+      "meta": {},
+      "timestamp": "2026-08-30T02:09:09.997Z"
+    },
+    {
+      "id": 118,
+      "level": "INFO",
+      "message": "M-Pesa: STK Push prompt initiated for Job #CP929361 to 254712345678 (KES 60.00). CheckoutRequestID: ws_CO_20260830050909_1510",
+      "meta": {},
+      "timestamp": "2026-08-30T02:09:09.990Z"
+    },
+    {
+      "id": 117,
+      "level": "INFO",
+      "message": "Order Created: Job #CP929361 registered for 0712345678 (KES 60.00).",
+      "meta": {},
+      "timestamp": "2026-08-30T02:09:09.979Z"
+    },
+    {
+      "id": 116,
+      "level": "SUCCESS",
+      "message": "User 'Sarah Kimani' (Super Admin) logged in successfully from IP ::1.",
+      "meta": {},
+      "timestamp": "2026-08-30T02:09:09.972Z"
+    },
+    {
+      "id": 115,
+      "level": "INFO",
+      "message": "Print Spooler: Job #CP932151 dispatched to Agent 'Shop Floor Primary Gateway' for hardware processing.",
+      "meta": {},
+      "timestamp": "2026-08-30T02:00:06.480Z"
+    },
+    {
+      "id": 114,
+      "level": "SUCCESS",
+      "message": "M-Pesa Verified: Payment SJK492019 settled (KES 60.00) for Job #CP932151.",
+      "meta": {},
+      "timestamp": "2026-08-30T02:00:06.468Z"
+    },
+    {
+      "id": 113,
+      "level": "INFO",
+      "message": "M-Pesa: STK Push prompt initiated for Job #CP932151 to 254712345678 (KES 60.00). CheckoutRequestID: ws_CO_20260830050006_8293",
+      "meta": {},
+      "timestamp": "2026-08-30T02:00:06.460Z"
+    },
+    {
+      "id": 112,
+      "level": "INFO",
+      "message": "Order Created: Job #CP932151 registered for 0712345678 (KES 60.00).",
+      "meta": {},
+      "timestamp": "2026-08-30T02:00:06.450Z"
+    },
+    {
+      "id": 111,
+      "level": "SUCCESS",
+      "message": "User 'Sarah Kimani' (Super Admin) logged in successfully from IP ::1.",
+      "meta": {},
+      "timestamp": "2026-08-30T02:00:06.439Z"
+    },
+    {
+      "id": 110,
+      "level": "INFO",
+      "message": "Print Spooler: Job #CP804893 dispatched to Agent 'Shop Floor Primary Gateway' for hardware processing.",
+      "meta": {},
+      "timestamp": "2026-08-30T01:45:22.238Z"
+    },
+    {
+      "id": 109,
+      "level": "SUCCESS",
+      "message": "M-Pesa Verified: Payment SJK492019 settled (KES 60.00) for Job #CP804893.",
+      "meta": {},
+      "timestamp": "2026-08-30T01:45:22.229Z"
+    },
+    {
+      "id": 108,
+      "level": "INFO",
+      "message": "M-Pesa: STK Push prompt initiated for Job #CP804893 to 254712345678 (KES 60.00). CheckoutRequestID: ws_CO_20260830044522_4930",
+      "meta": {},
+      "timestamp": "2026-08-30T01:45:22.212Z"
+    },
+    {
+      "id": 107,
+      "level": "INFO",
+      "message": "Order Created: Job #CP804893 registered for 0712345678 (KES 60.00).",
+      "meta": {},
+      "timestamp": "2026-08-30T01:45:22.202Z"
+    },
+    {
+      "id": 106,
+      "level": "SUCCESS",
+      "message": "User 'Sarah Kimani' (Super Admin) logged in successfully from IP ::1.",
+      "meta": {},
+      "timestamp": "2026-08-30T01:45:22.192Z"
+    },
+    {
+      "id": 105,
+      "level": "INFO",
+      "message": "Print Spooler: Job #CP104765 dispatched to Agent 'Shop Floor Primary Gateway' for hardware processing.",
+      "meta": {},
+      "timestamp": "2026-08-30T01:22:13.414Z"
+    },
+    {
+      "id": 104,
+      "level": "SUCCESS",
+      "message": "M-Pesa Verified: Payment SJK492019 settled (KES 60.00) for Job #CP104765.",
+      "meta": {},
+      "timestamp": "2026-08-30T01:22:13.403Z"
+    },
+    {
+      "id": 103,
+      "level": "INFO",
+      "message": "M-Pesa: STK Push prompt initiated for Job #CP104765 to 254712345678 (KES 60.00). CheckoutRequestID: ws_CO_20260830042213_1043",
+      "meta": {},
+      "timestamp": "2026-08-30T01:22:13.394Z"
+    },
+    {
+      "id": 102,
+      "level": "INFO",
+      "message": "Order Created: Job #CP104765 registered for 0712345678 (KES 60.00).",
+      "meta": {},
+      "timestamp": "2026-08-30T01:22:13.384Z"
+    },
+    {
+      "id": 101,
+      "level": "SUCCESS",
+      "message": "User 'Sarah Kimani' (Super Admin) logged in successfully from IP ::1.",
+      "meta": {},
+      "timestamp": "2026-08-30T01:22:13.368Z"
+    },
+    {
+      "id": 100,
+      "level": "SUCCESS",
+      "message": "Staff Authenticated: 'Sarah Kimani' (Super Admin) signed in securely with Magic Passcode from IP 127.0.0.1.",
+      "meta": {},
+      "timestamp": "2026-08-30T01:22:11.245Z"
+    },
+    {
+      "id": 99,
+      "level": "WARN",
+      "message": "Invalid OTP entered for 'Sarah Kimani'. 2 attempts left.",
+      "meta": {},
+      "timestamp": "2026-08-30T01:22:11.241Z"
+    },
+    {
+      "id": 98,
+      "level": "INFO",
+      "message": "Security: Magic Passcode dispatched to 'Sarah Kimani' (Super Admin) via WhatsApp (+254712 *** *78) & Email (s****k@cloudprint.co.ke) [IP: 127.0.0.1].",
+      "meta": {},
+      "timestamp": "2026-08-30T01:22:11.237Z"
+    },
+    {
+      "id": 97,
+      "level": "INFO",
+      "message": "Print Spooler: Job #CP186422 dispatched to Agent 'Shop Floor Primary Gateway' for hardware processing.",
+      "meta": {},
+      "timestamp": "2026-08-30T01:07:24.072Z"
+    },
+    {
+      "id": 96,
+      "level": "SUCCESS",
+      "message": "M-Pesa Verified: Payment SJK492019 settled (KES 60.00) for Job #CP186422.",
+      "meta": {},
+      "timestamp": "2026-08-30T01:07:24.065Z"
+    },
+    {
+      "id": 95,
+      "level": "INFO",
+      "message": "M-Pesa: STK Push prompt initiated for Job #CP186422 to 254712345678 (KES 60.00). CheckoutRequestID: ws_CO_20260830040724_4292",
+      "meta": {},
+      "timestamp": "2026-08-30T01:07:24.058Z"
+    },
+    {
+      "id": 94,
+      "level": "INFO",
+      "message": "Order Created: Job #CP186422 registered for 0712345678 (KES 60.00).",
+      "meta": {},
+      "timestamp": "2026-08-30T01:07:24.050Z"
+    },
+    {
+      "id": 93,
+      "level": "SUCCESS",
+      "message": "User 'Sarah Kimani' (Super Admin) logged in successfully from IP ::1.",
+      "meta": {},
+      "timestamp": "2026-08-30T01:07:24.041Z"
+    },
+    {
+      "id": 92,
+      "level": "INFO",
+      "message": "Print Spooler: Job #CP560555 dispatched to Agent 'Shop Floor Primary Gateway' for hardware processing.",
+      "meta": {},
+      "timestamp": "2026-08-30T00:56:09.255Z"
+    },
+    {
+      "id": 91,
+      "level": "SUCCESS",
+      "message": "M-Pesa Verified: Payment SJK492019 settled (KES 60.00) for Job #CP560555.",
+      "meta": {},
+      "timestamp": "2026-08-30T00:56:09.244Z"
+    },
+    {
+      "id": 90,
+      "level": "INFO",
+      "message": "M-Pesa: STK Push prompt initiated for Job #CP560555 to 254712345678 (KES 60.00). CheckoutRequestID: ws_CO_20260830035609_3335",
+      "meta": {},
+      "timestamp": "2026-08-30T00:56:09.237Z"
+    },
+    {
+      "id": 89,
+      "level": "INFO",
+      "message": "Order Created: Job #CP560555 registered for 0712345678 (KES 60.00).",
+      "meta": {},
+      "timestamp": "2026-08-30T00:56:09.228Z"
+    },
+    {
+      "id": 88,
+      "level": "SUCCESS",
+      "message": "User 'Sarah Kimani' (Super Admin) logged in successfully from IP ::1.",
+      "meta": {},
+      "timestamp": "2026-08-30T00:56:09.220Z"
+    },
     {
       "id": 87,
       "level": "INFO",
@@ -2031,6 +2500,342 @@
       },
       "createdAt": 1788051099446,
       "expiresAt": 1788137499446
+    },
+    "idemp_test_key_1788051369094": {
+      "data": {
+        "success": true,
+        "orderId": "#CP999999"
+      },
+      "createdAt": 1788051369094,
+      "expiresAt": 1788137769094
+    },
+    "test_order_1788051369225": {
+      "data": {
+        "message": "Print job registered successfully.",
+        "order": {
+          "id": "#CP560555",
+          "customer": "Customer 5678",
+          "phone": "0712345678",
+          "fileName": "Project_Design.pdf",
+          "files": [
+            {
+              "name": "Project_Design.pdf",
+              "pages": 10
+            }
+          ],
+          "serviceName": "A4 Full Colour",
+          "paperSize": "a4",
+          "colorMode": "colour",
+          "ratePerPage": 3,
+          "pages": 10,
+          "copies": 2,
+          "total": 60,
+          "status": "Ready",
+          "lifecycleState": "PAYMENT_PENDING",
+          "mpesaRef": "PENDING",
+          "timestamp": "2026-08-30T00:56:09.227Z",
+          "filePurged": false
+        }
+      },
+      "createdAt": 1788051369229,
+      "expiresAt": 1788137769230
+    },
+    "webhook_daraja_ws_CO_20260830035609_3335": {
+      "data": {
+        "processedAt": 1788051369246,
+        "status": "SUCCESS",
+        "receipt": "SJK492019"
+      },
+      "createdAt": 1788051369246,
+      "expiresAt": 1788137769246
+    },
+    "idemp_test_key_1788052043910": {
+      "data": {
+        "success": true,
+        "orderId": "#CP999999"
+      },
+      "createdAt": 1788052043910,
+      "expiresAt": 1788138443910
+    },
+    "test_order_1788052044046": {
+      "data": {
+        "message": "Print job registered successfully.",
+        "order": {
+          "id": "#CP186422",
+          "customer": "Customer 5678",
+          "phone": "0712345678",
+          "fileName": "Project_Design.pdf",
+          "files": [
+            {
+              "name": "Project_Design.pdf",
+              "pages": 10
+            }
+          ],
+          "serviceName": "A4 Full Colour",
+          "paperSize": "a4",
+          "colorMode": "colour",
+          "ratePerPage": 3,
+          "pages": 10,
+          "copies": 2,
+          "total": 60,
+          "status": "Ready",
+          "lifecycleState": "PAYMENT_PENDING",
+          "mpesaRef": "PENDING",
+          "timestamp": "2026-08-30T01:07:24.049Z",
+          "filePurged": false
+        }
+      },
+      "createdAt": 1788052044051,
+      "expiresAt": 1788138444051
+    },
+    "webhook_daraja_ws_CO_20260830040724_4292": {
+      "data": {
+        "processedAt": 1788052044066,
+        "status": "SUCCESS",
+        "receipt": "SJK492019"
+      },
+      "createdAt": 1788052044066,
+      "expiresAt": 1788138444066
+    },
+    "idemp_test_key_1788052933024": {
+      "data": {
+        "success": true,
+        "orderId": "#CP999999"
+      },
+      "createdAt": 1788052933025,
+      "expiresAt": 1788139333025
+    },
+    "test_order_1788052933375": {
+      "data": {
+        "message": "Print job registered successfully.",
+        "order": {
+          "id": "#CP104765",
+          "customer": "Customer 5678",
+          "phone": "0712345678",
+          "fileName": "Project_Design.pdf",
+          "files": [
+            {
+              "name": "Project_Design.pdf",
+              "pages": 10
+            }
+          ],
+          "serviceName": "A4 Full Colour",
+          "paperSize": "a4",
+          "colorMode": "colour",
+          "ratePerPage": 3,
+          "pages": 10,
+          "copies": 2,
+          "total": 60,
+          "status": "Ready",
+          "lifecycleState": "PAYMENT_PENDING",
+          "mpesaRef": "PENDING",
+          "timestamp": "2026-08-30T01:22:13.382Z",
+          "filePurged": false
+        }
+      },
+      "createdAt": 1788052933385,
+      "expiresAt": 1788139333385
+    },
+    "webhook_daraja_ws_CO_20260830042213_1043": {
+      "data": {
+        "processedAt": 1788052933404,
+        "status": "SUCCESS",
+        "receipt": "SJK492019"
+      },
+      "createdAt": 1788052933404,
+      "expiresAt": 1788139333404
+    },
+    "idemp_test_key_1788054321993": {
+      "data": {
+        "success": true,
+        "orderId": "#CP999999"
+      },
+      "createdAt": 1788054321993,
+      "expiresAt": 1788140721993
+    },
+    "test_order_1788054322197": {
+      "data": {
+        "message": "Print job registered successfully.",
+        "order": {
+          "id": "#CP804893",
+          "customer": "Customer 5678",
+          "phone": "0712345678",
+          "fileName": "Project_Design.pdf",
+          "files": [
+            {
+              "name": "Project_Design.pdf",
+              "pages": 10
+            }
+          ],
+          "serviceName": "A4 Full Colour",
+          "paperSize": "a4",
+          "colorMode": "colour",
+          "ratePerPage": 3,
+          "pages": 10,
+          "copies": 2,
+          "total": 60,
+          "status": "Ready",
+          "lifecycleState": "PAYMENT_PENDING",
+          "mpesaRef": "PENDING",
+          "timestamp": "2026-08-30T01:45:22.201Z",
+          "filePurged": false
+        }
+      },
+      "createdAt": 1788054322203,
+      "expiresAt": 1788140722203
+    },
+    "webhook_daraja_ws_CO_20260830044522_4930": {
+      "data": {
+        "processedAt": 1788054322230,
+        "status": "SUCCESS",
+        "receipt": "SJK492019"
+      },
+      "createdAt": 1788054322230,
+      "expiresAt": 1788140722230
+    },
+    "idemp_test_key_1788055206295": {
+      "data": {
+        "success": true,
+        "orderId": "#CP999999"
+      },
+      "createdAt": 1788055206295,
+      "expiresAt": 1788141606295
+    },
+    "test_order_1788055206445": {
+      "data": {
+        "message": "Print job registered successfully.",
+        "order": {
+          "id": "#CP932151",
+          "customer": "Customer 5678",
+          "phone": "0712345678",
+          "fileName": "Project_Design.pdf",
+          "files": [
+            {
+              "name": "Project_Design.pdf",
+              "pages": 10
+            }
+          ],
+          "serviceName": "A4 Full Colour",
+          "paperSize": "a4",
+          "colorMode": "colour",
+          "ratePerPage": 3,
+          "pages": 10,
+          "copies": 2,
+          "total": 60,
+          "status": "Ready",
+          "lifecycleState": "PAYMENT_PENDING",
+          "mpesaRef": "PENDING",
+          "timestamp": "2026-08-30T02:00:06.447Z",
+          "filePurged": false
+        }
+      },
+      "createdAt": 1788055206451,
+      "expiresAt": 1788141606451
+    },
+    "webhook_daraja_ws_CO_20260830050006_8293": {
+      "data": {
+        "processedAt": 1788055206470,
+        "status": "SUCCESS",
+        "receipt": "SJK492019"
+      },
+      "createdAt": 1788055206470,
+      "expiresAt": 1788141606470
+    },
+    "idemp_test_key_1788055749829": {
+      "data": {
+        "success": true,
+        "orderId": "#CP999999"
+      },
+      "createdAt": 1788055749829,
+      "expiresAt": 1788142149829
+    },
+    "test_order_1788055749975": {
+      "data": {
+        "message": "Print job registered successfully.",
+        "order": {
+          "id": "#CP929361",
+          "customer": "Customer 5678",
+          "phone": "0712345678",
+          "fileName": "Project_Design.pdf",
+          "files": [
+            {
+              "name": "Project_Design.pdf",
+              "pages": 10
+            }
+          ],
+          "serviceName": "A4 Full Colour",
+          "paperSize": "a4",
+          "colorMode": "colour",
+          "ratePerPage": 3,
+          "pages": 10,
+          "copies": 2,
+          "total": 60,
+          "status": "Ready",
+          "lifecycleState": "PAYMENT_PENDING",
+          "mpesaRef": "PENDING",
+          "timestamp": "2026-08-30T02:09:09.978Z",
+          "filePurged": false
+        }
+      },
+      "createdAt": 1788055749981,
+      "expiresAt": 1788142149981
+    },
+    "webhook_daraja_ws_CO_20260830050909_1510": {
+      "data": {
+        "processedAt": 1788055749999,
+        "status": "SUCCESS",
+        "receipt": "SJK492019"
+      },
+      "createdAt": 1788055749999,
+      "expiresAt": 1788142149999
+    },
+    "idemp_test_key_1788056226897": {
+      "data": {
+        "success": true,
+        "orderId": "#CP999999"
+      },
+      "createdAt": 1788056226897,
+      "expiresAt": 1788142626897
+    },
+    "test_order_1788056227040": {
+      "data": {
+        "message": "Print job registered successfully.",
+        "order": {
+          "id": "#CP755454",
+          "customer": "Customer 5678",
+          "phone": "0712345678",
+          "fileName": "Project_Design.pdf",
+          "files": [
+            {
+              "name": "Project_Design.pdf",
+              "pages": 10
+            }
+          ],
+          "serviceName": "A4 Full Colour",
+          "paperSize": "a4",
+          "colorMode": "colour",
+          "ratePerPage": 3,
+          "pages": 10,
+          "copies": 2,
+          "total": 60,
+          "status": "Ready",
+          "lifecycleState": "PAYMENT_PENDING",
+          "mpesaRef": "PENDING",
+          "timestamp": "2026-08-30T02:17:07.043Z",
+          "filePurged": false
+        }
+      },
+      "createdAt": 1788056227045,
+      "expiresAt": 1788142627045
+    },
+    "webhook_daraja_ws_CO_20260830051707_9149": {
+      "data": {
+        "processedAt": 1788056227068,
+        "status": "SUCCESS",
+        "receipt": "SJK492019"
+      },
+      "createdAt": 1788056227068,
+      "expiresAt": 1788142627068
     }
   }
 }

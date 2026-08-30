@@ -2258,7 +2258,7 @@ html, body {
 
 .login-btn-submit {
   width: 100%;
-  padding: 12px;
+  padding: 13px;
   background: linear-gradient(135deg, var(--primary-gold), #d97706);
   border: none;
   border-radius: 8px;
@@ -2270,70 +2270,284 @@ html, body {
   align-items: center;
   justify-content: center;
   gap: 8px;
-  margin-top: 20px;
+  margin-top: 18px;
   transition: var(--transition-fast);
 }
 
-.login-btn-submit:hover {
+.login-btn-submit:hover:not(:disabled) {
   transform: translateY(-1px);
   box-shadow: 0 6px 20px rgba(245, 158, 11, 0.3);
 }
 
-.login-demo-section {
-  margin-top: 22px;
-  padding-top: 18px;
+.login-btn-submit:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Quick Staff Selection Chips */
+.staff-quick-section {
+  margin-top: 20px;
+  padding-top: 16px;
   border-top: 1px solid var(--border-subtle);
 }
 
-.login-demo-title {
+.staff-quick-label {
   font-size: 0.72rem;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.05em;
   color: var(--text-muted);
   margin-bottom: 10px;
-  text-align: center;
 }
 
-.login-demo-grid {
+.staff-chips-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 8px;
 }
 
-.login-demo-btn {
-  padding: 7px 10px;
-  background: rgba(255, 255, 255, 0.04);
+.staff-chip-btn {
+  padding: 8px 10px;
+  background: rgba(255, 255, 255, 0.03);
   border: 1px solid var(--border-subtle);
   border-radius: 6px;
   color: var(--text-secondary);
-  font-size: 0.74rem;
-  font-weight: 700;
+  font-size: 0.75rem;
+  font-weight: 600;
   cursor: pointer;
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  gap: 8px;
   transition: var(--transition-fast);
 }
 
-.login-demo-btn:hover {
-  background: rgba(245, 158, 11, 0.12);
-  border-color: rgba(245, 158, 11, 0.35);
+.staff-chip-btn:hover {
+  background: rgba(245, 158, 11, 0.1);
+  border-color: rgba(245, 158, 11, 0.3);
   color: var(--primary-gold);
 }
 
-.login-error-banner {
-  background: rgba(239, 68, 68, 0.14);
-  border: 1px solid rgba(239, 68, 68, 0.35);
-  color: #fca5a5;
-  padding: 10px 12px;
+.chip-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.chip-dot.admin { background: var(--primary-gold); box-shadow: 0 0 6px rgba(245, 158, 11, 0.5); }
+.chip-dot.operator { background: var(--mpesa-green); box-shadow: 0 0 6px rgba(16, 185, 129, 0.5); }
+.chip-dot.technician { background: #3b82f6; box-shadow: 0 0 6px rgba(59, 130, 246, 0.5); }
+.chip-dot.auditor { background: #a855f7; box-shadow: 0 0 6px rgba(168, 85, 247, 0.5); }
+
+/* Step 2: 6-Digit Segmented Passcode Box Styling */
+.otp-sent-badge {
+  background: rgba(16, 185, 129, 0.1);
+  border: 1px solid rgba(16, 185, 129, 0.25);
+  color: #d1fae5;
+  padding: 9px 12px;
   border-radius: 8px;
   font-size: 0.8rem;
-  font-weight: 600;
-  margin-bottom: 16px;
-  display: none;
+  display: flex;
   align-items: center;
   gap: 8px;
+  margin-bottom: 20px;
+}
+
+.otp-inputs-grid {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin: 14px 0 16px 0;
+}
+
+.otp-digit-box {
+  width: 46px;
+  height: 52px;
+  background: #090a0e;
+  border: 1.5px solid var(--border-medium);
+  border-radius: 8px;
+  color: #ffffff;
+  font-family: var(--font-heading);
+  font-size: 1.4rem;
+  font-weight: 700;
+  text-align: center;
+  outline: none;
+  transition: var(--transition-fast);
+}
+
+.otp-digit-box:focus {
+  border-color: var(--primary-gold);
+  box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.2);
+  background: #101217;
+  transform: translateY(-2px);
+}
+
+.otp-digit-box.filled {
+  border-color: rgba(245, 158, 11, 0.5);
+  background: rgba(245, 158, 11, 0.05);
+}
+
+.otp-expiry-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 10px;
+  padding: 0 4px;
+}
+
+.otp-timer-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.76rem;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.btn-resend-otp {
+  background: transparent;
+  border: none;
+  color: var(--primary-gold);
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 4px 6px;
+  border-radius: 4px;
+  transition: var(--transition-fast);
+}
+
+.btn-resend-otp:hover:not(:disabled) {
+  text-decoration: underline;
+}
+
+.btn-resend-otp:disabled {
+  color: var(--text-muted);
+  cursor: not-allowed;
+  text-decoration: none;
+}
+
+.btn-back-step1 {
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: var(--transition-fast);
+}
+
+.btn-back-step1:hover {
+  color: #ffffff;
+}
+
+.login-error-banner {
+  background: rgba(239, 68, 68, 0.18);
+  border: 1px solid rgba(239, 68, 68, 0.45);
+  color: #fca5a5;
+  padding: 11px 14px;
+  border-radius: 8px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  margin-bottom: 18px;
+  display: none;
+  align-items: center;
+  gap: 10px;
+  animation: fadeIn 0.25s ease;
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.15);
+}
+
+.login-error-banner i,
+.login-error-banner svg {
+  color: #f87171;
+}
+
+/* Shake Animation for Invalid Login */
+@keyframes cardShake {
+  0%, 100% { transform: translateX(0); }
+  20%, 60% { transform: translateX(-8px); }
+  40%, 80% { transform: translateX(8px); }
+}
+
+.admin-login-card.shake {
+  animation: cardShake 0.45s ease-in-out;
+  border-color: rgba(239, 68, 68, 0.5) !important;
+  box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.9), 0 0 30px rgba(239, 68, 68, 0.2) !important;
+}
+
+/* Toast Notifications Container & Styling */
+.toast-container {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 100000;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  pointer-events: none;
+}
+
+.toast {
+  background: #14161f;
+  border: 1px solid var(--border-medium);
+  color: #ffffff;
+  padding: 12px 18px;
+  border-radius: 10px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+  font-size: 0.86rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  animation: toastSlideUp 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  pointer-events: auto;
+  min-width: 260px;
+  max-width: 420px;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.toast.success {
+  border-color: rgba(16, 185, 129, 0.45);
+  background: #0d1e17;
+}
+
+.toast.success svg,
+.toast.success i {
+  color: var(--mpesa-green);
+}
+
+.toast.error {
+  border-color: rgba(239, 68, 68, 0.5);
+  background: #200f13;
+  color: #fca5a5;
+}
+
+.toast.error svg,
+.toast.error i {
+  color: #f87171;
+}
+
+.toast.info {
+  border-color: rgba(59, 130, 246, 0.45);
+  background: #0d1627;
+}
+
+.toast.info svg,
+.toast.info i {
+  color: #60a5fa;
+}
+
+@keyframes toastSlideUp {
+  from {
+    transform: translateY(24px) scale(0.92);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
 }
 
 .btn-topbar-logout {

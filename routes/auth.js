@@ -8,8 +8,36 @@ const db = require('../lib/db');
 const auth = require('../lib/auth');
 
 /**
+ * POST /api/auth/request-otp
+ * Dispatches a cryptographically random 6-digit Magic Passcode to registered staff WhatsApp & Email
+ */
+router.post('/request-otp', (req, res) => {
+  const { identifier } = req.body || {};
+  const result = auth.requestOTP(identifier, req);
+  if (!result.success) {
+    const status = result.lockout ? 429 : 400;
+    return res.status(status).json({ error: result.error, lockout: result.lockout, remainingSeconds: result.remainingSeconds });
+  }
+  return res.json(result);
+});
+
+/**
+ * POST /api/auth/verify-otp
+ * Verifies the 6-digit Magic Passcode, single-use invalidates it, and issues a session token
+ */
+router.post('/verify-otp', (req, res) => {
+  const { identifier, code } = req.body || {};
+  const result = auth.verifyOTP(identifier, code, req);
+  if (!result.success) {
+    const status = result.lockout ? 429 : 401;
+    return res.status(status).json({ error: result.error, lockout: result.lockout, remainingSeconds: result.remainingSeconds });
+  }
+  return res.json(result);
+});
+
+/**
  * POST /api/auth/login
- * Staff login with progressive rate limiting and password hash validation
+ * Traditional staff login with progressive rate limiting and password hash validation
  */
 router.post('/login', (req, res) => {
   const { email, password } = req.body || {};

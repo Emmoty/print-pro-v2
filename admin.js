@@ -533,11 +533,26 @@ function loadAdminState() {
 }
 
 // ==============================================================================
-// ADMIN AUTHENTICATION & LOGIN GATEWAY
+// MAGIC CODE / 6-DIGIT OTP AUTHENTICATION & LOGIN GATEWAY
 // ==============================================================================
+let otpCountdownInterval = null;
+let currentOtpIdentifier = '';
+
 function checkAdminAuth() {
   const overlay = document.getElementById('adminLoginOverlay');
   if (!overlay) return;
+
+  setupOtpBoxListeners();
+
+  // Clear error banner on identifier input
+  const identInput = document.getElementById('adminLoginIdentifier');
+  const errorBanner = document.getElementById('adminLoginError');
+  if (identInput && !identInput._hasClearListener) {
+    identInput.addEventListener('input', () => {
+      if (errorBanner) errorBanner.style.display = 'none';
+    });
+    identInput._hasClearListener = true;
+  }
 
   try {
     const session = JSON.parse(sessionStorage.getItem('cloudprint_admin_session') || 'null');
@@ -551,93 +566,329 @@ function checkAdminAuth() {
 
   // Not authenticated - Show login gate
   overlay.classList.remove('hidden');
+  backToStep1();
   return false;
 }
 
-function handleAdminLogin() {
-  const usernameInput = document.getElementById('adminLoginUsername');
-  const passwordInput = document.getElementById('adminLoginPassword');
-  const errorBanner = document.getElementById('adminLoginError');
-  const errorText = document.getElementById('adminLoginErrorText');
-
-  const username = (usernameInput ? usernameInput.value : '').trim().toLowerCase();
-  const password = passwordInput ? passwordInput.value : '';
-
-  if (!username || !password) {
-    if (errorBanner && errorText) {
-      errorText.textContent = 'Please enter both username/email and password.';
-      errorBanner.style.display = 'flex';
-    }
-    return;
+function quickFillIdentifier(identifier) {
+  const input = document.getElementById('adminLoginIdentifier');
+  if (input) {
+    input.value = identifier;
+    handleRequestOTP();
   }
+}
 
-  // Lookup in staff list or match recognized aliases
-  const users = adminState.users || DEFAULT_USERS;
-  let matchedUser = users.find(u => 
-    (u.email && u.email.toLowerCase() === username) ||
-    (u.id && u.id.toLowerCase() === username) ||
-    (username === 'admin' && u.role === 'admin') ||
-    (username === 'operator' && (u.role === 'manager' || u.role === 'cashier')) ||
-    (username === 'cashier' && u.role === 'cashier') ||
-    (username === 'manager' && u.role === 'manager') ||
-    (username === 'technician' && u.role === 'technician') ||
-    (username === 'tech' && u.role === 'technician') ||
-    (username === 'auditor' && u.role === 'accountant') ||
-    (username === 'accountant' && u.role === 'accountant')
-  );
+function backToStep1() {
+  if (otpCountdownInterval) clearInterval(otpCountdownInterval);
+  const step1 = document.getElementById('loginStep1Container');
+  const step2 = document.getElementById('loginStep2Container');
+  const errorBanner = document.getElementById('adminLoginError');
 
-  // Accepted passwords per role
-  const rolePasswords = {
-    admin: 'Admin@CloudPrint2026!',
-    manager: 'Operator@2026!',
-    cashier: 'Operator@2026!',
-    technician: 'Tech@Hardware2026!',
-    accountant: 'Auditor@Finance2026!'
+  if (step1) step1.style.display = 'block';
+  if (step2) step2.style.display = 'none';
+  if (errorBanner) errorBanner.style.display = 'none';
+
+  const identInput = document.getElementById('adminLoginIdentifier');
+  if (identInput) identInput.focus();
+}
+
+function setupOtpBoxListeners() {
+  const boxes = document.querySelectorAll('.otp-digit-box');
+  if (!boxes || boxes.length === 0) return;
+
+  boxes.forEach((box, idx) => {
+    if (box._hasOtpListener) return;
+    box._hasOtpListener = true;
+
+    box.addEventListener('input', (e) => {
+      const val = e.target.value.replace(/[^0-9]/g, '');
+      e.target.value = val ? val[val.length - 1] : '';
+      e.target.classList.toggle('filled', !!e.target.value);
+
+      const errorBanner = document.getElementById('adminLoginError');
+      if (errorBanner) errorBanner.style.display = 'none';
+
+      // Auto-advance to next box
+      if (val && idx < boxes.length - 1) {
+        boxes[idx + 1].focus();
+      }
+
+      // If all 6 digits entered, auto-verify!
+      const fullCode = Array.from(boxes).map(b => b.value).join('');
+      if (fullCode.length === 6) {
+        handleVerifyOTP();
+      }
+    });
+
+    box.addEventListener('keydown', (e) => {
+      if (e.key === 'Backspace' && !box.value && idx > 0) {
+        boxes[idx - 1].focus();
+      }
+    });
+
+    box.addEventListener('paste', (e) => {
+      e.preventDefault();
+      const pasted = (e.clipboardData || window.clipboardData).getData('text');
+      const digits = pasted.replace(/[^0-9]/g, '').slice(0, 6);
+      if (digits) {
+        digits.split('').forEach((d, i) => {
+          if (boxes[i]) {
+            boxes[i].value = d;
+            boxes[i].classList.add('filled');
+          }
+        });
+        const focusIdx = Math.min(digits.length, boxes.length - 1);
+        if (boxes[focusIdx]) boxes[focusIdx].focus();
+        if (digits.length === 6) {
+          handleVerifyOTP();
+        }
+      }
+    });
+  });
+}
+
+function startOtpCountdown(seconds = 300) {
+  if (otpCountdownInterval) clearInterval(otpCountdownInterval);
+  let remaining = seconds;
+  const countdownEl = document.getElementById('otpCountdownText');
+  const resendBtn = document.getElementById('resendOtpBtn');
+
+  if (resendBtn) resendBtn.disabled = true;
+
+  const update = () => {
+    const mins = Math.floor(remaining / 60);
+    const secs = remaining % 60;
+    if (countdownEl) {
+      countdownEl.textContent = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+    }
+
+    if (remaining <= 270 && resendBtn) { // Enabled after 30 seconds
+      resendBtn.disabled = false;
+      resendBtn.textContent = 'Resend Code';
+    } else if (resendBtn) {
+      const waitSecs = remaining - 270;
+      resendBtn.textContent = `Resend (${waitSecs}s)`;
+    }
+
+    if (remaining <= 0) {
+      clearInterval(otpCountdownInterval);
+      if (countdownEl) countdownEl.textContent = '00:00 (Expired)';
+      if (resendBtn) {
+        resendBtn.disabled = false;
+        resendBtn.textContent = 'Request New Code';
+      }
+    }
+    remaining--;
   };
 
-  const expectedPassword = (matchedUser && rolePasswords[matchedUser.role]) ? rolePasswords[matchedUser.role] : 'Admin@CloudPrint2026!';
-  const isValid = matchedUser && (password === expectedPassword || password === 'admin' || password === '123456');
+  update();
+  otpCountdownInterval = setInterval(update, 1000);
+}
 
-  if (!isValid) {
+// STEP 1: Request 6-Digit Passcode
+async function handleRequestOTP() {
+  const identInput = document.getElementById('adminLoginIdentifier');
+  const errorBanner = document.getElementById('adminLoginError');
+  const errorText = document.getElementById('adminLoginErrorText');
+  const loginCard = document.querySelector('.admin-login-card');
+  const sendBtn = document.getElementById('adminSendOtpBtn');
+
+  const identifier = (identInput ? identInput.value : '').trim();
+
+  const triggerError = (msg) => {
     if (errorBanner && errorText) {
-      errorText.textContent = 'Invalid username or password. Please verify credentials.';
+      errorText.textContent = msg;
       errorBanner.style.display = 'flex';
       if (window.lucide) lucide.createIcons();
     }
-    showAdminToast('Login failed: Invalid credentials.', 'error');
+    if (loginCard) {
+      loginCard.classList.remove('shake');
+      void loginCard.offsetWidth;
+      loginCard.classList.add('shake');
+    }
+    showAdminToast(msg, 'error');
+  };
+
+  if (!identifier) {
+    triggerError('Please enter your staff username, email, or phone.');
     return;
   }
 
-  // Authentication Success
-  if (errorBanner) errorBanner.style.display = 'none';
+  if (sendBtn) {
+    sendBtn.disabled = true;
+    sendBtn.innerHTML = '<i data-lucide="loader-2" class="spin" style="width: 18px; height: 18px;"></i><span>Sending Passcode...</span>';
+    if (window.lucide) lucide.createIcons();
+  }
 
-  adminState.currentUser = matchedUser;
-  const session = {
-    user: matchedUser,
-    token: 'cptk_sess_' + Math.random().toString(36).substr(2, 12),
-    createdAt: Date.now(),
-    expiresAt: Date.now() + (12 * 3600 * 1000)
+  try {
+    const res = await fetch('/api/auth/request-otp', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ identifier: identifier })
+    });
+
+    const data = await res.json();
+    if (!res.ok) {
+      triggerError(data.error || 'Failed to dispatch passcode.');
+      return;
+    }
+
+    // Success - Switch to Step 2
+    currentOtpIdentifier = identifier;
+    if (errorBanner) errorBanner.style.display = 'none';
+
+    const step1 = document.getElementById('loginStep1Container');
+    const step2 = document.getElementById('loginStep2Container');
+    const maskedTargetEl = document.getElementById('otpMaskedTarget');
+
+    if (step1) step1.style.display = 'none';
+    if (step2) step2.style.display = 'block';
+    if (maskedTargetEl) maskedTargetEl.textContent = data.maskedDestination || identifier;
+
+    // Clear digit boxes
+    document.querySelectorAll('.otp-digit-box').forEach(b => {
+      b.value = '';
+      b.classList.remove('filled');
+    });
+
+    startOtpCountdown(300);
+    showAdminToast(data.message || 'Passcode dispatched! Please check your WhatsApp & Email.', 'success');
+
+    // Auto-focus first digit box
+    const firstBox = document.querySelector('.otp-digit-box[data-index="0"]');
+    if (firstBox) firstBox.focus();
+
+    // Auto-fill in local dev environment if code returned
+    if (data.devCode) {
+      console.log(`🔐 Auto-filling dev passcode: ${data.devCode}`);
+      data.devCode.split('').forEach((d, i) => {
+        const box = document.querySelector(`.otp-digit-box[data-index="${i}"]`);
+        if (box) {
+          box.value = d;
+          box.classList.add('filled');
+        }
+      });
+    }
+
+    if (window.lucide) lucide.createIcons();
+  } catch (err) {
+    triggerError('Network error connecting to authentication server.');
+  } finally {
+    if (sendBtn) {
+      sendBtn.disabled = false;
+      sendBtn.innerHTML = '<i data-lucide="key-round" style="width: 18px; height: 18px;"></i><span>Send Magic Passcode</span>';
+      if (window.lucide) lucide.createIcons();
+    }
+  }
+}
+
+// STEP 2: Verify 6-Digit Passcode
+async function handleVerifyOTP() {
+  const errorBanner = document.getElementById('adminLoginError');
+  const errorText = document.getElementById('adminLoginErrorText');
+  const loginCard = document.querySelector('.admin-login-card');
+  const verifyBtn = document.getElementById('adminVerifyOtpBtn');
+  const boxes = document.querySelectorAll('.otp-digit-box');
+
+  const code = Array.from(boxes).map(b => b.value).join('').trim();
+
+  const triggerError = (msg) => {
+    if (errorBanner && errorText) {
+      errorText.textContent = msg;
+      errorBanner.style.display = 'flex';
+      if (window.lucide) lucide.createIcons();
+    }
+    if (loginCard) {
+      loginCard.classList.remove('shake');
+      void loginCard.offsetWidth;
+      loginCard.classList.add('shake');
+    }
+    showAdminToast(msg, 'error');
+    boxes.forEach(b => {
+      b.value = '';
+      b.classList.remove('filled');
+    });
+    const firstBox = document.querySelector('.otp-digit-box[data-index="0"]');
+    if (firstBox) firstBox.focus();
   };
 
-  sessionStorage.setItem('cloudprint_admin_session', JSON.stringify(session));
-  localStorage.setItem('cloudprint_active_user', JSON.stringify(matchedUser));
-
-  const overlay = document.getElementById('adminLoginOverlay');
-  if (overlay) overlay.classList.add('hidden');
-
-  updateSidebarUserProfile();
-  addAuditLog('SUCCESS', `Staff Login: '${matchedUser.name}' authenticated as ${matchedUser.roleLabel}.`);
-  showAdminToast(`Welcome back, ${matchedUser.name} (${matchedUser.roleLabel})!`, 'success');
-
-  // Switch to allowed tab if current active tab is forbidden for this role
-  if (!canAccessTab(adminState.activeTab)) {
-    switchTab('overview');
+  if (code.length !== 6) {
+    triggerError('Please enter all 6 digits of your one-time passcode.');
+    return;
   }
+
+  if (verifyBtn) {
+    verifyBtn.disabled = true;
+    verifyBtn.innerHTML = '<i data-lucide="loader-2" class="spin" style="width: 18px; height: 18px;"></i><span>Verifying...</span>';
+    if (window.lucide) lucide.createIcons();
+  }
+
+  try {
+    const res = await fetch('/api/auth/verify-otp', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        identifier: currentOtpIdentifier,
+        code: code
+      })
+    });
+
+    const data = await res.json();
+    if (!res.ok) {
+      triggerError(data.error || 'Verification failed. Please try again.');
+      return;
+    }
+
+    // Success!
+    if (otpCountdownInterval) clearInterval(otpCountdownInterval);
+    if (errorBanner) errorBanner.style.display = 'none';
+
+    adminState.currentUser = data.user;
+    const session = {
+      user: data.user,
+      token: data.token,
+      createdAt: Date.now(),
+      expiresAt: Date.now() + (12 * 3600 * 1000)
+    };
+
+    sessionStorage.setItem('cloudprint_admin_session', JSON.stringify(session));
+    localStorage.setItem('cloudprint_active_user', JSON.stringify(data.user));
+
+    const overlay = document.getElementById('adminLoginOverlay');
+    if (overlay) overlay.classList.add('hidden');
+
+    updateSidebarUserProfile();
+    showAdminToast(`Authenticated! Welcome back, ${data.user.name} (${data.user.roleLabel || 'Staff'})!`, 'success');
+
+    if (!canAccessTab(adminState.activeTab)) {
+      switchTab('overview');
+    }
+  } catch (err) {
+    triggerError('Network error during passcode verification.');
+  } finally {
+    if (verifyBtn) {
+      verifyBtn.disabled = false;
+      verifyBtn.innerHTML = '<i data-lucide="shield-check" style="width: 18px; height: 18px;"></i><span>Verify &amp; Access Dashboard</span>';
+      if (window.lucide) lucide.createIcons();
+    }
+  }
+}
+
+// Resend OTP handler
+async function handleResendOTP() {
+  if (!currentOtpIdentifier) {
+    backToStep1();
+    return;
+  }
+  const identInput = document.getElementById('adminLoginIdentifier');
+  if (identInput) identInput.value = currentOtpIdentifier;
+  await handleRequestOTP();
 }
 
 function handleAdminLogout() {
   sessionStorage.removeItem('cloudprint_admin_session');
   localStorage.removeItem('cloudprint_active_user');
+  if (otpCountdownInterval) clearInterval(otpCountdownInterval);
   
   const user = adminState.currentUser || { name: 'Staff User' };
   addAuditLog('INFO', `Staff Logout: '${user.name}' signed out of dashboard.`);
@@ -645,44 +896,20 @@ function handleAdminLogout() {
   const overlay = document.getElementById('adminLoginOverlay');
   if (overlay) {
     overlay.classList.remove('hidden');
+    backToStep1();
   }
 
   showAdminToast('Logged out of Admin Portal.', 'info');
 }
 
-function fillLoginCredentials(username, password) {
-  const usernameInput = document.getElementById('adminLoginUsername');
-  const passwordInput = document.getElementById('adminLoginPassword');
-  const errorBanner = document.getElementById('adminLoginError');
-
-  if (usernameInput) usernameInput.value = username;
-  if (passwordInput) passwordInput.value = password;
-  if (errorBanner) errorBanner.style.display = 'none';
-
-  const submitBtn = document.getElementById('adminLoginSubmitBtn');
-  if (submitBtn) submitBtn.focus();
-}
-
-function toggleAdminLoginPassword() {
-  const passwordInput = document.getElementById('adminLoginPassword');
-  const icon = document.getElementById('pwdToggleIcon');
-  if (!passwordInput) return;
-
-  const isPassword = passwordInput.type === 'password';
-  passwordInput.type = isPassword ? 'text' : 'password';
-
-  if (icon) {
-    icon.setAttribute('data-lucide', isPassword ? 'eye-off' : 'eye');
-    if (window.lucide) lucide.createIcons();
-  }
-}
-
 // Attach to window object for inline HTML handlers
 window.checkAdminAuth = checkAdminAuth;
-window.handleAdminLogin = handleAdminLogin;
+window.handleRequestOTP = handleRequestOTP;
+window.handleVerifyOTP = handleVerifyOTP;
+window.handleResendOTP = handleResendOTP;
+window.quickFillIdentifier = quickFillIdentifier;
+window.backToStep1 = backToStep1;
 window.handleAdminLogout = handleAdminLogout;
-window.fillLoginCredentials = fillLoginCredentials;
-window.toggleAdminLoginPassword = toggleAdminLoginPassword;
 window.clearPaperJam = clearPaperJam;
 window.runDiagnosticSweep = runDiagnosticSweep;
 
@@ -4475,21 +4702,28 @@ function formatLogTime(date) {
 }
 
 function showAdminToast(msg, type = 'info') {
-  const container = document.getElementById('adminToastContainer');
-  if (!container) return;
+  let container = document.getElementById('adminToastContainer');
+  if (!container) {
+    container = document.createElement('div');
+    container.id = 'adminToastContainer';
+    container.className = 'toast-container';
+    document.body.appendChild(container);
+  }
 
   const toast = document.createElement('div');
   toast.className = `toast ${type}`;
+  const iconName = type === 'error' ? 'alert-triangle' : (type === 'success' ? 'check-circle' : 'info');
   toast.innerHTML = `
-    <i data-lucide="${type === 'success' ? 'check-circle' : 'info'}" style="width: 16px; height: 16px;"></i>
+    <i data-lucide="${iconName}" style="width: 17px; height: 17px; flex-shrink: 0;"></i>
     <span>${escapeHtml(msg)}</span>
   `;
   container.appendChild(toast);
   if (window.lucide) lucide.createIcons();
 
+  const displayTime = type === 'error' ? 4500 : 3200;
   setTimeout(() => {
     toast.style.opacity = '0';
     toast.style.transform = 'translateY(10px)';
     setTimeout(() => toast.remove(), 300);
-  }, 3200);
+  }, displayTime);
 }

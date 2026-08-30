@@ -195,6 +195,17 @@ document.addEventListener('DOMContentLoaded', () => {
   if (window.lucide) {
     lucide.createIcons();
   }
+
+  // Adaptive responsive layout initialization
+  const savedMode = localStorage.getItem('cloudprint_view_mode');
+  if (savedMode) {
+    setViewMode(savedMode);
+  } else if (window.innerWidth >= 768) {
+    setViewMode('fluid');
+  } else {
+    setViewMode('mobile');
+  }
+
   setupEventListeners();
   initSavedCustomerPhone();
   renderLandingStandardRates();
@@ -203,6 +214,16 @@ document.addEventListener('DOMContentLoaded', () => {
   applySystemSettingsDefaults(true);
   renderOrdersHistory();
   renderScreenReceipt();
+});
+
+window.addEventListener('resize', () => {
+  if (!localStorage.getItem('cloudprint_view_mode')) {
+    if (window.innerWidth >= 768 && elements.deviceFrameWrapper && !elements.deviceFrameWrapper.classList.contains('fluid-mode')) {
+      setViewMode('fluid');
+    } else if (window.innerWidth < 768 && elements.deviceFrameWrapper && !elements.deviceFrameWrapper.classList.contains('mobile-mode')) {
+      setViewMode('mobile');
+    }
+  }
 });
 
 // Customer Phone Memory
@@ -241,8 +262,8 @@ window.addEventListener('focus', () => {
 // Setup Event Listeners
 function setupEventListeners() {
   // Navigation & View Mode
-  if (elements.viewMobileBtn) elements.viewMobileBtn.addEventListener('click', () => setViewMode('mobile'));
-  if (elements.viewFluidBtn) elements.viewFluidBtn.addEventListener('click', () => setViewMode('fluid'));
+  if (elements.viewMobileBtn) elements.viewMobileBtn.addEventListener('click', () => setViewMode('mobile', true));
+  if (elements.viewFluidBtn) elements.viewFluidBtn.addEventListener('click', () => setViewMode('fluid', true));
 
   if (elements.brandHomeBtn) elements.brandHomeBtn.addEventListener('click', () => navigateTo('home'));
   if (elements.flowBackBtn) elements.flowBackBtn.addEventListener('click', handleFlowBack);
@@ -1729,7 +1750,7 @@ function showToast(message, type = 'info') {
 }
 
 // View Mode (Mobile Phone vs Fluid Desktop)
-function setViewMode(mode) {
+function setViewMode(mode, isManual = false) {
   if (!elements.deviceFrameWrapper) return;
   if (mode === 'mobile') {
     elements.deviceFrameWrapper.classList.remove('fluid-mode');
@@ -1741,6 +1762,9 @@ function setViewMode(mode) {
     elements.deviceFrameWrapper.classList.add('fluid-mode');
     if (elements.viewFluidBtn) elements.viewFluidBtn.classList.add('active');
     if (elements.viewMobileBtn) elements.viewMobileBtn.classList.remove('active');
+  }
+  if (isManual) {
+    try { localStorage.setItem('cloudprint_view_mode', mode); } catch (e) {}
   }
 }
 

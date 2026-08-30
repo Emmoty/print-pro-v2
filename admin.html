@@ -31,40 +31,104 @@
         </div>
         <div>
           <h2 class="login-title">CloudPrint <span style="color: var(--primary-gold);">Pro</span></h2>
-          <div class="login-subtitle">Admin Control Center &bull; Staff Authentication</div>
+          <div class="login-subtitle">Secure Staff Access &bull; Magic Code Verification</div>
         </div>
       </div>
 
       <div class="login-error-banner" id="adminLoginError">
         <i data-lucide="alert-triangle" style="width: 16px; height: 16px; flex-shrink: 0;"></i>
-        <span id="adminLoginErrorText">Invalid username or password.</span>
+        <span id="adminLoginErrorText">Invalid verification code.</span>
       </div>
 
-      <form id="adminLoginForm" onsubmit="event.preventDefault(); handleAdminLogin();">
-        <div class="login-input-group">
-          <label class="login-input-label" for="adminLoginUsername">Username or Staff Email</label>
-          <div class="login-input-wrapper">
-            <i data-lucide="user" class="login-input-icon" style="width: 16px; height: 16px;"></i>
-            <input type="text" id="adminLoginUsername" class="login-input-field" placeholder="Enter your username or staff email" required autocomplete="username">
+      <!-- STEP 1: Staff Identifier Form -->
+      <div id="loginStep1Container">
+        <form id="adminOtpRequestForm" onsubmit="event.preventDefault(); handleRequestOTP();">
+          <div class="login-input-group">
+            <label class="login-input-label" for="adminLoginIdentifier">Staff Email, Username or Phone</label>
+            <div class="login-input-wrapper">
+              <i data-lucide="user-check" class="login-input-icon" style="width: 16px; height: 16px;"></i>
+              <input type="text" id="adminLoginIdentifier" class="login-input-field" placeholder="e.g. admin or sarah.k@cloudprint.co.ke" required autocomplete="username">
+            </div>
+            <div style="font-size: 0.74rem; color: var(--text-muted); margin-top: 6px;">
+              A secure 6-digit one-time passcode will be dispatched to your registered WhatsApp &amp; Email.
+            </div>
           </div>
-        </div>
 
-        <div class="login-input-group">
-          <label class="login-input-label" for="adminLoginPassword">Password</label>
-          <div class="login-input-wrapper">
-            <i data-lucide="lock" class="login-input-icon" style="width: 16px; height: 16px;"></i>
-            <input type="password" id="adminLoginPassword" class="login-input-field" placeholder="Enter your password" required autocomplete="current-password">
-            <button type="button" class="login-pwd-toggle" id="adminLoginPwdToggle" onclick="toggleAdminLoginPassword()" title="Show/Hide Password">
-              <i data-lucide="eye" id="pwdToggleIcon" style="width: 15px; height: 15px;"></i>
+          <button type="submit" class="login-btn-submit" id="adminSendOtpBtn">
+            <i data-lucide="key-round" style="width: 18px; height: 18px;"></i>
+            <span>Send Magic Passcode</span>
+          </button>
+        </form>
+
+        <!-- Quick Staff Chips for 1-Click Selection -->
+        <div class="staff-quick-section">
+          <div class="staff-quick-label">Or Select Staff Profile:</div>
+          <div class="staff-chips-grid">
+            <button type="button" class="staff-chip-btn" onclick="quickFillIdentifier('admin')">
+              <span class="chip-dot admin"></span>
+              <span>Sarah (Super Admin)</span>
+            </button>
+            <button type="button" class="staff-chip-btn" onclick="quickFillIdentifier('operator')">
+              <span class="chip-dot operator"></span>
+              <span>Brian (Operator)</span>
+            </button>
+            <button type="button" class="staff-chip-btn" onclick="quickFillIdentifier('technician')">
+              <span class="chip-dot technician"></span>
+              <span>David (Tech)</span>
+            </button>
+            <button type="button" class="staff-chip-btn" onclick="quickFillIdentifier('auditor')">
+              <span class="chip-dot auditor"></span>
+              <span>Mercy (Auditor)</span>
             </button>
           </div>
         </div>
+      </div>
 
-        <button type="submit" class="login-btn-submit" id="adminLoginSubmitBtn">
-          <i data-lucide="log-in" style="width: 18px; height: 18px;"></i>
-          <span>Secure Sign In</span>
-        </button>
-      </form>
+      <!-- STEP 2: 6-Digit Passcode Verification -->
+      <div id="loginStep2Container" style="display: none;">
+        <div class="otp-sent-badge">
+          <i data-lucide="message-square" style="width: 15px; height: 15px; color: var(--mpesa-green);"></i>
+          <span>Passcode dispatched to <strong id="otpMaskedTarget">+254 712 *** *78</strong></span>
+        </div>
+
+        <form id="adminOtpVerifyForm" onsubmit="event.preventDefault(); handleVerifyOTP();">
+          <div class="login-input-group" style="text-align: center;">
+            <label class="login-input-label" style="text-align: center; margin-bottom: 12px;">Enter 6-Digit One-Time Passcode</label>
+            
+            <div class="otp-inputs-grid" id="otpInputsGrid">
+              <input type="text" maxlength="1" class="otp-digit-box" data-index="0" inputmode="numeric" autocomplete="one-time-code" autofocus>
+              <input type="text" maxlength="1" class="otp-digit-box" data-index="1" inputmode="numeric">
+              <input type="text" maxlength="1" class="otp-digit-box" data-index="2" inputmode="numeric">
+              <input type="text" maxlength="1" class="otp-digit-box" data-index="3" inputmode="numeric">
+              <input type="text" maxlength="1" class="otp-digit-box" data-index="4" inputmode="numeric">
+              <input type="text" maxlength="1" class="otp-digit-box" data-index="5" inputmode="numeric">
+            </div>
+
+            <!-- Visual Passcode Expiry Countdown -->
+            <div class="otp-expiry-row">
+              <div class="otp-timer-pill" id="otpTimerPill">
+                <i data-lucide="clock" style="width: 13px; height: 13px;"></i>
+                <span>Expires in <span id="otpCountdownText">05:00</span></span>
+              </div>
+              <button type="button" class="btn-resend-otp" id="resendOtpBtn" onclick="handleResendOTP()" disabled>
+                Resend Code
+              </button>
+            </div>
+          </div>
+
+          <button type="submit" class="login-btn-submit" id="adminVerifyOtpBtn">
+            <i data-lucide="shield-check" style="width: 18px; height: 18px;"></i>
+            <span>Verify &amp; Access Dashboard</span>
+          </button>
+        </form>
+
+        <div style="text-align: center; margin-top: 14px;">
+          <button type="button" class="btn-back-step1" onclick="backToStep1()">
+            <i data-lucide="arrow-left" style="width: 13px; height: 13px;"></i>
+            <span>Use different staff account</span>
+          </button>
+        </div>
+      </div>
 
       <div style="text-align: center; margin-top: 24px; padding-top: 18px; border-top: 1px solid var(--border-subtle);">
         <a href="index.html" style="font-size: 0.8rem; color: var(--text-secondary); text-decoration: none; display: inline-flex; align-items: center; gap: 6px; font-weight: 600;">

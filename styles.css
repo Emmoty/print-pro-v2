@@ -484,22 +484,33 @@ html, body {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
-  color: var(--primary-gold);
-  font-size: 0.78rem;
+  gap: 8px;
+  color: var(--text-primary);
+  background: rgba(16, 185, 129, 0.08);
+  border: 1px solid rgba(16, 185, 129, 0.25);
+  padding: 4px 12px;
+  border-radius: var(--radius-pill);
+  font-size: 0.75rem;
   font-weight: 600;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  margin-bottom: 10px;
-  text-align: center;
+  letter-spacing: 0.02em;
+  margin-bottom: 12px;
   align-self: center;
+}
+
+.live-dot-green {
+  width: 7px;
+  height: 7px;
+  background: var(--mpesa-green);
+  border-radius: 50%;
+  box-shadow: 0 0 8px rgba(16, 185, 129, 0.8);
+  animation: pulse-dot 2s infinite ease-in-out;
 }
 
 .hero-title {
   font-family: var(--font-heading);
-  font-size: 2.2rem;
+  font-size: clamp(1.9rem, 4vw, 2.5rem);
   font-weight: 800;
-  line-height: 1.15;
+  line-height: 1.12;
   text-align: center;
   margin-bottom: 12px;
   letter-spacing: -0.02em;
@@ -512,12 +523,42 @@ html, body {
 
 .hero-subtitle {
   color: var(--text-secondary);
-  font-size: 0.92rem;
+  font-size: clamp(0.88rem, 2vw, 0.98rem);
   text-align: center;
   line-height: 1.5;
-  margin-bottom: 24px;
-  max-width: 310px;
+  margin-bottom: 18px;
+  max-width: 380px;
   align-self: center;
+}
+
+/* Trust Pillars Grid */
+.trust-pillars-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-bottom: 22px;
+  width: 100%;
+}
+
+.trust-pillar-item {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 8px 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  text-align: center;
+  transition: var(--transition-fast);
+}
+
+.trust-pillar-item:hover {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: var(--border-medium);
 }
 
 /* Pricing Section Header */
