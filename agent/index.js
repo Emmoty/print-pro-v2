@@ -16,6 +16,7 @@ const fs = require('fs');
 const path = require('path');
 const http = require('http');
 const https = require('https');
+const net = require('net');
 const crypto = require('crypto');
 
 const config = require('./config');
@@ -24,6 +25,80 @@ const spooler = require('./spooler');
 
 let isRunning = true;
 let isPolling = false;
+let mutexServer = null;
+
+const LOCK_PORT = 49152;
+const LOCK_FILE = path.join(__dirname, '.agent.lock');
+
+/**
+ * Acquire Single-Instance Mutex Lock
+ * Prevents multiple print agent instances from running simultaneously on the host.
+ */
+function acquireSingleInstanceLock() {
+  return new Promise((resolve) => {
+    // 1. Check PID Lock File
+    if (fs.existsSync(LOCK_FILE)) {
+      try {
+        const lockData = JSON.parse(fs.readFileSync(LOCK_FILE, 'utf8'));
+        if (lockData && lockData.pid && lockData.pid !== process.pid) {
+          try {
+            process.kill(lockData.pid, 0); // Checks if active process exists
+            console.error(`\n❌ [STARTUP ABORTED] Another CloudPrint Pro Agent is ALREADY RUNNING!`);
+            console.error(`   Active Agent PID : ${lockData.pid} (Started: ${lockData.startedAt || 'Unknown'})`);
+            console.error(`   Only 1 active print agent is permitted per host to prevent duplicate printing.`);
+            console.error(`   If the previous process was forcefully closed, remove: ${LOCK_FILE}\n`);
+            process.exit(1);
+          } catch (deadErr) {
+            // Process is dead, remove stale lock
+            try { fs.unlinkSync(LOCK_FILE); } catch (e) {}
+          }
+        }
+      } catch (e) {
+        try { fs.unlinkSync(LOCK_FILE); } catch (e2) {}
+      }
+    }
+
+    // 2. Loopback Port Mutex (Atomic OS-level socket lock)
+    mutexServer = net.createServer();
+
+    mutexServer.once('error', (err) => {
+      if (err.code === 'EADDRINUSE') {
+        console.error(`\n❌ [STARTUP ABORTED] Another CloudPrint Pro Agent is ALREADY RUNNING!`);
+        console.error(`   Port ${LOCK_PORT} is locked by an active agent process.`);
+        console.error(`   Duplicate agent execution blocked to ensure zero duplicate prints.\n`);
+        process.exit(1);
+      } else {
+        resolve();
+      }
+    });
+
+    mutexServer.once('listening', () => {
+      try {
+        fs.writeFileSync(LOCK_FILE, JSON.stringify({
+          pid: process.pid,
+          startedAt: new Date().toISOString(),
+          hostname: config.HOSTNAME,
+          agentId: config.AGENT_ID
+        }, null, 2));
+      } catch (e) {}
+
+      const cleanLock = () => {
+        try {
+          if (fs.existsSync(LOCK_FILE)) fs.unlinkSync(LOCK_FILE);
+          if (mutexServer) mutexServer.close();
+        } catch (e) {}
+      };
+
+      process.on('exit', cleanLock);
+      process.on('SIGINT', () => { cleanLock(); process.exit(0); });
+      process.on('SIGTERM', () => { cleanLock(); process.exit(0); });
+
+      resolve();
+    });
+
+    mutexServer.listen(LOCK_PORT, '127.0.0.1');
+  });
+}
 
 // Ensure temporary spool directory exists
 if (!fs.existsSync(config.TEMP_DIR)) {
@@ -204,7 +279,10 @@ async function pollPrintQueue() {
  * Main Initialization & Timers
  */
 async function startAgent() {
-  // Initial hardware discovery
+  // 1. Acquire singleton lock to prevent multiple agent processes
+  await acquireSingleInstanceLock();
+
+  // 2. Initial hardware discovery
   const localPrinters = telemetry.getLocalPrinters();
   console.log(`🔍 Detected ${localPrinters.length} local printer(s) on this host:`);
   localPrinters.forEach((p, idx) => {
@@ -215,13 +293,11 @@ async function startAgent() {
   // Initial heartbeat
   await sendHeartbeat();
 
-  // Periodic heartbeat timer
-  const heartbeatTimer = setInterval(sendHeartbeat, config.HEARTBEAT_INTERVAL_MS);
-  if (heartbeatTimer.unref) heartbeatTimer.unref();
+  // Periodic heartbeat timer (Keeps process alive)
+  setInterval(sendHeartbeat, config.HEARTBEAT_INTERVAL_MS);
 
-  // Continuous polling loop
-  const pollTimer = setInterval(pollPrintQueue, config.POLL_INTERVAL_MS);
-  if (pollTimer.unref) pollTimer.unref();
+  // Continuous queue polling loop (Keeps process alive)
+  setInterval(pollPrintQueue, config.POLL_INTERVAL_MS);
 
   // Initial immediate poll
   pollPrintQueue();

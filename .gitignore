@@ -14,8 +14,11 @@ agent/temp_spool/*
 data/backups/*
 !data/backups/.gitkeep
 
-# Logs and runtime data
+# Logs, lockfiles and runtime data
 *.log
+*.lock
+.agent.lock
+agent/.agent.lock
 npm-debug.log*
 
 # OS metadata
