@@ -143,6 +143,21 @@ CREATE TABLE IF NOT EXISTS transactions (
   created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
+-- Schema Auto-Patching (Ensures existing tables acquire newly added columns)
+ALTER TABLE orders ADD COLUMN IF NOT EXISTS checkout_request_id VARCHAR(128);
+ALTER TABLE orders ADD COLUMN IF NOT EXISTS merchant_request_id VARCHAR(128);
+ALTER TABLE orders ADD COLUMN IF NOT EXISTS mpesa_receipt_number VARCHAR(128);
+ALTER TABLE orders ADD COLUMN IF NOT EXISTS mpesa_ref VARCHAR(128);
+ALTER TABLE orders ADD COLUMN IF NOT EXISTS lifecycle_state VARCHAR(64) DEFAULT 'PAYMENT_PENDING';
+ALTER TABLE orders ADD COLUMN IF NOT EXISTS file_purged BOOLEAN DEFAULT FALSE;
+ALTER TABLE orders ADD COLUMN IF NOT EXISTS reversal_ref VARCHAR(128);
+ALTER TABLE orders ADD COLUMN IF NOT EXISTS refund_amount NUMERIC(10, 2);
+ALTER TABLE orders ADD COLUMN IF NOT EXISTS reversal_reason TEXT;
+ALTER TABLE orders ADD COLUMN IF NOT EXISTS reversal_timestamp TIMESTAMP WITH TIME ZONE;
+
+ALTER TABLE transactions ADD COLUMN IF NOT EXISTS mpesa_receipt_number VARCHAR(128);
+ALTER TABLE transactions ADD COLUMN IF NOT EXISTS raw_callback JSONB;
+
 -- Performance Indexes
 CREATE INDEX IF NOT EXISTS idx_orders_status ON orders(status);
 CREATE INDEX IF NOT EXISTS idx_orders_timestamp ON orders(timestamp DESC);
