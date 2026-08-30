@@ -1240,6 +1240,10 @@ async function triggerMpesaSTKPush() {
     let isSettled = false;
 
     const handleSuccess = (mpesaRef) => {
+      if (!mpesaRef || mpesaRef === 'PENDING') {
+        // Do not generate receipt until transaction code is stored and confirmed
+        return;
+      }
       if (isSettled) return;
       isSettled = true;
       if (state.stkCountdownTimer) clearInterval(state.stkCountdownTimer);
@@ -1247,7 +1251,7 @@ async function triggerMpesaSTKPush() {
         window.stkEventSource.close();
         window.stkEventSource = null;
       }
-      state.currentJob.mpesaRef = mpesaRef;
+      state.currentJob.mpesaRef = String(mpesaRef).trim();
       state.currentJob.timestamp = new Date();
       closeModal(elements.mpesaStkModal);
       startJobProcessingFlow();
