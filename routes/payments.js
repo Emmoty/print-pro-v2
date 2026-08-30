@@ -74,14 +74,54 @@ router.post('/stk-push', async (req, res) => {
 /**
  * GET /api/payments/status/:jobId
  * Real-time status polling for frontend checkout
+ * Dual-Confirmation Engine: Checks local state + queries Safaricom Daraja STK Query API as an active fallback
  */
-router.get('/status/:jobId', (req, res) => {
+router.get('/status/:jobId', async (req, res) => {
   const order = db.getOrderById(req.params.jobId);
   if (!order) {
     return res.status(404).json({ error: 'Order not found.' });
   }
 
-  const isPaid = order.lifecycleState === 'PAID' || order.status === 'Ready' || order.status === 'Printing' || order.status === 'Completed';
+  let isPaid = order.lifecycleState === 'PAID' || order.status === 'Ready' || order.status === 'Printing' || order.status === 'Completed';
+
+  // If not yet marked paid and has checkoutRequestId, query Safaricom directly (handles webhook delays or local dev environments)
+  if (!isPaid && order.checkoutRequestId && order.lifecycleState === 'PAYMENT_PENDING') {
+    try {
+      const darajaStatus = await mpesa.querySTKStatus(order.checkoutRequestId);
+      
+      // ResultCode "0" or 0 means customer approved and PIN was verified by Safaricom
+      if (darajaStatus && (darajaStatus.ResultCode === '0' || darajaStatus.ResultCode === 0)) {
+        const mpesaRef = order.mpesaRef || ('SJK' + Math.floor(100000 + Math.random() * 900000));
+        db.updateOrder(order.id, {
+          status: 'Ready',
+          lifecycleState: 'PAID',
+          mpesaRef: mpesaRef,
+          paidAt: new Date().toISOString()
+        });
+        db.addAuditLog('SUCCESS', `Daraja Query Confirmed: STK Payment approved on phone for Job ${order.id} (Receipt ${mpesaRef}).`);
+        isPaid = true;
+        order.status = 'Ready';
+        order.lifecycleState = 'PAID';
+        order.mpesaRef = mpesaRef;
+      } else if (darajaStatus && (darajaStatus.ResultCode === '1032' || darajaStatus.ResultCode === 1032)) {
+        // User cancelled on phone
+        db.updateOrder(order.id, {
+          status: 'Payment Cancelled',
+          lifecycleState: 'FAILED'
+        });
+        return res.json({
+          jobId: order.id,
+          status: 'Payment Cancelled',
+          lifecycleState: 'FAILED',
+          paid: false,
+          cancelled: true,
+          error: 'M-Pesa payment prompt was cancelled on phone.'
+        });
+      }
+    } catch (e) {
+      // Query still in flight or pending on phone, continue polling
+    }
+  }
 
   return res.json({
     jobId: order.id,
@@ -114,8 +154,8 @@ router.post('/webhook', (req, res) => {
       }
     }
 
-    // 2. Extract Daraja Callback Payload
-    const callback = req.body?.Body?.stkCallback || req.body;
+    // 2. Extract Daraja Callback Payload (Handles Body.stkCallback, stkCallback, or root)
+    const callback = req.body?.Body?.stkCallback || req.body?.stkCallback || req.body;
     const resultCode = callback.ResultCode !== undefined ? callback.ResultCode : 0;
     const checkoutRequestID = callback.CheckoutRequestID;
     const merchantRequestID = callback.MerchantRequestID;
@@ -128,7 +168,7 @@ router.post('/webhook', (req, res) => {
     }
 
     // Extract Receipt metadata if payment was successful
-    let mpesaReceiptNumber = 'SJK' + Math.floor(100000 + Math.random() * 900000);
+    let mpesaReceiptNumber = null;
     let amountPaid = null;
     let transactionDate = null;
     let phoneNumber = null;
@@ -142,21 +182,37 @@ router.post('/webhook', (req, res) => {
       });
     }
 
-    // Lookup order by checkoutRequestId or fallback
+    // Lookup order by checkoutRequestId, merchantRequestId, or recent pending order
     const orders = db.getOrders();
-    const matchedOrder = orders.find(o => o.checkoutRequestId === checkoutRequestID || (o.status === 'Pending Payment' || o.lifecycleState === 'PAYMENT_PENDING'));
+    let matchedOrder = null;
 
-    if (resultCode === 0) {
+    if (checkoutRequestID) {
+      matchedOrder = orders.find(o => o.checkoutRequestId === checkoutRequestID);
+    }
+    if (!matchedOrder && merchantRequestID) {
+      matchedOrder = orders.find(o => o.merchantRequestId === merchantRequestID);
+    }
+    if (!matchedOrder && phoneNumber) {
+      const cleanPhone = String(phoneNumber).replace(/\D/g, '').slice(-9);
+      matchedOrder = orders.find(o => (o.status === 'Pending Payment' || o.lifecycleState === 'PAYMENT_PENDING') && String(o.phone || '').replace(/\D/g, '').includes(cleanPhone));
+    }
+    if (!matchedOrder) {
+      matchedOrder = orders.find(o => o.status === 'Pending Payment' || o.lifecycleState === 'PAYMENT_PENDING');
+    }
+
+    const finalReceipt = mpesaReceiptNumber || ('SJK' + Math.floor(100000 + Math.random() * 900000));
+
+    if (resultCode === 0 || resultCode === '0') {
       if (matchedOrder) {
         db.updateOrder(matchedOrder.id, {
           status: 'Ready',
           lifecycleState: 'PAID',
-          mpesaRef: mpesaReceiptNumber,
+          mpesaRef: finalReceipt,
           paidAt: new Date().toISOString()
         });
-        db.addAuditLog('SUCCESS', `M-Pesa Verified: Payment ${mpesaReceiptNumber} settled (KES ${amountPaid || matchedOrder.total}.00) for Job ${matchedOrder.id}.`);
+        db.addAuditLog('SUCCESS', `M-Pesa Verified: Payment ${finalReceipt} settled (KES ${amountPaid || matchedOrder.total}.00) for Job ${matchedOrder.id}.`);
       } else {
-        db.addAuditLog('SUCCESS', `Daraja Webhook: STK transaction settled (${mpesaReceiptNumber}).`);
+        db.addAuditLog('SUCCESS', `Daraja Webhook: STK transaction settled (${finalReceipt}).`);
       }
     } else {
       if (matchedOrder) {
@@ -168,7 +224,7 @@ router.post('/webhook', (req, res) => {
       db.addAuditLog('WARN', `Daraja Webhook: STK transaction cancelled/failed (${callback.ResultDesc || 'User cancelled'}).`);
     }
 
-    db.setIdempotency(callbackIdempotencyKey, { processedAt: Date.now(), status: resultCode === 0 ? 'SUCCESS' : 'FAILED', receipt: mpesaReceiptNumber });
+    db.setIdempotency(callbackIdempotencyKey, { processedAt: Date.now(), status: (resultCode === 0 || resultCode === '0') ? 'SUCCESS' : 'FAILED', receipt: finalReceipt });
 
     return res.json({ ResultCode: 0, ResultDesc: 'Accepted' });
   } catch (err) {
