@@ -1181,8 +1181,8 @@ async function triggerMpesaSTKPush() {
   openModal(elements.mpesaStkModal);
 
   try {
-    // 2. Ensure documents are staged into server vault
-    await uploadFilesToVault();
+    // 2. Stage documents into server vault in background parallel to STK dispatch
+    uploadFilesToVault();
 
     // Fast Order Registration
     const filesPayload = (state.currentJob.files || []).map(f => ({
