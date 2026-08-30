@@ -1400,9 +1400,11 @@ async function triggerMpesaSTKPush() {
           try {
             const data = JSON.parse(event.data);
             const receipt = data.mpesa_receipt_number || data.mpesaRef;
-            if (data && data.paid && receipt && receipt !== 'PENDING') {
+            if (data && (data.paid || data.status === 'PAID') && receipt && receipt !== 'PENDING') {
               handleSuccess(receipt);
-            } else if (data && (data.cancelled || data.status === 'Payment Failed' || data.status === 'FAILED')) {
+            } else if (data && (data.status === 'RECONCILING')) {
+              if (indicatorText) indicatorText.textContent = data.message || 'Payment authorized on phone! Finalizing receipt...';
+            } else if (data && (data.cancelled || data.status === 'Payment Failed' || data.status === 'FAILED' || data.status === 'CANCELLED')) {
               handleFailure();
             }
           } catch (e) {}
@@ -1415,7 +1417,7 @@ async function triggerMpesaSTKPush() {
     let pollIndex = 0;
 
     const scheduleNextPoll = () => {
-      if (isSettled || countdown <= 0) return;
+      if (isSettled) return;
       const interval = pollIntervals[pollIndex] || 3000;
       if (pollIndex < pollIntervals.length - 1) pollIndex++;
 
@@ -1424,8 +1426,11 @@ async function triggerMpesaSTKPush() {
         if (elements.stkCountdown) elements.stkCountdown.textContent = countdown;
 
         if (countdown <= 0) {
-          handleFailure();
-          return;
+          // Graceful verification timeout: Expand manual code section rather than failing
+          if (indicatorText) indicatorText.textContent = 'Auto-check timed out. If paid, enter your M-Pesa SMS code below:';
+          if (elements.manualCodeInputContainer) elements.manualCodeInputContainer.style.display = 'block';
+          if (elements.manualCodeChevron) elements.manualCodeChevron.style.transform = 'rotate(180deg)';
+          if (elements.manualMpesaCodeInput) elements.manualMpesaCodeInput.focus();
         }
 
         try {
@@ -1436,14 +1441,16 @@ async function triggerMpesaSTKPush() {
             if (statusData.paid && receipt && receipt !== 'PENDING') {
               handleSuccess(receipt);
               return;
-            } else if (statusData.cancelled || statusData.lifecycleState === 'FAILED' || statusData.status === 'FAILED') {
+            } else if (statusData.status === 'RECONCILING') {
+              if (indicatorText) indicatorText.textContent = statusData.message || 'Payment authorized on phone! Finalizing receipt...';
+            } else if (statusData.cancelled || statusData.lifecycleState === 'FAILED' || statusData.lifecycleState === 'CANCELLED' || statusData.status === 'FAILED') {
               handleFailure();
               return;
             }
           }
         } catch (e) {}
 
-        if (!isSettled) scheduleNextPoll();
+        if (!isSettled && countdown > 0) scheduleNextPoll();
       }, interval);
     };
 

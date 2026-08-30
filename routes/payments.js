@@ -32,17 +32,16 @@ router.post('/stk-push', async (req, res) => {
       return res.status(400).json({ error: 'Customer phone number is required.' });
     }
 
-    // Call Daraja STK Push with dynamic live host callback discovery
-    const hostHeader = req.get('host') || 'printpro.hudumacyber.shop';
-    const proto = (req.headers['x-forwarded-proto'] || req.protocol || 'https').split(',')[0].trim();
-    const dynamicCallback = process.env.MPESA_CALLBACK_URL || `${proto}://${hostHeader}/api/payments/webhook`;
+    // Fixed production callback URL (Never unvalidated dynamic Host)
+    const fixedCallback = process.env.MPESA_CALLBACK_URL || 
+      (process.env.PUBLIC_APP_URL ? `${process.env.PUBLIC_APP_URL}/api/payments/webhook` : 'https://printpro.hudumacyber.shop/api/payments/webhook');
 
     const result = await mpesa.initiateSTKPush({
       phone: customerPhone,
       amount: order.total,
       jobId: order.id,
       accountReference: order.id,
-      callbackUrl: dynamicCallback
+      callbackUrl: fixedCallback
     });
 
     // Update order with pending checkoutRequestId
@@ -54,7 +53,7 @@ router.post('/stk-push', async (req, res) => {
       phone: customerPhone
     });
 
-    db.addAuditLog('INFO', `M-Pesa: STK Push prompt initiated for Job ${order.id} to ${result.phone} (KES ${order.total}.00). CallbackURL: ${dynamicCallback}. CheckoutRequestID: ${result.CheckoutRequestID}`);
+    db.addAuditLog('INFO', `M-Pesa: STK Push prompt initiated for Job ${order.id} to ${result.phone} (KES ${order.total}.00). CallbackURL: ${fixedCallback}. CheckoutRequestID: ${result.CheckoutRequestID}`);
 
     const responseData = {
       success: true,
@@ -106,7 +105,9 @@ router.get('/stream/:jobId', (req, res) => {
 
   const listener = (data) => {
     res.write(`data: ${JSON.stringify(data)}\n\n`);
-    res.end();
+    if (data && (data.paid || data.status === 'PAID' || data.cancelled || data.status === 'FAILED')) {
+      res.end();
+    }
   };
 
   paymentEvents.once(`payment_${jobId}`, listener);
@@ -153,7 +154,7 @@ const handlePaymentStatus = (req, res) => {
     });
   }
 
-  if (order.lifecycleState === 'FAILED' || order.status === 'Payment Cancelled' || order.status === 'Payment Failed') {
+  if (order.lifecycleState === 'FAILED' || order.lifecycleState === 'CANCELLED' || order.status === 'Payment Cancelled' || order.status === 'Payment Failed') {
     return res.json({
       status: 'FAILED',
       mpesa_receipt_number: null,
@@ -162,55 +163,63 @@ const handlePaymentStatus = (req, res) => {
       payment_method: 'mpesa',
       paid: false,
       jobId: order.id,
-      error: 'Payment was cancelled or failed.'
+      error: order.status || 'Payment was cancelled or failed.'
     });
   }
 
-  // Non-blocking Asynchronous Fallback Query:
-  // If webhook is delayed, query Daraja in the background without blocking the HTTP response
+  if (order.lifecycleState === 'RECONCILING') {
+    return res.json({
+      status: 'RECONCILING',
+      mpesa_receipt_number: null,
+      mpesaRef: null,
+      amount: order.total,
+      payment_method: 'mpesa',
+      paid: false,
+      jobId: order.id,
+      message: 'Payment authorized on phone! Finalizing receipt from Safaricom...'
+    });
+  }
+
+  // Non-blocking Asynchronous Status Query:
+  // If callback is taking time, query Daraja in the background for terminal failure or success authorization
   if (order.checkoutRequestId && order.lifecycleState === 'PAYMENT_PENDING') {
     const checkoutId = order.checkoutRequestId;
     const now = Date.now();
     const lastQuery = lastDarajaQueryTime.get(checkoutId) || 0;
 
-    if (!activeDarajaQueries.has(checkoutId) && now - lastQuery > 2500) {
+    if (!activeDarajaQueries.has(checkoutId) && now - lastQuery > 3000) {
       activeDarajaQueries.add(checkoutId);
       lastDarajaQueryTime.set(checkoutId, now);
 
       mpesa.querySTKStatus(checkoutId)
         .then(darajaStatus => {
           activeDarajaQueries.delete(checkoutId);
-          if (darajaStatus && (darajaStatus.ResultCode === '0' || darajaStatus.ResultCode === 0)) {
-            const queriedReceipt = darajaStatus.MpesaReceiptNumber || darajaStatus.mpesaReceiptNumber || darajaStatus.ReceiptNumber;
+          if (darajaStatus && (darajaStatus.status === 'SUCCESS' || darajaStatus.resultCode === '0' || darajaStatus.resultCode === 0)) {
             const freshOrder = db.getOrderById(order.id);
-            const webhookReceipt = (freshOrder && freshOrder.mpesa_receipt_number) ? freshOrder.mpesa_receipt_number : ((freshOrder && freshOrder.mpesaRef && freshOrder.mpesaRef !== 'PENDING') ? freshOrder.mpesaRef : null);
-
-            const validReceipt = queriedReceipt || webhookReceipt;
-            if (validReceipt) {
-              const cleanReceipt = String(validReceipt).trim().toUpperCase();
-              const txRecord = db.recordPaymentTransaction({
-                jobId: order.id,
-                mpesaReceiptNumber: cleanReceipt,
-                amount: order.total,
-                phone: order.phone,
-                rawCallback: darajaStatus
+            if (freshOrder && freshOrder.lifecycleState !== 'PAID') {
+              db.updateOrder(order.id, {
+                lifecycleState: 'RECONCILING',
+                status: 'Payment Authorized'
               });
-
               paymentEvents.emit(`payment_${order.id}`, { 
-                paid: true, 
-                status: 'PAID', 
-                mpesa_receipt_number: cleanReceipt, 
-                mpesaRef: cleanReceipt, 
-                jobId: order.id,
-                paidAt: txRecord.recordedAt
+                paid: false, 
+                status: 'RECONCILING', 
+                message: 'Payment authorized on phone! Finalizing receipt...', 
+                jobId: order.id 
               });
             }
-          } else if (darajaStatus && (darajaStatus.ResultCode === '1032' || darajaStatus.ResultCode === 1032)) {
+          } else if (darajaStatus && (darajaStatus.status === 'CANCELLED' || darajaStatus.resultCode === '1032' || darajaStatus.resultCode === 1032)) {
             db.updateOrder(order.id, {
               status: 'Payment Cancelled',
+              lifecycleState: 'CANCELLED'
+            });
+            paymentEvents.emit(`payment_${order.id}`, { paid: false, cancelled: true, status: 'CANCELLED', message: darajaStatus.userMessage, jobId: order.id });
+          } else if (darajaStatus && (darajaStatus.status === 'FAILED' || darajaStatus.status === 'TIMEOUT')) {
+            db.updateOrder(order.id, {
+              status: 'Payment Failed',
               lifecycleState: 'FAILED'
             });
-            paymentEvents.emit(`payment_${order.id}`, { paid: false, cancelled: true, status: 'FAILED', jobId: order.id });
+            paymentEvents.emit(`payment_${order.id}`, { paid: false, cancelled: false, status: 'FAILED', message: darajaStatus.userMessage, jobId: order.id });
           }
         })
         .catch(() => {
