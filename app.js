@@ -185,9 +185,7 @@ const elements = {
   recPages: document.getElementById('recPages'),
   recPhone: document.getElementById('recPhone'),
   recMpesaRef: document.getElementById('recMpesaRef'),
-  recTotal: document.getElementById('recTotal'),
-
-  toastContainer: document.getElementById('toastContainer')
+  recTotal: document.getElementById('recTotal')
 };
 
 // Initialize Application
@@ -331,7 +329,6 @@ function setupEventListeners() {
   if (elements.uploadNextBtn) {
     elements.uploadNextBtn.addEventListener('click', () => {
       if (!state.currentJob.files || state.currentJob.files.length === 0) {
-        showToast('Please select at least one document to print', 'warn');
         if (elements.fileInputElement) elements.fileInputElement.click();
         return;
       }
@@ -340,7 +337,6 @@ function setupEventListeners() {
       const settings = getSystemSettings();
       const maxPages = settings.maxPages || 300;
       if (totalPgs > maxPages) {
-        showToast(`Selected documents (${totalPgs} pages) exceed the maximum allowed limit of ${maxPages} pages per job.`, 'error');
         return;
       }
 
@@ -780,13 +776,7 @@ async function processFiles(fileList) {
 
   for (const file of newFiles) {
     // 1. File Size Validation against Dynamic System Rule
-    if (file.size > maxBytes) {
-      showToast(`File "${escapeHtml(file.name)}" exceeds the configured limit of ${maxMb}MB.`, 'error');
-      continue;
-    }
-
-    if (file.size === 0) {
-      showToast(`File "${escapeHtml(file.name)}" is empty (0 bytes).`, 'error');
+    if (file.size > maxBytes || file.size === 0) {
       continue;
     }
 
@@ -797,7 +787,6 @@ async function processFiles(fileList) {
 
     // 2. Extension Validation
     if (!allowedExts.includes(ext)) {
-      showToast(`Unsupported file type: .${escapeHtml(ext)}. Please upload PDF, Office, or image documents.`, 'error');
       continue;
     }
 
@@ -833,7 +822,6 @@ async function processFiles(fileList) {
     renderUploadStagingQueue();
     renderReviewFilesList();
     updateCalculations();
-    showToast(`Added ${addedCount} document${addedCount > 1 ? 's' : ''} (Pages auto-detected)`, 'success');
   }
 }
 
@@ -1075,13 +1063,11 @@ window.updateFilePages = function (fileId, delta) {
 };
 
 window.removeFile = function (fileId) {
-  const removedFile = state.currentJob.files.find(f => f.id === fileId);
   state.currentJob.files = state.currentJob.files.filter(f => f.id !== fileId);
   
   renderReviewFilesList();
   renderUploadStagingQueue();
   updateCalculations();
-  showToast(`Removed ${removedFile ? escapeHtml(removedFile.name) : 'file'}`, 'info');
 };
 
 // Pricing Calculation for Entire Multi-file Batch
@@ -1112,13 +1098,11 @@ async function triggerMpesaSTKPush() {
   const currentPages = state.currentJob.selectedPagesCount || 1;
 
   if (currentPages > maxPages) {
-    showToast(`Print job (${currentPages} pages) exceeds the maximum allowed limit of ${maxPages} pages per job.`, 'error');
     return;
   }
 
   const rawPhone = elements.mpesaPhoneInput ? elements.mpesaPhoneInput.value.trim() : '';
   if (!isValidKenyanPhone(rawPhone)) {
-    showToast('Please enter a valid Safaricom/Airtel phone number (e.g. 0712345678 or 0112345678)', 'error');
     if (elements.mpesaPhoneInput) elements.mpesaPhoneInput.focus();
     return;
   }
@@ -1127,8 +1111,6 @@ async function triggerMpesaSTKPush() {
   state.currentJob.phone = phone;
 
   try {
-    showToast('Registering print order...', 'info');
-
     // 1. Register order on server
     const createOrderRes = await fetch('/api/orders/create', {
       method: 'POST',
@@ -1203,14 +1185,11 @@ async function triggerMpesaSTKPush() {
             state.currentJob.timestamp = new Date();
             
             closeModal(elements.mpesaStkModal);
-            playSuccessSound();
-            showToast(`M-Pesa payment verified! Receipt: ${state.currentJob.mpesaRef}`, 'success');
             startJobProcessingFlow();
             return;
           } else if (statusData.cancelled || statusData.lifecycleState === 'FAILED' || statusData.status === 'Payment Cancelled') {
             clearInterval(state.stkCountdownTimer);
             closeModal(elements.mpesaStkModal);
-            showToast(statusData.error || 'M-Pesa prompt was cancelled on your phone.', 'error');
             return;
           }
         }
@@ -1219,12 +1198,11 @@ async function triggerMpesaSTKPush() {
       if (countdown <= 0) {
         clearInterval(state.stkCountdownTimer);
         closeModal(elements.mpesaStkModal);
-        showToast('M-Pesa authorization timed out. Please try again.', 'error');
       }
     }, 2000);
 
   } catch (err) {
-    showToast(err.message || 'Payment initiation error', 'error');
+    // Handled silently
   }
 }
 
@@ -1335,7 +1313,6 @@ function finishProcessing() {
 
   setTimeout(() => {
     navigateTo('completed');
-    playSuccessSound();
   }, 500);
 }
 
@@ -1405,11 +1382,7 @@ function setCheckItemState(itemEl, stateName, statusText) {
 
 // Copy Job ID
 function copyJobId() {
-  navigator.clipboard.writeText(state.currentJob.id).then(() => {
-    showToast(`Copied ${state.currentJob.id} to clipboard!`, 'success');
-  }).catch(() => {
-    showToast(`Job ID: ${state.currentJob.id}`, 'info');
-  });
+  navigator.clipboard.writeText(state.currentJob.id).catch(() => {});
 }
 
 // QR Code Canvas Renderer (Lightweight Procedural Matrix)
@@ -1515,8 +1488,6 @@ ${docNames}
 
   const encodedMessage = encodeURIComponent(message);
   const whatsappUrl = `https://wa.me/${storeNumber}?text=${encodedMessage}`;
-
-  showToast(`Sending receipt to store WhatsApp (${rawStoreContact})...`, 'success');
   window.open(whatsappUrl, '_blank');
 }
 
@@ -1632,7 +1603,6 @@ function renderOrdersHistory() {
 function searchJobAudit() {
   const rawQuery = elements.trackJobInput ? elements.trackJobInput.value.trim().toUpperCase() : '';
   if (!rawQuery) {
-    showToast('Please enter a Job ID', 'error');
     return;
   }
 
@@ -1730,11 +1700,6 @@ function closeModal(modalEl) {
   if (state.stkCountdownTimer) clearInterval(state.stkCountdownTimer);
 }
 
-// Toast Notifications (Disabled for silent clean experience)
-function showToast(message, type = 'info') {
-  // Silent - No popups
-}
-
 // View Mode (Mobile Phone vs Fluid Desktop)
 function setViewMode(mode, isManual = false) {
   if (!elements.deviceFrameWrapper) return;
@@ -1752,9 +1717,4 @@ function setViewMode(mode, isManual = false) {
   if (isManual) {
     try { localStorage.setItem('cloudprint_view_mode', mode); } catch (e) {}
   }
-}
-
-// Animation Sound (Disabled for clean, silent experience)
-function playSuccessSound() {
-  // Silent - No audio chimes
 }
