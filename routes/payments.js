@@ -32,12 +32,17 @@ router.post('/stk-push', async (req, res) => {
       return res.status(400).json({ error: 'Customer phone number is required.' });
     }
 
-    // Call Daraja STK Push
+    // Call Daraja STK Push with dynamic live host callback discovery
+    const hostHeader = req.get('host') || 'printpro.hudumacyber.shop';
+    const proto = (req.headers['x-forwarded-proto'] || req.protocol || 'https').split(',')[0].trim();
+    const dynamicCallback = process.env.MPESA_CALLBACK_URL || `${proto}://${hostHeader}/api/payments/webhook`;
+
     const result = await mpesa.initiateSTKPush({
       phone: customerPhone,
       amount: order.total,
       jobId: order.id,
-      accountReference: order.id
+      accountReference: order.id,
+      callbackUrl: dynamicCallback
     });
 
     // Update order with pending checkoutRequestId
@@ -49,7 +54,7 @@ router.post('/stk-push', async (req, res) => {
       phone: customerPhone
     });
 
-    db.addAuditLog('INFO', `M-Pesa: STK Push prompt initiated for Job ${order.id} to ${result.phone} (KES ${order.total}.00). CheckoutRequestID: ${result.CheckoutRequestID}`);
+    db.addAuditLog('INFO', `M-Pesa: STK Push prompt initiated for Job ${order.id} to ${result.phone} (KES ${order.total}.00). CallbackURL: ${dynamicCallback}. CheckoutRequestID: ${result.CheckoutRequestID}`);
 
     const responseData = {
       success: true,
@@ -129,8 +134,69 @@ const handlePaymentStatus = async (req, res) => {
     return res.status(404).json({ error: 'Associated print job not found.' });
   }
 
-  const authenticReceipt = order.mpesa_receipt_number || (order.mpesaRef && order.mpesaRef !== 'PENDING' ? order.mpesaRef : null);
-  const isPaid = (order.lifecycleState === 'PAID' || order.status === 'Ready' || order.status === 'Completed') && Boolean(authenticReceipt);
+  let authenticReceipt = order.mpesa_receipt_number || (order.mpesaRef && order.mpesaRef !== 'PENDING' ? order.mpesaRef : null);
+  let isPaid = (order.lifecycleState === 'PAID' || order.status === 'Ready' || order.status === 'Completed') && Boolean(authenticReceipt);
+
+  // If not yet marked paid and has checkoutRequestId, query Safaricom directly (handles webhook delays or local dev environments)
+  if (!isPaid && order.checkoutRequestId && order.lifecycleState === 'PAYMENT_PENDING') {
+    try {
+      const darajaStatus = await mpesa.querySTKStatus(order.checkoutRequestId);
+      
+      // ResultCode "0" or 0 means customer approved on phone
+      if (darajaStatus && (darajaStatus.ResultCode === '0' || darajaStatus.ResultCode === 0)) {
+        const queriedReceipt = darajaStatus.MpesaReceiptNumber || darajaStatus.mpesaReceiptNumber || darajaStatus.ReceiptNumber;
+        
+        // Check if real webhook arrived in DB
+        const freshOrder = db.getOrderById(order.id);
+        const webhookReceipt = (freshOrder && freshOrder.mpesa_receipt_number) ? freshOrder.mpesa_receipt_number : ((freshOrder && freshOrder.mpesaRef && freshOrder.mpesaRef !== 'PENDING') ? freshOrder.mpesaRef : null);
+
+        const validReceiptCode = queriedReceipt || webhookReceipt;
+
+        if (validReceiptCode) {
+          const validReceipt = String(validReceiptCode).trim().toUpperCase();
+
+          const txRecord = db.recordPaymentTransaction({
+            jobId: order.id,
+            mpesaReceiptNumber: validReceipt,
+            amount: order.total,
+            phone: order.phone,
+            rawCallback: darajaStatus
+          });
+
+          isPaid = true;
+          authenticReceipt = validReceipt;
+
+          paymentEvents.emit(`payment_${order.id}`, { 
+            paid: true, 
+            status: 'PAID', 
+            mpesa_receipt_number: validReceipt, 
+            mpesaRef: validReceipt, 
+            jobId: order.id,
+            paidAt: txRecord.recordedAt
+          });
+        }
+      } else if (darajaStatus && (darajaStatus.ResultCode === '1032' || darajaStatus.ResultCode === 1032)) {
+        // User cancelled on phone
+        db.updateOrder(order.id, {
+          status: 'Payment Cancelled',
+          lifecycleState: 'FAILED'
+        });
+        paymentEvents.emit(`payment_${order.id}`, { paid: false, cancelled: true, status: 'FAILED', jobId: order.id });
+        return res.json({
+          status: 'FAILED',
+          mpesa_receipt_number: null,
+          mpesaRef: null,
+          amount: order.total,
+          payment_method: 'mpesa',
+          paid: false,
+          jobId: order.id,
+          error: 'M-Pesa payment prompt was cancelled on phone.'
+        });
+      }
+    } catch (e) {
+      // Query in flight
+    }
+  }
 
   if (isPaid) {
     return res.json({
