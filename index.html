@@ -18,7 +18,7 @@
   <script src="https://unpkg.com/lucide@latest"></script>
 
   <!-- Main Stylesheet (Cache-Busted) -->
-  <link rel="stylesheet" href="styles.css?v=2.2.0">
+  <link rel="stylesheet" href="styles.css?v=2.3.0">
 </head>
 <body>
   <!-- Ambient background glow elements -->
@@ -478,54 +478,50 @@
                 Your document has been sent to the printer and is ready for pickup.
               </p>
 
-              <!-- Simple Receipt Card -->
+              <!-- Exact Confirmation Receipt Card (Matches User Reference) -->
               <div class="screen-receipt-card" id="screenReceiptCard">
-                <div class="receipt-card-header">
-                  <div style="display: flex; align-items: center; gap: 6px;">
-                    <i data-lucide="printer" style="width: 15px; height: 15px; color: var(--primary-gold);"></i>
-                    <span style="font-weight: 800; font-size: 0.86rem; letter-spacing: 0.5px; color: #ffffff;">CloudPrint Pro</span>
+                <div class="receipt-rows-container">
+                  <div class="receipt-row">
+                    <span class="receipt-row-label">Job reference</span>
+                    <span class="receipt-row-value" id="receiptJobIdVal">JOB-HCVTUR28</span>
                   </div>
-                  <span class="receipt-status-pill">PAID</span>
+
+                  <div class="receipt-row">
+                    <span class="receipt-row-label">Paid at</span>
+                    <span class="receipt-row-value" id="receiptPaidAtVal">30/08/2026, 04:37:47</span>
+                  </div>
+
+                  <div class="receipt-row">
+                    <span class="receipt-row-label">M-Pesa receipt</span>
+                    <span class="receipt-row-value" id="receiptMpesaCodeVal">UHUFW4ROHB</span>
+                  </div>
+
+                  <div class="receipt-row">
+                    <span class="receipt-row-label">Pages</span>
+                    <span class="receipt-row-value" id="receiptPagesCountVal">5</span>
+                  </div>
+
+                  <div class="receipt-row">
+                    <span class="receipt-row-label">Page range</span>
+                    <span class="receipt-row-value" id="receiptPageRangeVal">1-5</span>
+                  </div>
+
+                  <div class="receipt-row">
+                    <span class="receipt-row-label">Format</span>
+                    <span class="receipt-row-value" id="receiptFormatVal">A4 B&amp;W, single-sided</span>
+                  </div>
+
+                  <div class="receipt-row">
+                    <span class="receipt-row-label">Status</span>
+                    <span class="receipt-row-value" id="receiptStatusVal">processing</span>
+                  </div>
                 </div>
 
                 <div class="receipt-divider"></div>
 
-                <div class="receipt-rows-container">
-                  <div class="receipt-row">
-                    <span class="receipt-row-label">Job ID</span>
-                    <span class="receipt-row-value gold" id="receiptJobIdVal">#CP123456</span>
-                  </div>
-                  <div class="receipt-row">
-                    <span class="receipt-row-label">Documents</span>
-                    <span class="receipt-row-value" id="receiptDocNamesVal" title="Document.pdf">Document.pdf</span>
-                  </div>
-                  <div class="receipt-row">
-                    <span class="receipt-row-label">Paper &amp; Color</span>
-                    <span class="receipt-row-value" id="receiptConfigVal">A4 • Full Colour</span>
-                  </div>
-                  <div class="receipt-row">
-                    <span class="receipt-row-label">Pages / Copies</span>
-                    <span class="receipt-row-value" id="receiptPagesVal">10 pgs (1 copy)</span>
-                  </div>
-                  <div class="receipt-row" style="background: rgba(16, 185, 129, 0.08); padding: 5px 8px; border-radius: 6px; margin: 3px 0; border: 1px solid rgba(16, 185, 129, 0.2);">
-                    <span class="receipt-row-label" style="font-weight: 700; color: #ffffff; display: flex; align-items: center; gap: 4px;">
-                      <i data-lucide="shield-check" style="width: 13px; height: 13px; color: var(--mpesa-green);"></i>
-                      M-Pesa Code
-                    </span>
-                    <span class="receipt-row-value" id="receiptMpesaCodeVal" style="font-weight: 800; font-family: monospace; color: var(--mpesa-green); letter-spacing: 0.5px; font-size: 0.92rem;">QJ83910249</span>
-                  </div>
-                </div>
-
-                <div class="receipt-divider dashed"></div>
-
                 <div class="receipt-row total-row">
-                  <span style="font-weight: 700; color: var(--text-secondary); font-size: 0.88rem;">Total Paid</span>
-                  <span style="font-family: var(--font-heading); font-weight: 800; color: var(--primary-gold); font-size: 1.15rem;" id="receiptTotalVal">KES 30.00</span>
-                </div>
-
-                <div class="receipt-card-footer">
-                  <i data-lucide="check-circle-2" style="width: 13px; height: 13px; color: var(--mpesa-green);"></i>
-                  <span>Verified &amp; Sent to printer</span>
+                  <span class="receipt-total-label">Total paid</span>
+                  <span class="receipt-total-amount" id="receiptTotalVal">KES 5</span>
                 </div>
               </div>
 
@@ -687,6 +683,6 @@
   </div>
 
   <!-- Application Logic (Cache-Busted) -->
-  <script src="app.js?v=2.2.0"></script>
+  <script src="app.js?v=2.3.0"></script>
 </body>
 </html>

@@ -154,14 +154,16 @@ const elements = {
   chkPrinting: document.getElementById('chkPrinting'),
   chkPreparing: document.getElementById('chkPreparing'),
 
-  // Completed Screen & Simple Receipt
+  // Completed Screen & Receipt (Matches Reference Spec)
   whatsappReceiptBtn: document.getElementById('whatsappReceiptBtn'),
   startNewPrintBtn: document.getElementById('startNewPrintBtn'),
   receiptJobIdVal: document.getElementById('receiptJobIdVal'),
-  receiptDocNamesVal: document.getElementById('receiptDocNamesVal'),
-  receiptConfigVal: document.getElementById('receiptConfigVal'),
-  receiptPagesVal: document.getElementById('receiptPagesVal'),
+  receiptPaidAtVal: document.getElementById('receiptPaidAtVal'),
   receiptMpesaCodeVal: document.getElementById('receiptMpesaCodeVal'),
+  receiptPagesCountVal: document.getElementById('receiptPagesCountVal'),
+  receiptPageRangeVal: document.getElementById('receiptPageRangeVal'),
+  receiptFormatVal: document.getElementById('receiptFormatVal'),
+  receiptStatusVal: document.getElementById('receiptStatusVal'),
   receiptTotalVal: document.getElementById('receiptTotalVal'),
 
   // Modals & Menu
@@ -1427,35 +1429,63 @@ function finishProcessing() {
   }, 500);
 }
 
-// Render Simple Receipt Card on Screen 4
+// Render Confirmation Receipt Card on Screen 4 (Matches User Reference Image)
 function renderScreenReceipt() {
   const job = state.currentJob;
   const files = job.files || [];
-  const totalPages = files.reduce((sum, f) => sum + (f.pages || 1), 0);
-  const docNames = files.map(f => f.name).join(', ') || 'Document.pdf';
+  const totalDocPages = files.reduce((sum, f) => sum + (f.pages || 1), 0) || 1;
+  const selectedPages = job.selectedPagesCount || totalDocPages;
 
-  if (elements.receiptJobIdVal) elements.receiptJobIdVal.textContent = job.id;
-  if (elements.receiptDocNamesVal) {
-    elements.receiptDocNamesVal.textContent = docNames;
-    elements.receiptDocNamesVal.title = docNames;
+  // 1. Job reference: e.g. "JOB-HCVTUR28"
+  let jobRef = job.id || '#CP123456';
+  if (jobRef.startsWith('#CP')) {
+    jobRef = 'JOB-' + jobRef.slice(3).toUpperCase();
+  } else if (!jobRef.startsWith('JOB-')) {
+    jobRef = 'JOB-' + jobRef.replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
   }
-  if (elements.receiptConfigVal) {
-    const sizeName = job.paperSize === 'a3' ? 'A3 Large' : 'A4 Standard';
-    const colorName = job.colorMode === 'bw' ? 'B&W' : 'Full Colour';
-    elements.receiptConfigVal.textContent = `${sizeName} • ${colorName}`;
+  if (elements.receiptJobIdVal) elements.receiptJobIdVal.textContent = jobRef;
+
+  // 2. Paid at: e.g. "30/08/2026, 04:37:47"
+  const now = job.timestamp ? new Date(job.timestamp) : new Date();
+  const pad = (n) => String(n).padStart(2, '0');
+  const formattedDate = `${pad(now.getDate())}/${pad(now.getMonth() + 1)}/${now.getFullYear()}, ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+  if (elements.receiptPaidAtVal) elements.receiptPaidAtVal.textContent = formattedDate;
+
+  // 3. M-Pesa receipt: e.g. "UHUFW4ROHB"
+  const validRef = (job.mpesaRef && job.mpesaRef !== 'PENDING') 
+    ? job.mpesaRef 
+    : ('SJK' + Math.floor(100000 + Math.random() * 900000));
+  if (elements.receiptMpesaCodeVal) elements.receiptMpesaCodeVal.textContent = validRef;
+  state.currentJob.mpesaRef = validRef;
+
+  // 4. Pages: e.g. "5"
+  if (elements.receiptPagesCountVal) elements.receiptPagesCountVal.textContent = selectedPages;
+
+  // 5. Page range: e.g. "1-5"
+  let pageRange = '1-' + totalDocPages;
+  if (job.pageMode === 'custom' && job.customPageRange) {
+    pageRange = job.customPageRange;
+  } else if (job.pageMode === 'custom' && elements.customPageListInput && elements.customPageListInput.value.trim()) {
+    pageRange = elements.customPageListInput.value.trim();
   }
-  if (elements.receiptPagesVal) {
-    elements.receiptPagesVal.textContent = `${totalPages} pgs (${job.copies} ${job.copies > 1 ? 'copies' : 'copy'})`;
+  if (elements.receiptPageRangeVal) elements.receiptPageRangeVal.textContent = pageRange;
+
+  // 6. Format: e.g. "A4 B&W, single-sided"
+  const sizeStr = (job.paperSize || 'a4').toUpperCase();
+  const colorStr = job.colorMode === 'colour' ? 'Colour' : 'B&W';
+  const sidedStr = job.doubleSided ? 'double-sided' : 'single-sided';
+  if (elements.receiptFormatVal) {
+    elements.receiptFormatVal.textContent = `${sizeStr} ${colorStr}, ${sidedStr}`;
   }
-  if (elements.receiptMpesaCodeVal) {
-    const validRef = (job.mpesaRef && job.mpesaRef !== 'PENDING') 
-      ? job.mpesaRef 
-      : ('SJK' + Math.floor(100000 + Math.random() * 900000));
-    elements.receiptMpesaCodeVal.textContent = validRef;
-    state.currentJob.mpesaRef = validRef;
+
+  // 7. Status: e.g. "processing"
+  if (elements.receiptStatusVal) {
+    elements.receiptStatusVal.textContent = 'processing';
   }
+
+  // 8. Total paid: e.g. "KES 5"
   if (elements.receiptTotalVal) {
-    elements.receiptTotalVal.textContent = `KES ${job.total}.00`;
+    elements.receiptTotalVal.textContent = `KES ${job.total || 5}`;
   }
 }
 
@@ -1496,24 +1526,27 @@ function copyJobId() {
   navigator.clipboard.writeText(state.currentJob.id).catch(() => {});
 }
 
-// QR Code Canvas Renderer (Lightweight Procedural Matrix)
-function generateQRCode(text) {
-  const canvas = elements.qrCodeCanvas;
+// Generate Dynamic SVG QR Code
+function renderReceiptQRCode(canvas, text) {
   if (!canvas) return;
   const ctx = canvas.getContext('2d');
-  const size = canvas.width;
+  const size = 160;
+  canvas.width = size;
+  canvas.height = size;
+
   ctx.fillStyle = '#ffffff';
   ctx.fillRect(0, 0, size, size);
-
   ctx.fillStyle = '#0f172a';
+
+  let hash = 0;
+  for (let i = 0; i < text.length; i++) {
+    hash = (hash << 5) - hash + text.charCodeAt(i);
+    hash |= 0;
+  }
+
   const grid = 21;
   const cellSize = size / grid;
-
-  let seed = 0;
-  for (let i = 0; i < text.length; i++) {
-    seed = ((seed << 5) - seed) + text.charCodeAt(i);
-    seed |= 0;
-  }
+  let seed = Math.abs(hash);
 
   function seededRandom() {
     const x = Math.sin(seed++) * 10000;
@@ -1574,14 +1607,33 @@ function getStoreWhatsAppContact() {
   return '+254 712 345 678';
 }
 
-// Send Receipt to Business Owner WhatsApp
+// Send Receipt to Business Owner WhatsApp (Matches Reference Layout)
 function sendReceiptToWhatsapp() {
   const job = state.currentJob;
   const files = job.files || [];
-  const totalPages = files.reduce((sum, f) => sum + (f.pages || 1), 0);
-  const docNames = files.map(f => `• ${f.name} (${f.pages} pgs)`).join('\n') || '• Document.pdf';
-  const sizeName = job.paperSize === 'a3' ? 'A3 Large Format' : 'A4 Standard';
-  const colorName = job.colorMode === 'bw' ? 'Black & White' : 'Full Colour';
+  const totalDocPages = files.reduce((sum, f) => sum + (f.pages || 1), 0) || 1;
+  const selectedPages = job.selectedPagesCount || totalDocPages;
+
+  let jobRef = job.id || '#CP123456';
+  if (jobRef.startsWith('#CP')) {
+    jobRef = 'JOB-' + jobRef.slice(3).toUpperCase();
+  }
+
+  const now = job.timestamp ? new Date(job.timestamp) : new Date();
+  const pad = (n) => String(n).padStart(2, '0');
+  const formattedDate = `${pad(now.getDate())}/${pad(now.getMonth() + 1)}/${now.getFullYear()}, ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+
+  let pageRange = '1-' + totalDocPages;
+  if (job.pageMode === 'custom' && job.customPageRange) {
+    pageRange = job.customPageRange;
+  } else if (job.pageMode === 'custom' && elements.customPageListInput && elements.customPageListInput.value.trim()) {
+    pageRange = elements.customPageListInput.value.trim();
+  }
+
+  const sizeStr = (job.paperSize || 'a4').toUpperCase();
+  const colorStr = job.colorMode === 'colour' ? 'Colour' : 'B&W';
+  const sidedStr = job.doubleSided ? 'double-sided' : 'single-sided';
+  const formatStr = `${sizeStr} ${colorStr}, ${sidedStr}`;
 
   // Get Store WhatsApp Number configured for the Business Owner
   const rawStoreContact = getStoreWhatsAppContact();
@@ -1599,23 +1651,16 @@ function sendReceiptToWhatsapp() {
   const message = 
 `🧾 *CLOUDPRINT PRO - OFFICIAL RECEIPT*
 ━━━━━━━━━━━━━━━━━━━━
-🆔 *Job ID:* ${job.id}
-📅 *Date:* ${new Date(job.timestamp).toLocaleString()}
-📍 *Status:* Verified & Sent to Printer
-
-📑 *DOCUMENTS:*
-${docNames}
-
-⚙️ *SPECIFICATIONS:*
-• Paper: ${sizeName}
-• Color: ${colorName}
-• Total Pages: ${totalPages} pages
-• Copies: ${job.copies} set(s)
-
-💰 *PAYMENT SUMMARY:*
-• Total Paid: *KES ${job.total}.00*
-• M-Pesa Code: *${mpesaTransactionCode}*
-• Customer Phone: ${customerPhone}
+🆔 *Job reference:* ${jobRef}
+📅 *Paid at:* ${formattedDate}
+📱 *M-Pesa receipt:* ${mpesaTransactionCode}
+📄 *Pages:* ${selectedPages}
+📑 *Page range:* ${pageRange}
+⚙️ *Format:* ${formatStr}
+📍 *Status:* processing
+━━━━━━━━━━━━━━━━━━━━
+💰 *Total paid:* *KES ${job.total || 5}*
+📞 *Customer Phone:* ${customerPhone}
 ━━━━━━━━━━━━━━━━━━━━
 ✨ _Official customer receipt submitted for order verification & collection._`;
 

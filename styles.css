@@ -1847,74 +1847,50 @@ html, body {
 }
 
 /* Receipt Modal & Canvas QR */
-/* Screen 4: Simple Receipt Card */
+/* Screen 4: Confirmation Receipt Card (Matches User Reference) */
 .screen-receipt-card {
-  background: linear-gradient(180deg, #15181e 0%, #111317 100%);
-  border: 1px solid var(--border-medium);
-  border-radius: var(--radius-lg);
-  padding: 16px 18px;
+  background: #14161a;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  padding: 20px 22px;
   width: 100%;
-  max-width: 320px;
-  margin: 10px auto 0;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  max-width: 340px;
+  margin: 12px auto 0;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.04);
   text-align: left;
   position: relative;
 }
 
-.receipt-card-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 8px;
-}
-
-.receipt-status-pill {
-  background: rgba(16, 185, 129, 0.15);
-  color: var(--mpesa-green);
-  border: 1px solid var(--mpesa-pill-border);
-  font-size: 0.68rem;
-  font-weight: 800;
-  padding: 2px 8px;
-  border-radius: var(--radius-pill);
-  letter-spacing: 0.5px;
-}
-
 .receipt-divider {
   height: 1px;
-  background: var(--border-subtle);
-  margin: 10px 0;
-}
-
-.receipt-divider.dashed {
-  background: repeating-linear-gradient(90deg, var(--border-medium) 0, var(--border-medium) 4px, transparent 4px, transparent 8px);
+  background: rgba(255, 255, 255, 0.08);
+  margin: 16px 0 14px;
 }
 
 .receipt-rows-container {
   display: flex;
   flex-direction: column;
-  gap: 7px;
+  gap: 12px;
 }
 
 .receipt-row {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-size: 0.78rem;
+  font-size: 0.88rem;
 }
 
 .receipt-row-label {
-  color: var(--text-muted);
-  font-weight: 500;
+  color: #9ca3af;
+  font-weight: 400;
+  font-size: 0.86rem;
 }
 
 .receipt-row-value {
   color: #ffffff;
-  font-weight: 600;
+  font-weight: 500;
   text-align: right;
-  max-width: 150px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  font-size: 0.88rem;
 }
 
 .receipt-row-value.gold {
@@ -1923,20 +1899,24 @@ html, body {
 }
 
 .receipt-row.total-row {
-  margin: 4px 0 6px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 4px;
 }
 
-.receipt-card-footer {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 5px;
-  font-size: 0.7rem;
-  color: var(--mpesa-green);
+.receipt-total-label {
+  font-family: var(--font-heading);
+  font-size: 0.95rem;
   font-weight: 600;
-  margin-top: 6px;
-  padding-top: 6px;
-  border-top: 1px solid rgba(255, 255, 255, 0.04);
+  color: #d1d5db;
+}
+
+.receipt-total-amount {
+  font-family: var(--font-heading);
+  font-size: 1.55rem;
+  font-weight: 800;
+  color: var(--primary-gold);
 }
 
 /* ==========================================================================
