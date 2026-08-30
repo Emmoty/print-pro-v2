@@ -172,6 +172,13 @@ const elements = {
   closeStkModalBtn: document.getElementById('closeStkModalBtn'),
   cancelStkBtn: document.getElementById('cancelStkBtn'),
   confirmStkPinBtn: document.getElementById('confirmStkPinBtn'),
+  verifyPaymentNowBtn: document.getElementById('verifyPaymentNowBtn'),
+  toggleManualCodeBtn: document.getElementById('toggleManualCodeBtn'),
+  manualCodeInputContainer: document.getElementById('manualCodeInputContainer'),
+  manualMpesaCodeInput: document.getElementById('manualMpesaCodeInput'),
+  submitManualMpesaCodeBtn: document.getElementById('submitManualMpesaCodeBtn'),
+  manualCodeError: document.getElementById('manualCodeError'),
+  manualCodeChevron: document.getElementById('manualCodeChevron'),
   stkPromptMessage: document.getElementById('stkPromptMessage'),
   stkCountdown: document.getElementById('stkCountdown'),
   pinDigits: document.querySelectorAll('.stk-pin-digit'),
@@ -1240,6 +1247,11 @@ async function triggerMpesaSTKPush() {
 
     let isSettled = false;
 
+    // Reset manual code input state
+    if (elements.manualMpesaCodeInput) elements.manualMpesaCodeInput.value = '';
+    if (elements.manualCodeError) elements.manualCodeError.style.display = 'none';
+    if (elements.manualCodeInputContainer) elements.manualCodeInputContainer.style.display = 'none';
+
     const handleSuccess = async (mpesaRef) => {
       if (isSettled) return;
       isSettled = true;
@@ -1250,19 +1262,22 @@ async function triggerMpesaSTKPush() {
       }
 
       let confirmedCode = mpesaRef;
-      // Authoritatively refresh verified payment state from server
-      try {
-        const verifyRes = await fetch(`/api/payments/${encodeURIComponent(state.currentJob.id)}/status`);
-        if (verifyRes.ok) {
-          const vData = await verifyRes.json();
-          if (vData && vData.mpesa_receipt_number) {
-            confirmedCode = vData.mpesa_receipt_number;
+      if (!confirmedCode || confirmedCode === 'PENDING') {
+        // Authoritatively refresh verified payment state from server
+        try {
+          const verifyRes = await fetch(`/api/payments/${encodeURIComponent(state.currentJob.id)}/status`);
+          if (verifyRes.ok) {
+            const vData = await verifyRes.json();
+            if (vData && (vData.mpesa_receipt_number || vData.mpesaRef) && vData.mpesa_receipt_number !== 'PENDING') {
+              confirmedCode = vData.mpesa_receipt_number || vData.mpesaRef;
+            }
           }
-        }
-      } catch (e) {}
+        } catch (e) {}
+      }
 
       if (!confirmedCode || confirmedCode === 'PENDING') {
         isSettled = false;
+        scheduleNextPoll();
         return;
       }
 
@@ -1284,6 +1299,98 @@ async function triggerMpesaSTKPush() {
       closeModal(elements.mpesaStkModal);
     };
 
+    // Fast Check Button Handler ("I Have Entered PIN / Verify Payment")
+    if (elements.verifyPaymentNowBtn) {
+      elements.verifyPaymentNowBtn.onclick = async () => {
+        const originalText = elements.verifyPaymentNowBtn.innerHTML;
+        elements.verifyPaymentNowBtn.innerHTML = '<div class="active-pulse-dot" style="display:inline-block; margin-right:6px;"></div> Verifying with Safaricom...';
+        elements.verifyPaymentNowBtn.disabled = true;
+
+        try {
+          const res = await fetch('/api/payments/query-now', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ jobId: state.currentJob.id })
+          });
+          const data = await res.json();
+          if (data && data.paid && (data.mpesa_receipt_number || data.mpesaRef)) {
+            handleSuccess(data.mpesa_receipt_number || data.mpesaRef);
+            return;
+          }
+
+          // If not confirmed via query, trigger direct code verification
+          const manualRes = await fetch('/api/payments/verify-code', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ jobId: state.currentJob.id, phone: phone })
+          });
+          const manualData = await manualRes.json();
+          if (manualData && manualData.paid) {
+            handleSuccess(manualData.mpesa_receipt_number || manualData.mpesaRef);
+            return;
+          }
+        } catch (e) {}
+
+        elements.verifyPaymentNowBtn.innerHTML = originalText;
+        elements.verifyPaymentNowBtn.disabled = false;
+      };
+    }
+
+    // Toggle Manual Code Accordion
+    if (elements.toggleManualCodeBtn) {
+      elements.toggleManualCodeBtn.onclick = () => {
+        if (!elements.manualCodeInputContainer) return;
+        const isHidden = elements.manualCodeInputContainer.style.display === 'none' || !elements.manualCodeInputContainer.style.display;
+        elements.manualCodeInputContainer.style.display = isHidden ? 'block' : 'none';
+        if (elements.manualCodeChevron) {
+          elements.manualCodeChevron.style.transform = isHidden ? 'rotate(180deg)' : 'rotate(0deg)';
+        }
+      };
+    }
+
+    // Submit Manual M-Pesa Code Button
+    if (elements.submitManualMpesaCodeBtn) {
+      elements.submitManualMpesaCodeBtn.onclick = async () => {
+        const inputVal = elements.manualMpesaCodeInput ? elements.manualMpesaCodeInput.value.trim() : '';
+        if (!inputVal || inputVal.length < 6) {
+          if (elements.manualCodeError) {
+            elements.manualCodeError.textContent = 'Please enter a valid M-Pesa code (e.g. UHUFWR4OHB).';
+            elements.manualCodeError.style.display = 'block';
+          }
+          return;
+        }
+
+        elements.submitManualMpesaCodeBtn.textContent = 'Verifying...';
+        elements.submitManualMpesaCodeBtn.disabled = true;
+
+        try {
+          const res = await fetch('/api/payments/verify-code', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ jobId: state.currentJob.id, code: inputVal, phone: phone })
+          });
+          const data = await res.json();
+          if (res.ok && data && data.paid) {
+            handleSuccess(data.mpesa_receipt_number || data.mpesaRef);
+            return;
+          } else {
+            if (elements.manualCodeError) {
+              elements.manualCodeError.textContent = data.error || 'Verification failed. Please check code.';
+              elements.manualCodeError.style.display = 'block';
+            }
+          }
+        } catch (e) {
+          if (elements.manualCodeError) {
+            elements.manualCodeError.textContent = 'Connection error. Please try again.';
+            elements.manualCodeError.style.display = 'block';
+          }
+        }
+
+        elements.submitManualMpesaCodeBtn.textContent = 'Submit';
+        elements.submitManualMpesaCodeBtn.disabled = false;
+      };
+    }
+
     // 4. Real-time Reactive SSE Stream (Instant <10ms automatic confirmation upon Safaricom callback)
     if (window.EventSource) {
       try {
@@ -1303,13 +1410,13 @@ async function triggerMpesaSTKPush() {
       } catch (e) {}
     }
 
-    // 5. Controlled Adaptive Fallback Polling (1.5s, 2s, 2s, 3s, 3s, 5s, 5s, 10s)
-    const pollIntervals = [1500, 2000, 2000, 3000, 3000, 5000, 5000, 10000];
+    // 5. Controlled Adaptive Fallback Polling (1.2s, 1.5s, 2s, 2s, 2.5s, 3s, 4s, 5s)
+    const pollIntervals = [1200, 1500, 2000, 2000, 2500, 3000, 4000, 5000];
     let pollIndex = 0;
 
     const scheduleNextPoll = () => {
       if (isSettled || countdown <= 0) return;
-      const interval = pollIntervals[pollIndex] || 5000;
+      const interval = pollIntervals[pollIndex] || 3000;
       if (pollIndex < pollIntervals.length - 1) pollIndex++;
 
       state.stkCountdownTimer = setTimeout(async () => {

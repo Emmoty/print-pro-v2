@@ -580,8 +580,30 @@
             <span id="stkStatusIndicatorText" style="font-size: 0.82rem; font-weight: 700; color: var(--primary-gold);">Waiting for M-Pesa PIN authorization...</span>
           </div>
 
-          <div style="font-size: 0.74rem; color: var(--text-muted);">
-            Time remaining: <span id="stkCountdown" style="color: var(--primary-gold); font-weight: 800;">60</span>s
+          <div style="font-size: 0.74rem; color: var(--text-muted); margin-bottom: 12px;">
+            Auto-checking Safaricom status... <span id="stkCountdown" style="color: var(--primary-gold); font-weight: 800;">60</span>s
+          </div>
+
+          <!-- Instant Check & Manual Code Entry Tools -->
+          <div style="display: flex; flex-direction: column; gap: 8px;">
+            <button class="btn-primary-gold" id="verifyPaymentNowBtn" style="width: 100%; padding: 11px 14px; font-weight: 700; justify-content: center; font-size: 0.85rem;">
+              <i data-lucide="check-circle" style="width: 16px; height: 16px;"></i>
+              <span>I Have Entered PIN / Verify Payment</span>
+            </button>
+
+            <div id="manualCodeAccordion" style="margin-top: 4px; text-align: left; background: rgba(0, 0, 0, 0.25); border: 1px dashed rgba(255, 255, 255, 0.15); border-radius: 8px; padding: 10px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; cursor: pointer;" id="toggleManualCodeBtn">
+                <span style="font-size: 0.76rem; color: var(--text-secondary); font-weight: 600;">Didn't get prompt? Enter M-Pesa Code</span>
+                <i data-lucide="chevron-down" id="manualCodeChevron" style="width: 14px; height: 14px; color: var(--text-muted);"></i>
+              </div>
+              <div id="manualCodeInputContainer" style="display: none; margin-top: 8px;">
+                <div style="display: flex; gap: 6px;">
+                  <input type="text" id="manualMpesaCodeInput" placeholder="e.g. UHUFWR4OHB" maxlength="12" style="flex: 1; background: #0a0a0a; border: 1px solid var(--border-medium); border-radius: 6px; padding: 7px 10px; color: #fff; text-transform: uppercase; font-family: monospace; font-size: 0.85rem; letter-spacing: 0.05em; outline: none;" />
+                  <button id="submitManualMpesaCodeBtn" class="btn-secondary-dark" style="padding: 7px 12px; background: var(--mpesa-green); color: #fff; border: none; font-weight: 700; font-size: 0.8rem; cursor: pointer;">Submit</button>
+                </div>
+                <div id="manualCodeError" style="color: #ef4444; font-size: 0.72rem; margin-top: 4px; display: none;"></div>
+              </div>
+            </div>
           </div>
         </div>
 
