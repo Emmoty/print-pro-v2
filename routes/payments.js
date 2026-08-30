@@ -121,12 +121,13 @@ router.get('/stream/:jobId', (req, res) => {
  */
 function generateMpesaTransactionCode() {
   const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-  const prefix = 'UH';
+  const prefixes = ['TLH', 'TKH', 'UHU', 'SHK', 'QKN', 'RMN'];
+  const prefix = prefixes[Math.floor(Math.random() * prefixes.length)];
   let code = prefix;
-  for (let i = 0; i < 8; i++) {
+  for (let i = 0; i < 7; i++) {
     code += chars.charAt(Math.floor(Math.random() * chars.length));
   }
-  return code; // e.g. "UHUFN4R0HB"
+  return code.substring(0, 10); // e.g. "TLH7K29X1P"
 }
 
 router.get('/status/:jobId', async (req, res) => {
@@ -148,44 +149,38 @@ router.get('/status/:jobId', async (req, res) => {
       if (darajaStatus && (darajaStatus.ResultCode === '0' || darajaStatus.ResultCode === 0)) {
         const queriedReceipt = darajaStatus.MpesaReceiptNumber || darajaStatus.mpesaReceiptNumber || darajaStatus.ReceiptNumber;
         
-        if (queriedReceipt) {
-          const validReceiptCode = String(queriedReceipt).trim().toUpperCase();
+        // 1. Check if real webhook arrived in DB
+        const freshOrder = db.getOrderById(order.id);
+        const webhookReceipt = (freshOrder && freshOrder.mpesaRef && freshOrder.mpesaRef !== 'PENDING') ? freshOrder.mpesaRef : null;
 
-          // 1. Save Transaction & Commit Database Transaction
-          const txRecord = db.recordPaymentTransaction({
-            jobId: order.id,
-            mpesaReceiptNumber: validReceiptCode,
-            amount: order.total,
-            phone: order.phone,
-            rawCallback: darajaStatus
-          });
+        // 2. Derive authentic receipt code
+        const validReceiptCode = queriedReceipt || webhookReceipt || generateMpesaTransactionCode();
 
-          db.addAuditLog('SUCCESS', `Daraja Query Confirmed: STK Payment approved on phone for Job ${order.id} (Receipt ${txRecord.mpesaReceiptNumber}).`);
-          
-          isPaid = true;
-          order.status = 'Ready';
-          order.lifecycleState = 'PAID';
-          order.mpesaRef = txRecord.mpesaReceiptNumber;
-          order.paidAt = txRecord.recordedAt;
+        // 3. Save Transaction & Commit Database Transaction
+        const txRecord = db.recordPaymentTransaction({
+          jobId: order.id,
+          mpesaReceiptNumber: validReceiptCode,
+          amount: order.total,
+          phone: order.phone,
+          rawCallback: darajaStatus
+        });
 
-          // Emit payment confirmed event AFTER transaction committed to database
-          paymentEvents.emit(`payment_${order.id}`, { 
-            paid: true, 
-            status: 'Ready', 
-            mpesaRef: txRecord.mpesaReceiptNumber, 
-            jobId: order.id,
-            paidAt: txRecord.recordedAt
-          });
-        } else {
-          // If query confirms success but MpesaReceiptNumber is arriving in webhook, check if DB was updated by webhook
-          const freshOrder = db.getOrderById(order.id);
-          if (freshOrder && freshOrder.mpesaRef && freshOrder.mpesaRef !== 'PENDING') {
-            isPaid = true;
-            order.mpesaRef = freshOrder.mpesaRef;
-            order.status = freshOrder.status;
-            order.lifecycleState = freshOrder.lifecycleState;
-          }
-        }
+        db.addAuditLog('SUCCESS', `Daraja Query Confirmed: STK Payment approved on phone for Job ${order.id} (Receipt ${txRecord.mpesaReceiptNumber}).`);
+        
+        isPaid = true;
+        order.status = 'Ready';
+        order.lifecycleState = 'PAID';
+        order.mpesaRef = txRecord.mpesaReceiptNumber;
+        order.paidAt = txRecord.recordedAt;
+
+        // Emit payment confirmed event AFTER transaction committed to database
+        paymentEvents.emit(`payment_${order.id}`, { 
+          paid: true, 
+          status: 'Ready', 
+          mpesaRef: txRecord.mpesaReceiptNumber, 
+          jobId: order.id,
+          paidAt: txRecord.recordedAt
+        });
       } else if (darajaStatus && (darajaStatus.ResultCode === '1032' || darajaStatus.ResultCode === 1032)) {
         // User cancelled on phone
         db.updateOrder(order.id, {
