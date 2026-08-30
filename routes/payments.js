@@ -275,20 +275,96 @@ router.post('/verify-code', (req, res) => {
 });
 
 /**
+ * Extracts the authoritative M-Pesa transaction code from any Safaricom Daraja Callback JSON
+ * Supports:
+ * - STK Push Callback (Body.stkCallback.CallbackMetadata.Item[])
+ * - C2B Validation / Confirmation (TransID)
+ * - B2C / Reversal (TransactionID)
+ * - Deep recursive JSON scan
+ */
+function extractMpesaTransactionCodeFromCallback(body) {
+  if (!body) return null;
+
+  // 1. Standard STK CallbackMetadata.Item Array
+  const items = body?.Body?.stkCallback?.CallbackMetadata?.Item || 
+                body?.stkCallback?.CallbackMetadata?.Item || 
+                body?.CallbackMetadata?.Item || 
+                [];
+
+  if (Array.isArray(items)) {
+    for (const item of items) {
+      const name = String(item?.Name || '').toLowerCase();
+      if (name === 'mpesareceiptnumber' || name === 'receiptnumber' || name === 'transid' || name === 'transactionid') {
+        const val = String(item?.Value || '').trim().toUpperCase();
+        if (val && val !== 'UNDEFINED' && val !== 'NULL') {
+          return val;
+        }
+      }
+    }
+  }
+
+  // 2. Direct property lookups across STK & C2B
+  const directCandidates = [
+    body?.Body?.stkCallback?.MpesaReceiptNumber,
+    body?.stkCallback?.MpesaReceiptNumber,
+    body?.MpesaReceiptNumber,
+    body?.mpesaReceiptNumber,
+    body?.TransID,
+    body?.transID,
+    body?.TransactionID,
+    body?.transactionID,
+    body?.receiptNumber,
+    body?.ReceiptNumber
+  ];
+
+  for (const candidate of directCandidates) {
+    if (candidate) {
+      const val = String(candidate).trim().toUpperCase();
+      if (val && val !== 'UNDEFINED' && val !== 'NULL') {
+        return val;
+      }
+    }
+  }
+
+  // 3. Deep recursive JSON key traversal
+  function deepSearch(obj) {
+    if (!obj || typeof obj !== 'object') return null;
+    for (const key of Object.keys(obj)) {
+      const lowerKey = key.toLowerCase();
+      if (lowerKey === 'mpesareceiptnumber' || lowerKey === 'transid' || lowerKey === 'transactionid' || lowerKey === 'receiptnumber') {
+        const val = String(obj[key] || '').trim().toUpperCase();
+        if (val && typeof obj[key] !== 'object' && val !== 'UNDEFINED' && val !== 'NULL') {
+          return val;
+        }
+      }
+      if (typeof obj[key] === 'object') {
+        const nested = deepSearch(obj[key]);
+        if (nested) return nested;
+      }
+    }
+    return null;
+  }
+
+  return deepSearch(body);
+}
+
+/**
  * POST /api/payments/webhook
  * Safaricom Daraja Webhook Callback Listener
  * Receives real payment confirmation from Safaricom servers
  * 
  * Strict Sequence:
- * 1. Callback Received
- * 2. Validate Callback
- * 3. Extract MpesaReceiptNumber
+ * 1. Callback JSON Received from Safaricom
+ * 2. Validate Callback Signature & Schema
+ * 3. Extract MpesaReceiptNumber directly from JSON
  * 4. Save Transaction & Commit Database
  * 5. Mark Payment PAID
  * 6. Generate Receipt / Emit Event
  */
 router.post('/webhook', (req, res) => {
   try {
+    console.log('📥 [SAFARICOM DARAJA CALLBACK RECEIVED]:', JSON.stringify(req.body));
+
     const callbackSecret = process.env.MPESA_CALLBACK_SECRET || 'cloudprint_daraja_callback_secret_2026';
     const receivedSignature = req.headers['x-mpesa-signature'] || req.headers['x-daraja-hmac'];
     
@@ -303,11 +379,11 @@ router.post('/webhook', (req, res) => {
       }
     }
 
-    // 2. Extract Daraja Callback Payload (Handles Body.stkCallback, stkCallback, or root)
+    // 2. Extract Daraja Callback Payload
     const callback = req.body?.Body?.stkCallback || req.body?.stkCallback || req.body;
-    const resultCode = callback.ResultCode !== undefined ? callback.ResultCode : 0;
-    const checkoutRequestID = callback.CheckoutRequestID;
-    const merchantRequestID = callback.MerchantRequestID;
+    const resultCode = callback.ResultCode !== undefined ? callback.ResultCode : (callback.resultCode !== undefined ? callback.resultCode : 0);
+    const checkoutRequestID = callback.CheckoutRequestID || callback.checkoutRequestID;
+    const merchantRequestID = callback.MerchantRequestID || callback.merchantRequestID;
 
     // 3. Idempotent Processing
     const callbackIdempotencyKey = `webhook_daraja_${checkoutRequestID || merchantRequestID || Date.now()}`;
@@ -316,8 +392,9 @@ router.post('/webhook', (req, res) => {
       return res.json({ ResultCode: 0, ResultDesc: 'Callback already processed (Idempotent OK)' });
     }
 
-    // 4. Extract MpesaReceiptNumber from Callback Metadata
-    let mpesaReceiptNumber = null;
+    // 4. Fetch the authoritative MpesaReceiptNumber directly from callback JSON
+    const mpesaReceiptNumber = extractMpesaTransactionCodeFromCallback(req.body);
+
     let amountPaid = null;
     let transactionDate = null;
     let phoneNumber = null;
@@ -326,18 +403,20 @@ router.post('/webhook', (req, res) => {
     if (Array.isArray(items)) {
       items.forEach(item => {
         const name = String(item.Name || '').toLowerCase();
-        if (name === 'mpesareceiptnumber' || name === 'receiptnumber' || name === 'transactionid') {
-          mpesaReceiptNumber = String(item.Value || '').trim();
-        }
         if (name === 'amount') amountPaid = item.Value;
         if (name === 'transactiondate') transactionDate = item.Value;
         if (name === 'phonenumber') phoneNumber = item.Value;
       });
     }
 
-    if (!mpesaReceiptNumber && (callback.MpesaReceiptNumber || callback.mpesaReceiptNumber || callback.receiptNumber)) {
-      mpesaReceiptNumber = String(callback.MpesaReceiptNumber || callback.mpesaReceiptNumber || callback.receiptNumber).trim();
+    if (!amountPaid && (callback.TransAmount || callback.amount)) {
+      amountPaid = callback.TransAmount || callback.amount;
     }
+    if (!phoneNumber && (callback.MSISDN || callback.phoneNumber || callback.phone)) {
+      phoneNumber = callback.MSISDN || callback.phoneNumber || callback.phone;
+    }
+
+    console.log(`🔑 [EXTRACTED TRANSACTION CODE FROM CALLBACK JSON]: '${mpesaReceiptNumber}'`);
 
     // Lookup order by checkoutRequestId, merchantRequestId, or phone
     const orders = db.getOrders();
@@ -357,22 +436,22 @@ router.post('/webhook', (req, res) => {
       matchedOrder = orders.find(o => o.status === 'Pending Payment' || o.lifecycleState === 'PAYMENT_PENDING');
     }
 
-    const finalReceipt = mpesaReceiptNumber || (matchedOrder?.mpesaRef && matchedOrder.mpesaRef !== 'PENDING' ? matchedOrder.mpesaRef : generateMpesaTransactionCode());
+    const finalReceipt = mpesaReceiptNumber || matchedOrder?.mpesaRef;
 
     if (resultCode === 0 || resultCode === '0') {
-      if (matchedOrder) {
-        // 5. Save Transaction Record & Commit Database Transaction
+      if (matchedOrder && finalReceipt && finalReceipt !== 'PENDING') {
+        // 5. Save Transaction Record & Commit Database Transaction with the exact code from JSON
         const txRecord = db.recordPaymentTransaction({
           jobId: matchedOrder.id,
           mpesaReceiptNumber: finalReceipt,
           amount: amountPaid || matchedOrder.total,
           phone: phoneNumber || matchedOrder.phone,
-          rawCallback: callback
+          rawCallback: req.body
         });
 
-        db.addAuditLog('SUCCESS', `M-Pesa Verified: Transaction code ${txRecord.mpesaReceiptNumber} committed to DB (KES ${txRecord.amount}.00) for Job ${matchedOrder.id}.`);
+        db.addAuditLog('SUCCESS', `Safaricom Callback Processed: Transaction code ${txRecord.mpesaReceiptNumber} extracted from JSON and committed to DB for Job ${matchedOrder.id}.`);
 
-        // 6. Emit Payment Confirmed Event AFTER Transaction Committed to DB
+        // 6. Emit Payment Confirmed Event with the exact transaction code
         paymentEvents.emit(`payment_${matchedOrder.id}`, { 
           paid: true, 
           status: 'Ready', 
@@ -381,7 +460,7 @@ router.post('/webhook', (req, res) => {
           paidAt: txRecord.recordedAt
         });
       } else {
-        db.addAuditLog('SUCCESS', `Daraja Webhook: STK transaction settled (${finalReceipt}).`);
+        db.addAuditLog('SUCCESS', `Daraja Webhook: STK transaction settled (${finalReceipt || 'Unassigned'}).`);
       }
     } else {
       if (matchedOrder) {
