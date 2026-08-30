@@ -133,6 +133,28 @@ app.get('/readyz', (req, res) => {
 });
 
 // 8. Mount Modular REST API Routes
+app.get('/api/settings/public', (req, res) => {
+  const cms = db.getCMS() || {};
+  const settings = db.getSettings() || {};
+  const pricing = db.getPricing() || {};
+
+  const ownerPhone = process.env.BUSINESS_WHATSAPP_NUMBER || cms.whatsappContact || settings.supportPhone || '+254 712 345 678';
+
+  return res.json({
+    businessName: settings.businessName || 'CloudPrint Pro',
+    whatsappContact: ownerPhone,
+    announcement: cms.announcement || '',
+    bannerActive: cms.bannerActive !== false,
+    pricing: pricing,
+    settings: {
+      defaultPaper: settings.defaultPaper || 'a4',
+      defaultColor: settings.defaultColor || 'bw',
+      maxFileSize: settings.maxFileSize || 50,
+      maxPages: settings.maxPages || 300
+    }
+  });
+});
+
 app.use('/api/auth', authRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/payments', paymentRoutes);

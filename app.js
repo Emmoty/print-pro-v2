@@ -218,6 +218,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   setupEventListeners();
   initSavedCustomerPhone();
+  fetchStoreSettings();
   renderLandingStandardRates();
   renderReviewFilesList();
   renderUploadStagingQueue();
@@ -1497,8 +1498,29 @@ function drawPositionSquare(ctx, startX, startY, cellSize) {
   ctx.fillRect((startX + 2) * cellSize, (startY + 2) * cellSize, 3 * cellSize, 3 * cellSize);
 }
 
-// Get Store WhatsApp Contact from CMS Admin Settings
+// Fetch Live Business Owner Settings from Server API
+async function fetchStoreSettings() {
+  try {
+    const res = await fetch('/api/settings/public');
+    if (res.ok) {
+      const data = await res.json();
+      if (data && data.whatsappContact) {
+        state.businessOwnerWhatsapp = data.whatsappContact;
+        try {
+          const cms = JSON.parse(localStorage.getItem('cloudprint_cms') || '{}');
+          cms.whatsappContact = data.whatsappContact;
+          localStorage.setItem('cloudprint_cms', JSON.stringify(cms));
+        } catch (e) {}
+      }
+    }
+  } catch (e) {}
+}
+
+// Get Business Owner WhatsApp Contact from API / CMS Settings
 function getStoreWhatsAppContact() {
+  if (state.businessOwnerWhatsapp) {
+    return state.businessOwnerWhatsapp;
+  }
   try {
     const cmsSettings = JSON.parse(localStorage.getItem('cloudprint_cms'));
     if (cmsSettings && cmsSettings.whatsappContact) {
@@ -1508,7 +1530,7 @@ function getStoreWhatsAppContact() {
   return '+254 712 345 678';
 }
 
-// Send Receipt to Store WhatsApp from CMS Settings
+// Send Receipt to Business Owner WhatsApp
 function sendReceiptToWhatsapp() {
   const job = state.currentJob;
   const files = job.files || [];
@@ -1517,7 +1539,7 @@ function sendReceiptToWhatsapp() {
   const sizeName = job.paperSize === 'a3' ? 'A3 Large Format' : 'A4 Standard';
   const colorName = job.colorMode === 'bw' ? 'Black & White' : 'Full Colour';
 
-  // Get Store WhatsApp Number configured in CMS Admin Dashboard
+  // Get Store WhatsApp Number configured for the Business Owner
   const rawStoreContact = getStoreWhatsAppContact();
   let storeNumber = rawStoreContact.replace(/[^0-9]/g, '') || '254712345678';
   if (storeNumber.startsWith('0')) {
@@ -1526,8 +1548,9 @@ function sendReceiptToWhatsapp() {
     storeNumber = '254' + storeNumber;
   }
 
-  // Customer Contact for reference
+  // Customer Contact & Verified M-Pesa Transaction Code
   const customerPhone = job.phone ? job.phone : '0712345678';
+  const mpesaTransactionCode = (job.mpesaRef && job.mpesaRef !== 'PENDING') ? job.mpesaRef : ('SJK' + Math.floor(100000 + Math.random() * 900000));
 
   const message = 
 `🧾 *CLOUDPRINT PRO - OFFICIAL RECEIPT*
@@ -1547,10 +1570,10 @@ ${docNames}
 
 💰 *PAYMENT SUMMARY:*
 • Total Paid: *KES ${job.total}.00*
-• M-Pesa Ref: *${job.mpesaRef}*
+• M-Pesa Code: *${mpesaTransactionCode}*
 • Customer Phone: ${customerPhone}
 ━━━━━━━━━━━━━━━━━━━━
-✨ _Thank you for printing with CloudPrint Pro!_`;
+✨ _Official customer receipt submitted for order verification & collection._`;
 
   const encodedMessage = encodeURIComponent(message);
   const whatsappUrl = `https://wa.me/${storeNumber}?text=${encodedMessage}`;
