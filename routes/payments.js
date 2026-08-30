@@ -52,12 +52,14 @@ router.post('/stk-push', async (req, res) => {
     db.addAuditLog('INFO', `M-Pesa: STK Push prompt initiated for Job ${order.id} to ${result.phone} (KES ${order.total}.00). CheckoutRequestID: ${result.CheckoutRequestID}`);
 
     const responseData = {
-      message: result.CustomerMessage || 'STK Push prompt sent to your phone. Please enter your M-Pesa PIN.',
+      success: true,
+      status: 'pending',
+      checkout_request_id: result.CheckoutRequestID,
+      merchant_request_id: result.MerchantRequestID,
+      message: result.CustomerMessage || 'STK Push sent. Please enter your M-Pesa PIN on your phone.',
       jobId: order.id,
-      checkoutRequestId: result.CheckoutRequestID,
       phone: result.phone,
-      amount: order.total,
-      status: 'PENDING_PIN'
+      amount: order.total
     };
 
     if (idempotencyKey) {
@@ -90,9 +92,10 @@ router.get('/stream/:jobId', (req, res) => {
   res.setHeader('X-Accel-Buffering', 'no');
   res.flushHeaders?.();
 
-  // If already paid, immediately send event and close
-  if (order && (order.lifecycleState === 'PAID' || order.status === 'Ready' || order.status === 'Completed')) {
-    res.write(`data: ${JSON.stringify({ paid: true, status: order.status, mpesaRef: order.mpesaRef, jobId })}\n\n`);
+  // If already paid with authentic Safaricom receipt, immediately send event and close
+  const existingReceipt = order ? (order.mpesa_receipt_number || (order.mpesaRef !== 'PENDING' ? order.mpesaRef : null)) : null;
+  if (order && (order.lifecycleState === 'PAID' || order.status === 'Ready' || order.status === 'Completed') && existingReceipt) {
+    res.write(`data: ${JSON.stringify({ paid: true, status: 'PAID', mpesa_receipt_number: existingReceipt, mpesaRef: existingReceipt, jobId })}\n\n`);
     return res.end();
   }
 
@@ -115,159 +118,60 @@ router.get('/stream/:jobId', (req, res) => {
 });
 
 /**
- * GET /api/payments/status/:jobId
- * Real-time status polling for frontend checkout
- * Dual-Confirmation Engine: Checks local state + queries Safaricom Daraja STK Query API as an active fallback
+ * GET /api/payments/:jobId/status and GET /api/payments/status/:jobId
+ * Authoritative payment status endpoint
+ * Strictly returns mpesa_receipt_number only when verified from Safaricom callback
  */
-function generateMpesaTransactionCode() {
-  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-  const prefixes = ['TLH', 'TKH', 'UHU', 'SHK', 'QKN', 'RMN'];
-  const prefix = prefixes[Math.floor(Math.random() * prefixes.length)];
-  let code = prefix;
-  for (let i = 0; i < 7; i++) {
-    code += chars.charAt(Math.floor(Math.random() * chars.length));
-  }
-  return code.substring(0, 10); // e.g. "TLH7K29X1P"
-}
-
-router.get('/status/:jobId', async (req, res) => {
-  const order = db.getOrderById(req.params.jobId);
+const handlePaymentStatus = async (req, res) => {
+  const jobId = req.params.jobId;
+  const order = db.getOrderById(jobId);
   if (!order) {
-    return res.status(404).json({ error: 'Order not found.' });
+    return res.status(404).json({ error: 'Associated print job not found.' });
   }
 
-  // Authoritative check: Must be PAID lifecycle with non-empty transaction code from Safaricom
-  let hasValidMpesaRef = Boolean(order.mpesaRef && order.mpesaRef !== 'PENDING');
-  let isPaid = (order.lifecycleState === 'PAID' || order.status === 'Ready' || order.status === 'Printing' || order.status === 'Completed') && hasValidMpesaRef;
+  const authenticReceipt = order.mpesa_receipt_number || (order.mpesaRef && order.mpesaRef !== 'PENDING' ? order.mpesaRef : null);
+  const isPaid = (order.lifecycleState === 'PAID' || order.status === 'Ready' || order.status === 'Completed') && Boolean(authenticReceipt);
 
-  // If not yet marked paid and has checkoutRequestId, query Safaricom directly (handles webhook delays or local dev environments)
-  if (!isPaid && order.checkoutRequestId && order.lifecycleState === 'PAYMENT_PENDING') {
-    try {
-      const darajaStatus = await mpesa.querySTKStatus(order.checkoutRequestId);
-      
-      // ResultCode "0" or 0 means customer approved and PIN was verified by Safaricom
-      if (darajaStatus && (darajaStatus.ResultCode === '0' || darajaStatus.ResultCode === 0)) {
-        const queriedReceipt = darajaStatus.MpesaReceiptNumber || darajaStatus.mpesaReceiptNumber || darajaStatus.ReceiptNumber;
-        
-        // 1. Check if real webhook arrived in DB
-        const freshOrder = db.getOrderById(order.id);
-        const webhookReceipt = (freshOrder && freshOrder.mpesaRef && freshOrder.mpesaRef !== 'PENDING') ? freshOrder.mpesaRef : null;
-
-        // 2. Derive authentic receipt code
-        const validReceiptCode = queriedReceipt || webhookReceipt || generateMpesaTransactionCode();
-
-        // 3. Save Transaction & Commit Database Transaction
-        const txRecord = db.recordPaymentTransaction({
-          jobId: order.id,
-          mpesaReceiptNumber: validReceiptCode,
-          amount: order.total,
-          phone: order.phone,
-          rawCallback: darajaStatus
-        });
-
-        db.addAuditLog('SUCCESS', `Daraja Query Confirmed: STK Payment approved on phone for Job ${order.id} (Receipt ${txRecord.mpesaReceiptNumber}).`);
-        
-        isPaid = true;
-        order.status = 'Ready';
-        order.lifecycleState = 'PAID';
-        order.mpesaRef = txRecord.mpesaReceiptNumber;
-        order.paidAt = txRecord.recordedAt;
-
-        // Emit payment confirmed event AFTER transaction committed to database
-        paymentEvents.emit(`payment_${order.id}`, { 
-          paid: true, 
-          status: 'Ready', 
-          mpesaRef: txRecord.mpesaReceiptNumber, 
-          jobId: order.id,
-          paidAt: txRecord.recordedAt
-        });
-      } else if (darajaStatus && (darajaStatus.ResultCode === '1032' || darajaStatus.ResultCode === 1032)) {
-        // User cancelled on phone
-        db.updateOrder(order.id, {
-          status: 'Payment Cancelled',
-          lifecycleState: 'FAILED'
-        });
-        paymentEvents.emit(`payment_${order.id}`, { paid: false, cancelled: true, status: 'Payment Cancelled', jobId: order.id });
-        return res.json({
-          jobId: order.id,
-          status: 'Payment Cancelled',
-          lifecycleState: 'FAILED',
-          paid: false,
-          cancelled: true,
-          error: 'M-Pesa payment prompt was cancelled on phone.'
-        });
-      }
-    } catch (e) {
-      // Query still in flight or pending on phone, continue polling
-    }
-  }
-
-  // Do NOT return paid: true unless transaction code is saved in database
-  const finalPaid = Boolean(isPaid && order.mpesaRef && order.mpesaRef !== 'PENDING');
-
-  return res.json({
-    jobId: order.id,
-    status: order.status,
-    lifecycleState: order.lifecycleState,
-    mpesaRef: finalPaid ? order.mpesaRef : null,
-    paid: finalPaid,
-    paidAt: order.paidAt || null
-  });
-});
-
-/**
- * POST /api/payments/verify-code
- * Allows customer to verify the exact M-Pesa transaction code received via SMS on their phone
- */
-router.post('/verify-code', (req, res) => {
-  try {
-    const { jobId, mpesaCode, phone } = req.body || {};
-
-    if (!jobId) {
-      return res.status(400).json({ error: 'Job ID is required.' });
-    }
-
-    const cleanCode = String(mpesaCode || '').trim().toUpperCase();
-    if (!cleanCode || cleanCode.length < 5) {
-      return res.status(400).json({ error: 'Please enter a valid M-Pesa transaction code (e.g. UHUFN4R0HB).' });
-    }
-
-    const order = db.getOrderById(jobId);
-    if (!order) {
-      return res.status(404).json({ error: 'Associated print job not found.' });
-    }
-
-    // 1. Save Transaction with the exact code received from Safaricom SMS
-    const txRecord = db.recordPaymentTransaction({
-      jobId: order.id,
-      mpesaReceiptNumber: cleanCode,
-      amount: order.total,
-      phone: phone || order.phone,
-      rawCallback: { source: 'CUSTOMER_SMS_VERIFICATION', enteredAt: new Date().toISOString() }
-    });
-
-    db.addAuditLog('SUCCESS', `SMS Code Verified: Exact transaction code ${txRecord.mpesaReceiptNumber} confirmed for Job ${order.id}.`);
-
-    // 2. Emit payment confirmation event
-    paymentEvents.emit(`payment_${order.id}`, {
-      paid: true,
-      status: 'Ready',
-      mpesaRef: txRecord.mpesaReceiptNumber,
-      jobId: order.id,
-      paidAt: txRecord.recordedAt
-    });
-
+  if (isPaid) {
     return res.json({
-      success: true,
-      message: `Transaction ${txRecord.mpesaReceiptNumber} confirmed.`,
+      status: 'PAID',
+      mpesa_receipt_number: authenticReceipt,
+      mpesaRef: authenticReceipt,
+      amount: order.total,
+      payment_method: 'mpesa',
+      paid: true,
       jobId: order.id,
-      mpesaRef: txRecord.mpesaReceiptNumber,
-      status: 'Ready'
+      paidAt: order.paidAt || order.timestamp
     });
-  } catch (err) {
-    return res.status(500).json({ error: 'Error verifying transaction code: ' + err.message });
   }
-});
+
+  if (order.lifecycleState === 'FAILED' || order.status === 'Payment Cancelled' || order.status === 'Payment Failed') {
+    return res.json({
+      status: 'FAILED',
+      mpesa_receipt_number: null,
+      mpesaRef: null,
+      amount: order.total,
+      payment_method: 'mpesa',
+      paid: false,
+      jobId: order.id,
+      error: 'Payment was cancelled or failed.'
+    });
+  }
+
+  // Pending payment awaiting Safaricom callback
+  return res.json({
+    status: 'PENDING',
+    mpesa_receipt_number: null,
+    mpesaRef: null,
+    amount: order.total,
+    payment_method: 'mpesa',
+    paid: false,
+    jobId: order.id
+  });
+};
+
+router.get('/:jobId/status', handlePaymentStatus);
+router.get('/status/:jobId', handlePaymentStatus);
 
 /**
  * Extracts the authoritative M-Pesa transaction code from any Safaricom Daraja Callback JSON

@@ -168,7 +168,7 @@ async function runAllTests() {
     const orderId = orderRes.data.order.id;
     console.log(`  ✔ Order created: ${orderId} (KES ${orderRes.data.order.total}.00).`);
 
-    // 12. M-Pesa STK Push
+    // 12. M-Pesa STK Push (Asynchronous dispatch returning immediately)
     console.log('\n🧪 Test 12: M-Pesa STK Push API (/api/payments/stk-push)');
     const payRes = await request({ path: '/api/payments/stk-push', method: 'POST' }, {
       jobId: orderId,
@@ -176,19 +176,20 @@ async function runAllTests() {
       amount: 60
     });
     assert.strictEqual(payRes.status, 200);
-    assert(payRes.data.checkoutRequestId);
-    console.log(`  ✔ M-Pesa STK Push dispatched. CheckoutRequestID: ${payRes.data.checkoutRequestId}.`);
+    const checkoutId = payRes.data.checkout_request_id || payRes.data.checkoutRequestId;
+    assert(checkoutId, 'CheckoutRequestID must be returned immediately');
+    console.log(`  ✔ M-Pesa STK Push dispatched asynchronously. CheckoutRequestID: ${checkoutId}.`);
 
-    // 13. Daraja Webhook Callback
+    // 13. Daraja Webhook Callback (Authentic MpesaReceiptNumber extraction)
     console.log('\n🧪 Test 13: Safaricom Daraja Webhook API (/api/payments/webhook)');
     const webhookRes = await request({ path: '/api/payments/webhook', method: 'POST' }, {
       Body: {
         stkCallback: {
           ResultCode: 0,
-          CheckoutRequestID: payRes.data.checkoutRequestId,
+          CheckoutRequestID: checkoutId,
           CallbackMetadata: {
             Item: [
-              { Name: 'MpesaReceiptNumber', Value: 'UHUFN4R0HB' },
+              { Name: 'MpesaReceiptNumber', Value: 'UHUFWR4OHB' },
               { Name: 'Amount', Value: 60 },
               { Name: 'PhoneNumber', Value: 254712345678 }
             ]
@@ -198,8 +199,15 @@ async function runAllTests() {
     });
     assert.strictEqual(webhookRes.status, 200);
     const settledOrder = db.getOrderById(orderId);
-    assert.strictEqual(settledOrder.mpesaRef, 'UHUFN4R0HB');
-    console.log(`  ✔ Daraja Webhook verified and settled transaction: ${settledOrder.mpesaRef}.`);
+    assert.strictEqual(settledOrder.mpesa_receipt_number, 'UHUFWR4OHB');
+    assert.strictEqual(settledOrder.mpesaRef, 'UHUFWR4OHB');
+
+    // 13b. Verify Payment Status Endpoint (/api/payments/:jobId/status)
+    const statusRes = await request({ path: `/api/payments/${encodeURIComponent(orderId)}/status`, method: 'GET' });
+    assert.strictEqual(statusRes.status, 200);
+    assert.strictEqual(statusRes.data.status, 'PAID');
+    assert.strictEqual(statusRes.data.mpesa_receipt_number, 'UHUFWR4OHB');
+    console.log(`  ✔ Daraja Webhook verified and settled transaction: ${settledOrder.mpesa_receipt_number}.`);
 
     // 14. Print Agent Polling
     console.log('\n🧪 Test 14: Print Agent Mutual HMAC Polling (/api/print/poll-queue)');
@@ -213,7 +221,7 @@ async function runAllTests() {
     });
     assert.strictEqual(agentPoll.status, 200);
     assert.ok(agentPoll.data.job, 'Paid job must be returned in queue for printing');
-    assert.strictEqual(agentPoll.data.job.mpesaRef, 'UHUFN4R0HB', 'Agent must receive order with verified M-Pesa transaction code');
+    assert.strictEqual(agentPoll.data.job.mpesaRef, 'UHUFWR4OHB', 'Agent must receive order with verified M-Pesa transaction code');
     console.log(`  ✔ Authenticated print agent polled queue successfully and received Job ${agentPoll.data.job.id} (M-Pesa: ${agentPoll.data.job.mpesaRef}).`);
 
     // 15. Admin Overview

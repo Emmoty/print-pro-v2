@@ -56,7 +56,8 @@ const state = {
     doubleSided: false,
     phone: '0712345678',
     total: 0,
-    mpesaRef: 'SJK' + Math.floor(100000 + Math.random() * 900000),
+    mpesa_receipt_number: null,
+    mpesaRef: null,
     timestamp: new Date(),
     status: 'completed'
   },
@@ -1239,19 +1240,34 @@ async function triggerMpesaSTKPush() {
 
     let isSettled = false;
 
-    const handleSuccess = (mpesaRef) => {
-      if (!mpesaRef || mpesaRef === 'PENDING') {
-        // Do not generate receipt until real transaction code is stored and confirmed
-        return;
-      }
+    const handleSuccess = async (mpesaRef) => {
       if (isSettled) return;
       isSettled = true;
-      if (state.stkCountdownTimer) clearInterval(state.stkCountdownTimer);
+      if (state.stkCountdownTimer) clearTimeout(state.stkCountdownTimer);
       if (window.stkEventSource) {
         window.stkEventSource.close();
         window.stkEventSource = null;
       }
-      state.currentJob.mpesaRef = String(mpesaRef).trim().toUpperCase();
+
+      let confirmedCode = mpesaRef;
+      // Authoritatively refresh verified payment state from server
+      try {
+        const verifyRes = await fetch(`/api/payments/${encodeURIComponent(state.currentJob.id)}/status`);
+        if (verifyRes.ok) {
+          const vData = await verifyRes.json();
+          if (vData && vData.mpesa_receipt_number) {
+            confirmedCode = vData.mpesa_receipt_number;
+          }
+        }
+      } catch (e) {}
+
+      if (!confirmedCode || confirmedCode === 'PENDING') {
+        isSettled = false;
+        return;
+      }
+
+      state.currentJob.mpesa_receipt_number = String(confirmedCode).trim().toUpperCase();
+      state.currentJob.mpesaRef = state.currentJob.mpesa_receipt_number;
       state.currentJob.timestamp = new Date();
       closeModal(elements.mpesaStkModal);
       startJobProcessingFlow();
@@ -1260,7 +1276,7 @@ async function triggerMpesaSTKPush() {
     const handleFailure = () => {
       if (isSettled) return;
       isSettled = true;
-      if (state.stkCountdownTimer) clearInterval(state.stkCountdownTimer);
+      if (state.stkCountdownTimer) clearTimeout(state.stkCountdownTimer);
       if (window.stkEventSource) {
         window.stkEventSource.close();
         window.stkEventSource = null;
@@ -1276,9 +1292,10 @@ async function triggerMpesaSTKPush() {
         window.stkEventSource.onmessage = (event) => {
           try {
             const data = JSON.parse(event.data);
-            if (data && data.paid && data.mpesaRef && data.mpesaRef !== 'PENDING') {
-              handleSuccess(data.mpesaRef);
-            } else if (data && (data.cancelled || data.status === 'Payment Failed')) {
+            const receipt = data.mpesa_receipt_number || data.mpesaRef;
+            if (data && data.paid && receipt && receipt !== 'PENDING') {
+              handleSuccess(receipt);
+            } else if (data && (data.cancelled || data.status === 'Payment Failed' || data.status === 'FAILED')) {
               handleFailure();
             }
           } catch (e) {}
@@ -1286,37 +1303,44 @@ async function triggerMpesaSTKPush() {
       } catch (e) {}
     }
 
-    // 5. High-Frequency Fallback Polling (Every 800ms)
-    const checkStatus = async () => {
-      if (isSettled) return;
-      try {
-        const checkRes = await fetch(`/api/payments/status/${encodeURIComponent(state.currentJob.id)}`);
-        if (checkRes.ok) {
-          const statusData = await checkRes.json();
-          if (statusData.paid && statusData.mpesaRef && statusData.mpesaRef !== 'PENDING') {
-            handleSuccess(statusData.mpesaRef);
-          } else if (statusData.cancelled || statusData.lifecycleState === 'FAILED' || statusData.status === 'Payment Cancelled') {
-            handleFailure();
-          }
+    // 5. Controlled Adaptive Fallback Polling (1.5s, 2s, 2s, 3s, 3s, 5s, 5s, 10s)
+    const pollIntervals = [1500, 2000, 2000, 3000, 3000, 5000, 5000, 10000];
+    let pollIndex = 0;
+
+    const scheduleNextPoll = () => {
+      if (isSettled || countdown <= 0) return;
+      const interval = pollIntervals[pollIndex] || 5000;
+      if (pollIndex < pollIntervals.length - 1) pollIndex++;
+
+      state.stkCountdownTimer = setTimeout(async () => {
+        countdown = Math.max(0, countdown - Math.round(interval / 1000));
+        if (elements.stkCountdown) elements.stkCountdown.textContent = countdown;
+
+        if (countdown <= 0) {
+          handleFailure();
+          return;
         }
-      } catch (e) {}
+
+        try {
+          const checkRes = await fetch(`/api/payments/${encodeURIComponent(state.currentJob.id)}/status`);
+          if (checkRes.ok) {
+            const statusData = await checkRes.json();
+            const receipt = statusData.mpesa_receipt_number || statusData.mpesaRef;
+            if (statusData.paid && receipt && receipt !== 'PENDING') {
+              handleSuccess(receipt);
+              return;
+            } else if (statusData.cancelled || statusData.lifecycleState === 'FAILED' || statusData.status === 'FAILED') {
+              handleFailure();
+              return;
+            }
+          }
+        } catch (e) {}
+
+        if (!isSettled) scheduleNextPoll();
+      }, interval);
     };
 
-    // Run first check after 400ms
-    setTimeout(checkStatus, 400);
-
-    state.stkCountdownTimer = setInterval(async () => {
-      countdown--;
-      if (elements.stkCountdown) elements.stkCountdown.textContent = countdown;
-
-      if (!isSettled) {
-        await checkStatus();
-      }
-
-      if (countdown <= 0) {
-        handleFailure();
-      }
-    }, 800);
+    scheduleNextPoll();
 
   } catch (err) {
     closeModal(elements.mpesaStkModal);
@@ -1455,10 +1479,17 @@ function renderScreenReceipt() {
   const formattedDate = `${pad(now.getDate())}/${pad(now.getMonth() + 1)}/${now.getFullYear()}, ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
   if (elements.receiptPaidAtVal) elements.receiptPaidAtVal.textContent = formattedDate;
 
-  // 3. M-Pesa receipt: Exact transaction code received from Safaricom M-Pesa (e.g. "UHUFN4R0HB")
-  const exactMpesaCode = String(state.currentJob.mpesaRef || job.mpesaRef || '').trim() || 'UHUFN4R0HB';
-  if (elements.receiptMpesaCodeVal) elements.receiptMpesaCodeVal.textContent = exactMpesaCode;
-  state.currentJob.mpesaRef = exactMpesaCode;
+  // 3. M-Pesa receipt: Exact transaction code received from Safaricom M-Pesa (NO fallback fabrication)
+  const exactMpesaCode = String(state.currentJob.mpesa_receipt_number || state.currentJob.mpesaRef || job.mpesa_receipt_number || job.mpesaRef || '').trim();
+  const isValidCode = Boolean(exactMpesaCode && exactMpesaCode !== 'PENDING' && !exactMpesaCode.startsWith('SJK'));
+  
+  if (elements.receiptMpesaCodeVal) {
+    elements.receiptMpesaCodeVal.textContent = isValidCode ? exactMpesaCode : '—';
+  }
+  if (isValidCode) {
+    state.currentJob.mpesa_receipt_number = exactMpesaCode;
+    state.currentJob.mpesaRef = exactMpesaCode;
+  }
 
   // 4. Pages: e.g. "5"
   if (elements.receiptPagesCountVal) elements.receiptPagesCountVal.textContent = selectedPages;
@@ -1480,9 +1511,12 @@ function renderScreenReceipt() {
     elements.receiptFormatVal.textContent = `${sizeStr} ${colorStr}, ${sidedStr}`;
   }
 
-  // 7. Status: e.g. "processing"
+  // 7. Status: e.g. "PAID"
+  const isPaid = isValidCode || job.status === 'Ready' || job.status === 'Completed' || job.status === 'Printing';
   if (elements.receiptStatusVal) {
-    elements.receiptStatusVal.textContent = 'processing';
+    elements.receiptStatusVal.textContent = isPaid ? 'PAID' : (job.status || 'Awaiting payment');
+    elements.receiptStatusVal.style.color = isPaid ? 'var(--mpesa-green)' : 'var(--text-muted)';
+    elements.receiptStatusVal.style.fontWeight = '700';
   }
 
   // 8. Total paid: e.g. "KES 5"
@@ -1704,7 +1738,8 @@ function resetToNewJob() {
     doubleSided: false,
     phone: '0712345678',
     total: 0,
-    mpesaRef: 'SJK' + Math.floor(100000 + Math.random() * 900000),
+    mpesa_receipt_number: null,
+    mpesaRef: null,
     timestamp: new Date(),
     status: 'completed'
   };

@@ -30,8 +30,11 @@ CREATE TABLE IF NOT EXISTS orders (
   pages INT DEFAULT 1,
   copies INT DEFAULT 1,
   total NUMERIC(10, 2) NOT NULL,
-  status VARCHAR(64) DEFAULT 'Ready',
+  status VARCHAR(64) DEFAULT 'Pending Payment',
   lifecycle_state VARCHAR(64) DEFAULT 'PAYMENT_PENDING',
+  checkout_request_id VARCHAR(128),
+  merchant_request_id VARCHAR(128),
+  mpesa_receipt_number VARCHAR(128),
   mpesa_ref VARCHAR(128),
   reversal_ref VARCHAR(128),
   refund_amount NUMERIC(10, 2),
@@ -144,6 +147,9 @@ CREATE TABLE IF NOT EXISTS transactions (
 CREATE INDEX IF NOT EXISTS idx_orders_status ON orders(status);
 CREATE INDEX IF NOT EXISTS idx_orders_timestamp ON orders(timestamp DESC);
 CREATE INDEX IF NOT EXISTS idx_orders_phone ON orders(phone);
+CREATE INDEX IF NOT EXISTS idx_orders_checkout_request_id ON orders(checkout_request_id);
+CREATE INDEX IF NOT EXISTS idx_orders_merchant_request_id ON orders(merchant_request_id);
+CREATE INDEX IF NOT EXISTS idx_orders_mpesa_receipt ON orders(mpesa_receipt_number);
 CREATE INDEX IF NOT EXISTS idx_audit_logs_timestamp ON audit_logs(timestamp DESC);
 CREATE INDEX IF NOT EXISTS idx_idempotency_expires ON idempotency_keys(expires_at);
 CREATE INDEX IF NOT EXISTS idx_transactions_job_id ON transactions(job_id);
