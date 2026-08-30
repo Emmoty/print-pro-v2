@@ -183,6 +183,13 @@ const elements = {
   stkCountdown: document.getElementById('stkCountdown'),
   pinDigits: document.querySelectorAll('.stk-pin-digit'),
 
+  // Non-blocking Reconciliation Overlay
+  reconciliationOverlay: document.getElementById('reconciliationOverlay'),
+  reconciliationManualSection: document.getElementById('reconciliationManualSection'),
+  reconciliationManualInput: document.getElementById('reconciliationManualInput'),
+  submitReconciliationCodeBtn: document.getElementById('submitReconciliationCodeBtn'),
+  reconciliationManualError: document.getElementById('reconciliationManualError'),
+
   trackJobModal: document.getElementById('trackJobModal'),
   closeTrackModalBtn: document.getElementById('closeTrackModalBtn'),
   trackJobInput: document.getElementById('trackJobInput'),
@@ -1252,6 +1259,43 @@ async function triggerMpesaSTKPush() {
     if (elements.manualCodeError) elements.manualCodeError.style.display = 'none';
     if (elements.manualCodeInputContainer) elements.manualCodeInputContainer.style.display = 'none';
 
+    // Reconciliation Overlay Handlers
+    const showReconciliationOverlay = () => {
+      if (elements.reconciliationOverlay) {
+        elements.reconciliationOverlay.classList.remove('hidden');
+      }
+      if (elements.reconciliationManualSection) {
+        elements.reconciliationManualSection.classList.add('hidden');
+      }
+      if (elements.reconciliationManualError) {
+        elements.reconciliationManualError.classList.add('hidden');
+      }
+      if (elements.reconciliationManualInput) {
+        elements.reconciliationManualInput.value = '';
+      }
+
+      // Automatically reveal manual M-Pesa entry after 120s if webhook is delayed
+      if (state.reconciliationTimer) clearTimeout(state.reconciliationTimer);
+      state.reconciliationTimer = setTimeout(() => {
+        if (elements.reconciliationManualSection) {
+          elements.reconciliationManualSection.classList.remove('hidden');
+        }
+      }, 120000);
+    };
+
+    const hideReconciliationOverlay = () => {
+      if (elements.reconciliationOverlay) {
+        elements.reconciliationOverlay.classList.add('hidden');
+      }
+      if (elements.reconciliationManualSection) {
+        elements.reconciliationManualSection.classList.add('hidden');
+      }
+      if (state.reconciliationTimer) {
+        clearTimeout(state.reconciliationTimer);
+        state.reconciliationTimer = null;
+      }
+    };
+
     const handleSuccess = async (mpesaRef) => {
       if (isSettled) return;
       isSettled = true;
@@ -1284,6 +1328,7 @@ async function triggerMpesaSTKPush() {
       state.currentJob.mpesa_receipt_number = String(confirmedCode).trim().toUpperCase();
       state.currentJob.mpesaRef = state.currentJob.mpesa_receipt_number;
       state.currentJob.timestamp = new Date();
+      hideReconciliationOverlay();
       closeModal(elements.mpesaStkModal);
       startJobProcessingFlow();
     };
@@ -1296,6 +1341,7 @@ async function triggerMpesaSTKPush() {
         window.stkEventSource.close();
         window.stkEventSource = null;
       }
+      hideReconciliationOverlay();
       closeModal(elements.mpesaStkModal);
     };
 
@@ -1318,17 +1364,23 @@ async function triggerMpesaSTKPush() {
             return;
           }
 
-          // If not confirmed via query, trigger direct code verification
-          const manualRes = await fetch('/api/payments/verify-code', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ jobId: state.currentJob.id, phone: phone })
-          });
-          const manualData = await manualRes.json();
-          if (manualData && manualData.paid) {
-            handleSuccess(manualData.mpesa_receipt_number || manualData.mpesaRef);
+          if (data && data.status === 'RECONCILING') {
+            closeModal(elements.mpesaStkModal);
+            navigateTo('processing');
+            showReconciliationOverlay();
             return;
           }
+
+          if (data && (data.cancelled || data.status === 'CANCELLED' || data.status === 'FAILED')) {
+            handleFailure();
+            return;
+          }
+
+          // If still pending or prompt not received, expand manual entry inside modal
+          if (indicatorText) indicatorText.textContent = 'Waiting for Safaricom confirmation or enter M-Pesa SMS code below:';
+          if (elements.manualCodeInputContainer) elements.manualCodeInputContainer.style.display = 'block';
+          if (elements.manualCodeChevron) elements.manualCodeChevron.style.transform = 'rotate(180deg)';
+          if (elements.manualMpesaCodeInput) elements.manualMpesaCodeInput.focus();
         } catch (e) {}
 
         elements.verifyPaymentNowBtn.innerHTML = originalText;
@@ -1336,7 +1388,7 @@ async function triggerMpesaSTKPush() {
       };
     }
 
-    // Toggle Manual Code Accordion
+    // Toggle Manual Code Accordion in Modal
     if (elements.toggleManualCodeBtn) {
       elements.toggleManualCodeBtn.onclick = () => {
         if (!elements.manualCodeInputContainer) return;
@@ -1348,10 +1400,10 @@ async function triggerMpesaSTKPush() {
       };
     }
 
-    // Submit Manual M-Pesa Code Button
+    // Submit Manual M-Pesa Code Button in Modal
     if (elements.submitManualMpesaCodeBtn) {
       elements.submitManualMpesaCodeBtn.onclick = async () => {
-        const inputVal = elements.manualMpesaCodeInput ? elements.manualMpesaCodeInput.value.trim() : '';
+        const inputVal = elements.manualMpesaCodeInput ? elements.manualMpesaCodeInput.value.trim().toUpperCase() : '';
         if (!inputVal || inputVal.length < 6) {
           if (elements.manualCodeError) {
             elements.manualCodeError.textContent = 'Please enter a valid M-Pesa code (e.g. UHUFWR4OHB).';
@@ -1391,6 +1443,50 @@ async function triggerMpesaSTKPush() {
       };
     }
 
+    // Submit Reconciliation Code Button on Overlay
+    if (elements.submitReconciliationCodeBtn) {
+      elements.submitReconciliationCodeBtn.onclick = async () => {
+        const inputVal = elements.reconciliationManualInput ? elements.reconciliationManualInput.value.trim().toUpperCase() : '';
+        if (!inputVal || inputVal.length < 6) {
+          if (elements.reconciliationManualError) {
+            elements.reconciliationManualError.textContent = 'Please enter a valid M-Pesa code (e.g. UHUFWR4OHB).';
+            elements.reconciliationManualError.classList.remove('hidden');
+          }
+          return;
+        }
+
+        elements.submitReconciliationCodeBtn.textContent = 'Verifying...';
+        elements.submitReconciliationCodeBtn.disabled = true;
+        if (elements.reconciliationManualError) elements.reconciliationManualError.classList.add('hidden');
+
+        try {
+          const res = await fetch('/api/payments/verify-code', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ jobId: state.currentJob.id, code: inputVal, phone: phone })
+          });
+          const data = await res.json();
+          if (res.ok && data && data.paid) {
+            handleSuccess(data.mpesa_receipt_number || data.mpesaRef);
+            return;
+          } else {
+            if (elements.reconciliationManualError) {
+              elements.reconciliationManualError.textContent = data.error || 'Verification failed. Please check code.';
+              elements.reconciliationManualError.classList.remove('hidden');
+            }
+          }
+        } catch (e) {
+          if (elements.reconciliationManualError) {
+            elements.reconciliationManualError.textContent = 'Connection error. Please try again.';
+            elements.reconciliationManualError.classList.remove('hidden');
+          }
+        }
+
+        elements.submitReconciliationCodeBtn.textContent = 'Verify';
+        elements.submitReconciliationCodeBtn.disabled = false;
+      };
+    }
+
     // 4. Real-time Reactive SSE Stream (Instant <10ms automatic confirmation upon Safaricom callback)
     if (window.EventSource) {
       try {
@@ -1403,7 +1499,11 @@ async function triggerMpesaSTKPush() {
             if (data && (data.paid || data.status === 'PAID') && receipt && receipt !== 'PENDING') {
               handleSuccess(receipt);
             } else if (data && (data.status === 'RECONCILING')) {
-              // Handled silently in background
+              if (elements.mpesaStkModal && elements.mpesaStkModal.classList.contains('active')) {
+                closeModal(elements.mpesaStkModal);
+                navigateTo('processing');
+              }
+              showReconciliationOverlay();
             } else if (data && (data.cancelled || data.status === 'Payment Failed' || data.status === 'FAILED' || data.status === 'CANCELLED')) {
               handleFailure();
             }
@@ -1442,7 +1542,11 @@ async function triggerMpesaSTKPush() {
               handleSuccess(receipt);
               return;
             } else if (statusData.status === 'RECONCILING') {
-              // Handled silently in background
+              if (elements.mpesaStkModal && elements.mpesaStkModal.classList.contains('active')) {
+                closeModal(elements.mpesaStkModal);
+                navigateTo('processing');
+              }
+              showReconciliationOverlay();
             } else if (statusData.cancelled || statusData.lifecycleState === 'FAILED' || statusData.lifecycleState === 'CANCELLED' || statusData.status === 'FAILED') {
               handleFailure();
               return;

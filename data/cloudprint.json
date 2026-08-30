@@ -11,7 +11,7 @@
       "passwordHash": "c96590d28ac2ee23408d1b5b001a0253:0f9ed167583b23f1dbe40241a152112de253c0560a2bd952220556464fdabf9f4eae0050b67ed7d4fec5bdfac6d75e8690abc574c2cebb2681e553a7d5fa80aa",
       "status": "active",
       "mfaEnabled": true,
-      "lastLogin": "2026-08-30T14:12:57.527Z",
+      "lastLogin": "2026-08-30T16:33:21.396Z",
       "createdAt": "2026-08-29T22:25:26.671Z",
       "updatedAt": "2026-08-29T22:47:29.132Z"
     },
@@ -57,7 +57,36 @@
   ],
   "orders": [
     {
-      "id": "#CP346397",
+      "id": "#CP232777",
+      "customer": "Customer 4383",
+      "phone": "0720874383",
+      "fileName": "ChatGPT Image Aug 29, 2026, 02_49_36 AM4.png",
+      "files": [
+        {
+          "name": "ChatGPT Image Aug 29, 2026, 02_49_36 AM4.png",
+          "pages": 1,
+          "size": "0.3 MB",
+          "fileId": "722258dd-8bad-4b80-8949-52d7625df680"
+        }
+      ],
+      "serviceName": "A4 Black & White",
+      "paperSize": "a4",
+      "colorMode": "bw",
+      "ratePerPage": 1,
+      "pages": 1,
+      "copies": 1,
+      "total": 1,
+      "status": "Pending Payment",
+      "lifecycleState": "PAYMENT_PENDING",
+      "mpesaRef": "PENDING",
+      "timestamp": "2026-08-30T16:35:18.022Z",
+      "filePurged": false,
+      "mpesa_receipt_number": null,
+      "checkoutRequestId": "ws_CO_20260830193518_7929",
+      "merchantRequestId": "29103-99210-1788107718051"
+    },
+    {
+      "id": "#CP120855",
       "customer": "Customer 5678",
       "phone": "0712345678",
       "fileName": "Project_Design.pdf",
@@ -76,6 +105,490 @@
       "total": 60,
       "status": "Printing",
       "lifecycleState": "PRINTING",
+      "mpesaRef": "UHUFWR4OHB",
+      "timestamp": "2026-08-30T16:33:21.408Z",
+      "filePurged": false,
+      "mpesa_receipt_number": "UHUFWR4OHB",
+      "checkoutRequestId": "ws_CO_20260830193321_6634",
+      "merchantRequestId": "29103-99210-1788107601434",
+      "paidAt": "2026-08-30T16:33:21.448Z",
+      "spoolStartedAt": "2026-08-30T16:33:21.469Z",
+      "dispatchedToAgent": "AGT-LAN-01"
+    },
+    {
+      "id": "#CP424511",
+      "customer": "Customer 4383",
+      "phone": "0720874383",
+      "fileName": "ChatGPT Image Aug 29, 2026, 02_49_36 AM4.png",
+      "files": [
+        {
+          "name": "ChatGPT Image Aug 29, 2026, 02_49_36 AM4.png",
+          "pages": 1,
+          "size": "0.3 MB",
+          "fileId": "45fac923-c564-4547-836f-33370bf873f0"
+        }
+      ],
+      "serviceName": "A4 Black & White",
+      "paperSize": "a4",
+      "colorMode": "bw",
+      "ratePerPage": 1,
+      "pages": 1,
+      "copies": 1,
+      "total": 1,
+      "status": "Pending Payment",
+      "lifecycleState": "PAYMENT_PENDING",
+      "mpesaRef": "PENDING",
+      "timestamp": "2026-08-30T16:27:05.719Z",
+      "filePurged": false,
+      "mpesa_receipt_number": null,
+      "checkoutRequestId": "ws_CO_20260830192705_3201",
+      "merchantRequestId": "29103-99210-1788107225741"
+    },
+    {
+      "id": "#CP778889",
+      "customer": "Customer 4383",
+      "phone": "0720874383",
+      "fileName": "ChatGPT Image Aug 29, 2026, 02_49_36 AM1.png",
+      "files": [
+        {
+          "name": "ChatGPT Image Aug 29, 2026, 02_49_36 AM1.png",
+          "pages": 1,
+          "size": "0.4 MB",
+          "fileId": "82f1624d-d917-47e2-86c3-fce7d0490df2"
+        }
+      ],
+      "serviceName": "A4 Black & White",
+      "paperSize": "a4",
+      "colorMode": "bw",
+      "ratePerPage": 1,
+      "pages": 1,
+      "copies": 1,
+      "total": 1,
+      "status": "Pending Payment",
+      "lifecycleState": "PAYMENT_PENDING",
+      "mpesaRef": "PENDING",
+      "timestamp": "2026-08-30T15:48:29.433Z",
+      "filePurged": false,
+      "mpesa_receipt_number": null,
+      "checkoutRequestId": "ws_CO_20260830184829_9083",
+      "merchantRequestId": "29103-99210-1788104909453"
+    },
+    {
+      "id": "#CP382253",
+      "customer": "Customer 4383",
+      "phone": "0720874383",
+      "fileName": "ChatGPT Image Aug 29, 2026, 02_49_36 AM1.png",
+      "files": [
+        {
+          "name": "ChatGPT Image Aug 29, 2026, 02_49_36 AM1.png",
+          "pages": 1,
+          "size": "0.4 MB",
+          "fileId": "82f1624d-d917-47e2-86c3-fce7d0490df2"
+        }
+      ],
+      "serviceName": "A4 Black & White",
+      "paperSize": "a4",
+      "colorMode": "bw",
+      "ratePerPage": 1,
+      "pages": 1,
+      "copies": 1,
+      "total": 1,
+      "status": "Pending Payment",
+      "lifecycleState": "PAYMENT_PENDING",
+      "mpesaRef": "PENDING",
+      "timestamp": "2026-08-30T15:48:20.363Z",
+      "filePurged": false,
+      "mpesa_receipt_number": null,
+      "checkoutRequestId": "ws_CO_20260830184820_1635",
+      "merchantRequestId": "29103-99210-1788104900391"
+    },
+    {
+      "id": "#CP885531",
+      "customer": "Customer 5678",
+      "phone": "0712345678",
+      "fileName": "Project_Design.pdf",
+      "files": [
+        {
+          "name": "Project_Design.pdf",
+          "pages": 10
+        }
+      ],
+      "serviceName": "A4 Full Colour",
+      "paperSize": "a4",
+      "colorMode": "colour",
+      "ratePerPage": 3,
+      "pages": 10,
+      "copies": 2,
+      "total": 60,
+      "status": "Ready",
+      "lifecycleState": "PAID",
+      "mpesaRef": "UHUFWR4OHB",
+      "timestamp": "2026-08-30T15:09:39.122Z",
+      "filePurged": false,
+      "mpesa_receipt_number": "UHUFWR4OHB",
+      "checkoutRequestId": "ws_CO_20260830180939_2819",
+      "merchantRequestId": "29103-99210-1788102579146",
+      "paidAt": "2026-08-30T15:09:39.170Z",
+      "spoolStartedAt": "2026-08-30T15:09:39.202Z",
+      "dispatchedToAgent": "AGT-LAN-01"
+    },
+    {
+      "id": "#CP200851",
+      "customer": "Customer 5678",
+      "phone": "0712345678",
+      "fileName": "Project_Design.pdf",
+      "files": [
+        {
+          "name": "Project_Design.pdf",
+          "pages": 10
+        }
+      ],
+      "serviceName": "A4 Full Colour",
+      "paperSize": "a4",
+      "colorMode": "colour",
+      "ratePerPage": 3,
+      "pages": 10,
+      "copies": 2,
+      "total": 60,
+      "status": "Pending Payment",
+      "lifecycleState": "PAYMENT_PENDING",
+      "mpesaRef": "PENDING",
+      "timestamp": "2026-08-30T15:08:28.710Z",
+      "filePurged": false,
+      "mpesa_receipt_number": null
+    },
+    {
+      "id": "#CP884370",
+      "customer": "Customer 5678",
+      "phone": "0712345678",
+      "fileName": "Project_Design.pdf",
+      "files": [
+        {
+          "name": "Project_Design.pdf",
+          "pages": 10
+        }
+      ],
+      "serviceName": "A4 Full Colour",
+      "paperSize": "a4",
+      "colorMode": "colour",
+      "ratePerPage": 3,
+      "pages": 10,
+      "copies": 2,
+      "total": 60,
+      "status": "Pending Payment",
+      "lifecycleState": "PAYMENT_PENDING",
+      "mpesaRef": "PENDING",
+      "timestamp": "2026-08-30T15:07:14.706Z",
+      "filePurged": false,
+      "mpesa_receipt_number": null
+    },
+    {
+      "id": "#CP332323",
+      "customer": "Customer 678",
+      "phone": "0712345678",
+      "fileName": "Business_Proposal.pdf",
+      "total": 5,
+      "status": "Ready",
+      "lifecycleState": "PAID",
+      "checkoutRequestId": "ws_CO_1788102417068_8821",
+      "mpesa_receipt_number": "UHUFWR4OHB",
+      "mpesaRef": "UHUFWR4OHB",
+      "paidAt": "2026-08-30T15:06:57.196Z"
+    },
+    {
+      "id": "#CP937817",
+      "customer": "Customer 678",
+      "phone": "0712345678",
+      "fileName": "Business_Proposal.pdf",
+      "total": 5,
+      "status": "Ready",
+      "lifecycleState": "PAID",
+      "checkoutRequestId": "ws_CO_1788100045164_8821",
+      "mpesa_receipt_number": "UHUFWR4OHB",
+      "mpesaRef": "UHUFWR4OHB",
+      "paidAt": "2026-08-30T14:27:25.168Z"
+    },
+    {
+      "id": "#CP119066",
+      "customer": "Customer 5678",
+      "phone": "0712345678",
+      "fileName": "Project_Design.pdf",
+      "files": [
+        {
+          "name": "Project_Design.pdf",
+          "pages": 10
+        }
+      ],
+      "serviceName": "A4 Full Colour",
+      "paperSize": "a4",
+      "colorMode": "colour",
+      "ratePerPage": 3,
+      "pages": 10,
+      "copies": 2,
+      "total": 60,
+      "status": "Ready",
+      "lifecycleState": "PAID",
+      "mpesaRef": "UHUFWR4OHB",
+      "timestamp": "2026-08-30T14:27:12.148Z",
+      "filePurged": false,
+      "mpesa_receipt_number": "UHUFWR4OHB",
+      "checkoutRequestId": "ws_CO_20260830172712_6185",
+      "merchantRequestId": "29103-99210-1788100032162",
+      "paidAt": "2026-08-30T14:27:12.176Z",
+      "spoolStartedAt": "2026-08-30T14:27:12.202Z",
+      "dispatchedToAgent": "AGT-LAN-01"
+    },
+    {
+      "id": "#CP275167",
+      "customer": "Customer 8888",
+      "phone": "0788888888",
+      "fileName": "OnDemand_Query.pdf",
+      "files": [
+        {
+          "name": "OnDemand_Query.pdf",
+          "pages": 2,
+          "size": 15360
+        }
+      ],
+      "serviceName": "A4 Full Colour",
+      "paperSize": "a4",
+      "colorMode": "colour",
+      "ratePerPage": 3,
+      "pages": 2,
+      "copies": 1,
+      "total": 6,
+      "status": "Ready",
+      "lifecycleState": "PAID",
+      "mpesaRef": "UHUFMTDXMD",
+      "timestamp": "2026-08-30T14:26:59.997Z",
+      "filePurged": false,
+      "mpesa_receipt_number": "UHUFMTDXMD",
+      "checkoutRequestId": "ws_CO_20260830172700_5008",
+      "merchantRequestId": "29103-99210-1788100020007",
+      "paidAt": "2026-08-30T14:27:00.018Z"
+    },
+    {
+      "id": "#CP381904",
+      "customer": "Customer 9999",
+      "phone": "0799999999",
+      "fileName": "Manual_Verify.pdf",
+      "files": [
+        {
+          "name": "Manual_Verify.pdf",
+          "pages": 5,
+          "size": 30720
+        }
+      ],
+      "serviceName": "A4 Black & White",
+      "paperSize": "a4",
+      "colorMode": "bw",
+      "ratePerPage": 1,
+      "pages": 5,
+      "copies": 1,
+      "total": 5,
+      "status": "Ready",
+      "lifecycleState": "PAID",
+      "mpesaRef": "UHUF99XYZ8",
+      "timestamp": "2026-08-30T14:26:59.977Z",
+      "filePurged": false,
+      "mpesa_receipt_number": "UHUF99XYZ8",
+      "paidAt": "2026-08-30T14:26:59.984Z"
+    },
+    {
+      "id": "#CP167781",
+      "customer": "Customer 5678",
+      "phone": "254712345678",
+      "fileName": "Test_Fix_Doc.pdf",
+      "files": [
+        {
+          "name": "Test_Fix_Doc.pdf",
+          "pages": 3,
+          "size": 20480
+        }
+      ],
+      "serviceName": "A4 Black & White",
+      "paperSize": "a4",
+      "colorMode": "bw",
+      "ratePerPage": 1,
+      "pages": 3,
+      "copies": 1,
+      "total": 3,
+      "status": "Ready",
+      "lifecycleState": "PAID",
+      "mpesaRef": "UHUF69V2Q0",
+      "timestamp": "2026-08-30T14:26:59.730Z",
+      "filePurged": false,
+      "mpesa_receipt_number": "UHUF69V2Q0",
+      "checkoutRequestId": "ws_CO_20260830172659_9008",
+      "merchantRequestId": "29103-99210-1788100019748",
+      "paidAt": "2026-08-30T14:26:59.758Z"
+    },
+    {
+      "id": "#CP146292",
+      "customer": "Customer 5678",
+      "phone": "254712345678",
+      "fileName": "Test_Fix_Doc.pdf",
+      "files": [
+        {
+          "name": "Test_Fix_Doc.pdf",
+          "pages": 3,
+          "size": 20480
+        }
+      ],
+      "serviceName": "A4 Black & White",
+      "paperSize": "a4",
+      "colorMode": "bw",
+      "ratePerPage": 1,
+      "pages": 3,
+      "copies": 1,
+      "total": 3,
+      "status": "Ready",
+      "lifecycleState": "PAID",
+      "mpesaRef": "UHUFH8KGK3",
+      "timestamp": "2026-08-30T14:25:56.970Z",
+      "filePurged": false,
+      "mpesa_receipt_number": "UHUFH8KGK3",
+      "checkoutRequestId": "ws_CO_20260830172556_2716",
+      "merchantRequestId": "29103-99210-1788099956994",
+      "paidAt": "2026-08-30T14:25:57.008Z"
+    },
+    {
+      "id": "#CP648328",
+      "customer": "Customer 4383",
+      "phone": "0720874383",
+      "fileName": "ChatGPT Image Aug 30, 2026, 02_44_39 PM.png",
+      "files": [
+        {
+          "name": "ChatGPT Image Aug 30, 2026, 02_44_39 PM.png",
+          "pages": 1,
+          "size": "1.0 MB",
+          "fileId": "0ab99d2d-1535-4d03-9ccf-0c578e0a3833"
+        }
+      ],
+      "serviceName": "A4 Black & White",
+      "paperSize": "a4",
+      "colorMode": "bw",
+      "ratePerPage": 1,
+      "pages": 1,
+      "copies": 1,
+      "total": 1,
+      "status": "Ready",
+      "lifecycleState": "PAID",
+      "mpesaRef": "UHUF8BZHKH",
+      "timestamp": "2026-08-30T14:25:08.194Z",
+      "filePurged": false,
+      "mpesa_receipt_number": "UHUF8BZHKH",
+      "checkoutRequestId": "ws_CO_20260830172508_9826",
+      "merchantRequestId": "29103-99210-1788099908231",
+      "paidAt": "2026-08-30T14:25:09.478Z"
+    },
+    {
+      "id": "#CP937977",
+      "customer": "Customer 5678",
+      "phone": "254712345678",
+      "fileName": "Test_Fix_Doc.pdf",
+      "files": [
+        {
+          "name": "Test_Fix_Doc.pdf",
+          "pages": 3,
+          "size": 20480
+        }
+      ],
+      "serviceName": "A4 Black & White",
+      "paperSize": "a4",
+      "colorMode": "bw",
+      "ratePerPage": 1,
+      "pages": 3,
+      "copies": 1,
+      "total": 3,
+      "status": "Ready",
+      "lifecycleState": "PAID",
+      "mpesaRef": "UHUFAQ5TD7",
+      "timestamp": "2026-08-30T14:24:54.136Z",
+      "filePurged": false,
+      "mpesa_receipt_number": "UHUFAQ5TD7",
+      "checkoutRequestId": "ws_CO_20260830172454_2363",
+      "merchantRequestId": "29103-99210-1788099894154",
+      "paidAt": "2026-08-30T14:24:54.167Z"
+    },
+    {
+      "id": "#CP763549",
+      "customer": "Customer 5678",
+      "phone": "254712345678",
+      "fileName": "Test_Fix_Doc.pdf",
+      "files": [
+        {
+          "name": "Test_Fix_Doc.pdf",
+          "pages": 3,
+          "size": 20480
+        }
+      ],
+      "serviceName": "A4 Black & White",
+      "paperSize": "a4",
+      "colorMode": "bw",
+      "ratePerPage": 1,
+      "pages": 3,
+      "copies": 1,
+      "total": 3,
+      "status": "Pending Payment",
+      "lifecycleState": "PAYMENT_PENDING",
+      "mpesaRef": "PENDING",
+      "timestamp": "2026-08-30T14:24:30.006Z",
+      "filePurged": false,
+      "mpesa_receipt_number": null,
+      "checkoutRequestId": "ws_CO_20260830172430_8264",
+      "merchantRequestId": "29103-99210-1788099870051"
+    },
+    {
+      "id": "#CP299184",
+      "customer": "Customer 5678",
+      "phone": "0712345678",
+      "fileName": "Project_Design.pdf",
+      "files": [
+        {
+          "name": "Project_Design.pdf",
+          "pages": 10
+        }
+      ],
+      "serviceName": "A4 Full Colour",
+      "paperSize": "a4",
+      "colorMode": "colour",
+      "ratePerPage": 3,
+      "pages": 10,
+      "copies": 2,
+      "total": 60,
+      "status": "Ready",
+      "lifecycleState": "PAID",
+      "mpesaRef": "UHUFWR4OHB",
+      "timestamp": "2026-08-30T14:22:55.011Z",
+      "filePurged": false,
+      "mpesa_receipt_number": "UHUFWR4OHB",
+      "checkoutRequestId": "ws_CO_20260830172255_2419",
+      "merchantRequestId": "29103-99210-1788099775027",
+      "paidAt": "2026-08-30T14:22:55.045Z",
+      "spoolStartedAt": "2026-08-30T14:22:55.072Z",
+      "dispatchedToAgent": "AGT-LAN-01"
+    },
+    {
+      "id": "#CP346397",
+      "customer": "Customer 5678",
+      "phone": "0712345678",
+      "fileName": "Project_Design.pdf",
+      "files": [
+        {
+          "name": "Project_Design.pdf",
+          "pages": 10
+        }
+      ],
+      "serviceName": "A4 Full Colour",
+      "paperSize": "a4",
+      "colorMode": "colour",
+      "ratePerPage": 3,
+      "pages": 10,
+      "copies": 2,
+      "total": 60,
+      "status": "Ready",
+      "lifecycleState": "PAID",
       "mpesaRef": "UHUFWR4OHB",
       "timestamp": "2026-08-30T14:12:57.547Z",
       "filePurged": false,
@@ -2048,6 +2561,356 @@
     }
   ],
   "audit_logs": [
+    {
+      "id": 325,
+      "level": "INFO",
+      "message": "M-Pesa: STK Push prompt initiated for Job #CP232777 to 254720874383 (KES 1.00). CallbackURL: https://printpro.hudumacyber.shop/api/payments/webhook. CheckoutRequestID: ws_CO_20260830193518_7929",
+      "meta": {},
+      "timestamp": "2026-08-30T16:35:18.062Z"
+    },
+    {
+      "id": 324,
+      "level": "INFO",
+      "message": "Order Created: Job #CP232777 registered for 0720874383 (KES 1.00).",
+      "meta": {},
+      "timestamp": "2026-08-30T16:35:18.026Z"
+    },
+    {
+      "id": 323,
+      "level": "INFO",
+      "message": "Print Spooler: Job #CP120855 dispatched to Agent 'Shop Floor Primary Gateway' for hardware processing.",
+      "meta": {},
+      "timestamp": "2026-08-30T16:33:21.473Z"
+    },
+    {
+      "id": 322,
+      "level": "SUCCESS",
+      "message": "Safaricom Callback Processed: Transaction code UHUFWR4OHB extracted from JSON and committed to DB for Job #CP120855.",
+      "meta": {},
+      "timestamp": "2026-08-30T16:33:21.453Z"
+    },
+    {
+      "id": 321,
+      "level": "INFO",
+      "message": "M-Pesa: STK Push prompt initiated for Job #CP120855 to 254712345678 (KES 60.00). CallbackURL: https://printpro.hudumacyber.shop/api/payments/webhook. CheckoutRequestID: ws_CO_20260830193321_6634",
+      "meta": {},
+      "timestamp": "2026-08-30T16:33:21.438Z"
+    },
+    {
+      "id": 320,
+      "level": "INFO",
+      "message": "Order Created: Job #CP120855 registered for 0712345678 (KES 60.00).",
+      "meta": {},
+      "timestamp": "2026-08-30T16:33:21.411Z"
+    },
+    {
+      "id": 319,
+      "level": "SUCCESS",
+      "message": "User 'Sarah Kimani' (Super Admin) logged in successfully from IP ::1.",
+      "meta": {},
+      "timestamp": "2026-08-30T16:33:21.399Z"
+    },
+    {
+      "id": 318,
+      "level": "INFO",
+      "message": "M-Pesa: STK Push prompt initiated for Job #CP424511 to 254720874383 (KES 1.00). CallbackURL: https://printpro.hudumacyber.shop/api/payments/webhook. CheckoutRequestID: ws_CO_20260830192705_3201",
+      "meta": {},
+      "timestamp": "2026-08-30T16:27:05.745Z"
+    },
+    {
+      "id": 317,
+      "level": "INFO",
+      "message": "Order Created: Job #CP424511 registered for 0720874383 (KES 1.00).",
+      "meta": {},
+      "timestamp": "2026-08-30T16:27:05.723Z"
+    },
+    {
+      "id": 316,
+      "level": "INFO",
+      "message": "Privacy Engine: Shredded expired document payload from vault (82f1624d-d917-47e2-86c3-fce7d0490df2.png).",
+      "meta": {},
+      "timestamp": "2026-08-30T16:14:14.780Z"
+    },
+    {
+      "id": 315,
+      "level": "INFO",
+      "message": "M-Pesa: STK Push prompt initiated for Job #CP778889 to 254720874383 (KES 1.00). CallbackURL: https://printpro.hudumacyber.shop/api/payments/webhook. CheckoutRequestID: ws_CO_20260830184829_9083",
+      "meta": {},
+      "timestamp": "2026-08-30T15:48:29.457Z"
+    },
+    {
+      "id": 314,
+      "level": "INFO",
+      "message": "Order Created: Job #CP778889 registered for 0720874383 (KES 1.00).",
+      "meta": {},
+      "timestamp": "2026-08-30T15:48:29.437Z"
+    },
+    {
+      "id": 313,
+      "level": "INFO",
+      "message": "M-Pesa: STK Push prompt initiated for Job #CP382253 to 254720874383 (KES 1.00). CallbackURL: https://printpro.hudumacyber.shop/api/payments/webhook. CheckoutRequestID: ws_CO_20260830184820_1635",
+      "meta": {},
+      "timestamp": "2026-08-30T15:48:20.394Z"
+    },
+    {
+      "id": 312,
+      "level": "INFO",
+      "message": "Order Created: Job #CP382253 registered for 0720874383 (KES 1.00).",
+      "meta": {},
+      "timestamp": "2026-08-30T15:48:20.369Z"
+    },
+    {
+      "id": 311,
+      "level": "INFO",
+      "message": "Print Spooler: Job #CP885531 dispatched to Agent 'Shop Floor Primary Gateway' for hardware processing.",
+      "meta": {},
+      "timestamp": "2026-08-30T15:09:39.207Z"
+    },
+    {
+      "id": 310,
+      "level": "SUCCESS",
+      "message": "Safaricom Callback Processed: Transaction code UHUFWR4OHB extracted from JSON and committed to DB for Job #CP885531.",
+      "meta": {},
+      "timestamp": "2026-08-30T15:09:39.175Z"
+    },
+    {
+      "id": 309,
+      "level": "INFO",
+      "message": "M-Pesa: STK Push prompt initiated for Job #CP885531 to 254712345678 (KES 60.00). CallbackURL: https://printpro.hudumacyber.shop/api/payments/webhook. CheckoutRequestID: ws_CO_20260830180939_2819",
+      "meta": {},
+      "timestamp": "2026-08-30T15:09:39.151Z"
+    },
+    {
+      "id": 308,
+      "level": "INFO",
+      "message": "Order Created: Job #CP885531 registered for 0712345678 (KES 60.00).",
+      "meta": {},
+      "timestamp": "2026-08-30T15:09:39.128Z"
+    },
+    {
+      "id": 307,
+      "level": "SUCCESS",
+      "message": "User 'Sarah Kimani' (Super Admin) logged in successfully from IP ::1.",
+      "meta": {},
+      "timestamp": "2026-08-30T15:09:39.109Z"
+    },
+    {
+      "id": 306,
+      "level": "ERROR",
+      "message": "M-Pesa STK Push error: M-Pesa API credentials not configured in environment (MPESA_CONSUMER_KEY / MPESA_CONSUMER_SECRET).",
+      "meta": {},
+      "timestamp": "2026-08-30T15:08:28.729Z"
+    },
+    {
+      "id": 305,
+      "level": "INFO",
+      "message": "Order Created: Job #CP200851 registered for 0712345678 (KES 60.00).",
+      "meta": {},
+      "timestamp": "2026-08-30T15:08:28.713Z"
+    },
+    {
+      "id": 304,
+      "level": "SUCCESS",
+      "message": "User 'Sarah Kimani' (Super Admin) logged in successfully from IP ::1.",
+      "meta": {},
+      "timestamp": "2026-08-30T15:08:28.701Z"
+    },
+    {
+      "id": 303,
+      "level": "ERROR",
+      "message": "M-Pesa STK Push error: M-Pesa API credentials not configured in environment (MPESA_CONSUMER_KEY / MPESA_CONSUMER_SECRET).",
+      "meta": {},
+      "timestamp": "2026-08-30T15:07:14.722Z"
+    },
+    {
+      "id": 302,
+      "level": "INFO",
+      "message": "Order Created: Job #CP884370 registered for 0712345678 (KES 60.00).",
+      "meta": {},
+      "timestamp": "2026-08-30T15:07:14.709Z"
+    },
+    {
+      "id": 301,
+      "level": "SUCCESS",
+      "message": "User 'Sarah Kimani' (Super Admin) logged in successfully from IP ::1.",
+      "meta": {},
+      "timestamp": "2026-08-30T15:07:14.700Z"
+    },
+    {
+      "id": 300,
+      "level": "INFO",
+      "message": "Privacy Engine: Shredded expired document payload from vault (0ab99d2d-1535-4d03-9ccf-0c578e0a3833.png).",
+      "meta": {},
+      "timestamp": "2026-08-30T14:46:37.302Z"
+    },
+    {
+      "id": 299,
+      "level": "INFO",
+      "message": "Print Spooler: Job #CP119066 dispatched to Agent 'Shop Floor Primary Gateway' for hardware processing.",
+      "meta": {},
+      "timestamp": "2026-08-30T14:27:12.204Z"
+    },
+    {
+      "id": 298,
+      "level": "SUCCESS",
+      "message": "Safaricom Callback Processed: Transaction code UHUFWR4OHB extracted from JSON and committed to DB for Job #CP119066.",
+      "meta": {},
+      "timestamp": "2026-08-30T14:27:12.180Z"
+    },
+    {
+      "id": 297,
+      "level": "INFO",
+      "message": "M-Pesa: STK Push prompt initiated for Job #CP119066 to 254712345678 (KES 60.00). CallbackURL: http://localhost:3456/api/payments/webhook. CheckoutRequestID: ws_CO_20260830172712_6185",
+      "meta": {},
+      "timestamp": "2026-08-30T14:27:12.166Z"
+    },
+    {
+      "id": 296,
+      "level": "INFO",
+      "message": "Order Created: Job #CP119066 registered for 0712345678 (KES 60.00).",
+      "meta": {},
+      "timestamp": "2026-08-30T14:27:12.150Z"
+    },
+    {
+      "id": 295,
+      "level": "SUCCESS",
+      "message": "User 'Sarah Kimani' (Super Admin) logged in successfully from IP ::1.",
+      "meta": {},
+      "timestamp": "2026-08-30T14:27:12.138Z"
+    },
+    {
+      "id": 294,
+      "level": "INFO",
+      "message": "M-Pesa: STK Push prompt initiated for Job #CP275167 to 254788888888 (KES 6.00). CallbackURL: http://127.0.0.1:3000/api/payments/webhook. CheckoutRequestID: ws_CO_20260830172700_5008",
+      "meta": {},
+      "timestamp": "2026-08-30T14:27:00.010Z"
+    },
+    {
+      "id": 293,
+      "level": "INFO",
+      "message": "Order Created: Job #CP275167 registered for 0788888888 (KES 6.00).",
+      "meta": {},
+      "timestamp": "2026-08-30T14:27:00.000Z"
+    },
+    {
+      "id": 292,
+      "level": "SUCCESS",
+      "message": "Manual M-Pesa Verification: Customer verified Job #CP381904 with transaction code UHUF99XYZ8.",
+      "meta": {},
+      "timestamp": "2026-08-30T14:26:59.987Z"
+    },
+    {
+      "id": 291,
+      "level": "INFO",
+      "message": "Order Created: Job #CP381904 registered for 0799999999 (KES 5.00).",
+      "meta": {},
+      "timestamp": "2026-08-30T14:26:59.980Z"
+    },
+    {
+      "id": 290,
+      "level": "INFO",
+      "message": "M-Pesa: STK Push prompt initiated for Job #CP167781 to 254712345678 (KES 3.00). CallbackURL: http://127.0.0.1:3000/api/payments/webhook. CheckoutRequestID: ws_CO_20260830172659_9008",
+      "meta": {},
+      "timestamp": "2026-08-30T14:26:59.750Z"
+    },
+    {
+      "id": 289,
+      "level": "INFO",
+      "message": "Order Created: Job #CP167781 registered for 254712345678 (KES 3.00).",
+      "meta": {},
+      "timestamp": "2026-08-30T14:26:59.733Z"
+    },
+    {
+      "id": 288,
+      "level": "INFO",
+      "message": "M-Pesa: STK Push prompt initiated for Job #CP146292 to 254712345678 (KES 3.00). CallbackURL: http://127.0.0.1:3000/api/payments/webhook. CheckoutRequestID: ws_CO_20260830172556_2716",
+      "meta": {},
+      "timestamp": "2026-08-30T14:25:56.996Z"
+    },
+    {
+      "id": 287,
+      "level": "INFO",
+      "message": "Order Created: Job #CP146292 registered for 254712345678 (KES 3.00).",
+      "meta": {},
+      "timestamp": "2026-08-30T14:25:56.974Z"
+    },
+    {
+      "id": 286,
+      "level": "INFO",
+      "message": "M-Pesa: STK Push prompt initiated for Job #CP648328 to 254720874383 (KES 1.00). CallbackURL: http://localhost:3000/api/payments/webhook. CheckoutRequestID: ws_CO_20260830172508_9826",
+      "meta": {},
+      "timestamp": "2026-08-30T14:25:08.236Z"
+    },
+    {
+      "id": 285,
+      "level": "INFO",
+      "message": "Order Created: Job #CP648328 registered for 0720874383 (KES 1.00).",
+      "meta": {},
+      "timestamp": "2026-08-30T14:25:08.198Z"
+    },
+    {
+      "id": 284,
+      "level": "INFO",
+      "message": "M-Pesa: STK Push prompt initiated for Job #CP937977 to 254712345678 (KES 3.00). CallbackURL: http://127.0.0.1:3000/api/payments/webhook. CheckoutRequestID: ws_CO_20260830172454_2363",
+      "meta": {},
+      "timestamp": "2026-08-30T14:24:54.158Z"
+    },
+    {
+      "id": 283,
+      "level": "INFO",
+      "message": "Order Created: Job #CP937977 registered for 254712345678 (KES 3.00).",
+      "meta": {},
+      "timestamp": "2026-08-30T14:24:54.140Z"
+    },
+    {
+      "id": 282,
+      "level": "INFO",
+      "message": "M-Pesa: STK Push prompt initiated for Job #CP763549 to 254712345678 (KES 3.00). CallbackURL: http://127.0.0.1:3000/api/payments/webhook. CheckoutRequestID: ws_CO_20260830172430_8264",
+      "meta": {},
+      "timestamp": "2026-08-30T14:24:30.055Z"
+    },
+    {
+      "id": 281,
+      "level": "INFO",
+      "message": "Order Created: Job #CP763549 registered for 254712345678 (KES 3.00).",
+      "meta": {},
+      "timestamp": "2026-08-30T14:24:30.009Z"
+    },
+    {
+      "id": 280,
+      "level": "INFO",
+      "message": "Print Spooler: Job #CP299184 dispatched to Agent 'Shop Floor Primary Gateway' for hardware processing.",
+      "meta": {},
+      "timestamp": "2026-08-30T14:22:55.078Z"
+    },
+    {
+      "id": 279,
+      "level": "SUCCESS",
+      "message": "Safaricom Callback Processed: Transaction code UHUFWR4OHB extracted from JSON and committed to DB for Job #CP299184.",
+      "meta": {},
+      "timestamp": "2026-08-30T14:22:55.048Z"
+    },
+    {
+      "id": 278,
+      "level": "INFO",
+      "message": "M-Pesa: STK Push prompt initiated for Job #CP299184 to 254712345678 (KES 60.00). CallbackURL: http://localhost:3456/api/payments/webhook. CheckoutRequestID: ws_CO_20260830172255_2419",
+      "meta": {},
+      "timestamp": "2026-08-30T14:22:55.031Z"
+    },
+    {
+      "id": 277,
+      "level": "INFO",
+      "message": "Order Created: Job #CP299184 registered for 0712345678 (KES 60.00).",
+      "meta": {},
+      "timestamp": "2026-08-30T14:22:55.014Z"
+    },
+    {
+      "id": 276,
+      "level": "SUCCESS",
+      "message": "User 'Sarah Kimani' (Super Admin) logged in successfully from IP ::1.",
+      "meta": {},
+      "timestamp": "2026-08-30T14:22:55.003Z"
+    },
     {
       "id": 275,
       "level": "INFO",
@@ -6512,9 +7375,856 @@
       },
       "createdAt": 1788099177594,
       "expiresAt": 1788185577594
+    },
+    "idemp_test_key_1788099774828": {
+      "data": {
+        "success": true,
+        "orderId": "#CP999999"
+      },
+      "createdAt": 1788099774828,
+      "expiresAt": 1788186174828
+    },
+    "test_order_1788099775008": {
+      "data": {
+        "message": "Print job registered successfully.",
+        "order": {
+          "id": "#CP299184",
+          "customer": "Customer 5678",
+          "phone": "0712345678",
+          "fileName": "Project_Design.pdf",
+          "files": [
+            {
+              "name": "Project_Design.pdf",
+              "pages": 10
+            }
+          ],
+          "serviceName": "A4 Full Colour",
+          "paperSize": "a4",
+          "colorMode": "colour",
+          "ratePerPage": 3,
+          "pages": 10,
+          "copies": 2,
+          "total": 60,
+          "status": "Pending Payment",
+          "lifecycleState": "PAYMENT_PENDING",
+          "mpesaRef": "PENDING",
+          "timestamp": "2026-08-30T14:22:55.011Z",
+          "filePurged": false
+        }
+      },
+      "createdAt": 1788099775016,
+      "expiresAt": 1788186175016
+    },
+    "webhook_daraja_ws_CO_20260830172255_2419": {
+      "data": {
+        "processedAt": 1788099775052,
+        "status": "SUCCESS",
+        "receipt": "UHUFWR4OHB"
+      },
+      "createdAt": 1788099775052,
+      "expiresAt": 1788186175052
+    },
+    "ord_1788099908190_tu775a": {
+      "data": {
+        "message": "Print job registered successfully.",
+        "order": {
+          "id": "#CP648328",
+          "customer": "Customer 4383",
+          "phone": "0720874383",
+          "fileName": "ChatGPT Image Aug 30, 2026, 02_44_39 PM.png",
+          "files": [
+            {
+              "name": "ChatGPT Image Aug 30, 2026, 02_44_39 PM.png",
+              "pages": 1,
+              "size": "1.0 MB",
+              "fileId": "0ab99d2d-1535-4d03-9ccf-0c578e0a3833"
+            }
+          ],
+          "serviceName": "A4 Black & White",
+          "paperSize": "a4",
+          "colorMode": "bw",
+          "ratePerPage": 1,
+          "pages": 1,
+          "copies": 1,
+          "total": 1,
+          "status": "Pending Payment",
+          "lifecycleState": "PAYMENT_PENDING",
+          "mpesaRef": "PENDING",
+          "timestamp": "2026-08-30T14:25:08.194Z",
+          "filePurged": false
+        }
+      },
+      "createdAt": 1788099908201,
+      "expiresAt": 1788186308201
+    },
+    "stk_#CP648328": {
+      "data": {
+        "success": true,
+        "status": "pending",
+        "checkout_request_id": "ws_CO_20260830172508_9826",
+        "merchant_request_id": "29103-99210-1788099908231",
+        "message": "Success. Request accepted for processing",
+        "jobId": "#CP648328",
+        "phone": "254720874383",
+        "amount": 1
+      },
+      "createdAt": 1788099908243,
+      "expiresAt": 1788186308243
+    },
+    "idemp_test_key_1788100031953": {
+      "data": {
+        "success": true,
+        "orderId": "#CP999999"
+      },
+      "createdAt": 1788100031953,
+      "expiresAt": 1788186431953
+    },
+    "test_order_1788100032145": {
+      "data": {
+        "message": "Print job registered successfully.",
+        "order": {
+          "id": "#CP119066",
+          "customer": "Customer 5678",
+          "phone": "0712345678",
+          "fileName": "Project_Design.pdf",
+          "files": [
+            {
+              "name": "Project_Design.pdf",
+              "pages": 10
+            }
+          ],
+          "serviceName": "A4 Full Colour",
+          "paperSize": "a4",
+          "colorMode": "colour",
+          "ratePerPage": 3,
+          "pages": 10,
+          "copies": 2,
+          "total": 60,
+          "status": "Pending Payment",
+          "lifecycleState": "PAYMENT_PENDING",
+          "mpesaRef": "PENDING",
+          "timestamp": "2026-08-30T14:27:12.148Z",
+          "filePurged": false
+        }
+      },
+      "createdAt": 1788100032152,
+      "expiresAt": 1788186432152
+    },
+    "webhook_daraja_ws_CO_20260830172712_6185": {
+      "data": {
+        "processedAt": 1788100032182,
+        "status": "SUCCESS",
+        "receipt": "UHUFWR4OHB"
+      },
+      "createdAt": 1788100032182,
+      "expiresAt": 1788186432182
+    },
+    "webhook_daraja_ws_CO_1788100045164_8821": {
+      "data": {
+        "status": "SUCCESS",
+        "receipt": "UHUFWR4OHB"
+      },
+      "createdAt": 1788100045176,
+      "expiresAt": 1788186445176
+    },
+    "webhook_daraja_ws_CO_1788102417068_8821": {
+      "data": {
+        "status": "SUCCESS",
+        "receipt": "UHUFWR4OHB"
+      },
+      "createdAt": 1788102417244,
+      "expiresAt": 1788188817244
+    },
+    "idemp_test_key_1788102434488": {
+      "data": {
+        "success": true,
+        "orderId": "#CP999999"
+      },
+      "createdAt": 1788102434488,
+      "expiresAt": 1788188834488
+    },
+    "test_order_1788102434704": {
+      "data": {
+        "message": "Print job registered successfully.",
+        "order": {
+          "id": "#CP884370",
+          "customer": "Customer 5678",
+          "phone": "0712345678",
+          "fileName": "Project_Design.pdf",
+          "files": [
+            {
+              "name": "Project_Design.pdf",
+              "pages": 10
+            }
+          ],
+          "serviceName": "A4 Full Colour",
+          "paperSize": "a4",
+          "colorMode": "colour",
+          "ratePerPage": 3,
+          "pages": 10,
+          "copies": 2,
+          "total": 60,
+          "status": "Pending Payment",
+          "lifecycleState": "PAYMENT_PENDING",
+          "mpesaRef": "PENDING",
+          "timestamp": "2026-08-30T15:07:14.706Z",
+          "filePurged": false
+        }
+      },
+      "createdAt": 1788102434714,
+      "expiresAt": 1788188834714
+    },
+    "idemp_test_key_1788102508534": {
+      "data": {
+        "success": true,
+        "orderId": "#CP999999"
+      },
+      "createdAt": 1788102508534,
+      "expiresAt": 1788188908534
+    },
+    "test_order_1788102508707": {
+      "data": {
+        "message": "Print job registered successfully.",
+        "order": {
+          "id": "#CP200851",
+          "customer": "Customer 5678",
+          "phone": "0712345678",
+          "fileName": "Project_Design.pdf",
+          "files": [
+            {
+              "name": "Project_Design.pdf",
+              "pages": 10
+            }
+          ],
+          "serviceName": "A4 Full Colour",
+          "paperSize": "a4",
+          "colorMode": "colour",
+          "ratePerPage": 3,
+          "pages": 10,
+          "copies": 2,
+          "total": 60,
+          "status": "Pending Payment",
+          "lifecycleState": "PAYMENT_PENDING",
+          "mpesaRef": "PENDING",
+          "timestamp": "2026-08-30T15:08:28.710Z",
+          "filePurged": false
+        }
+      },
+      "createdAt": 1788102508715,
+      "expiresAt": 1788188908715
+    },
+    "idemp_test_key_1788102578881": {
+      "data": {
+        "success": true,
+        "orderId": "#CP999999"
+      },
+      "createdAt": 1788102578881,
+      "expiresAt": 1788188978881
+    },
+    "test_order_1788102579119": {
+      "data": {
+        "message": "Print job registered successfully.",
+        "order": {
+          "id": "#CP885531",
+          "customer": "Customer 5678",
+          "phone": "0712345678",
+          "fileName": "Project_Design.pdf",
+          "files": [
+            {
+              "name": "Project_Design.pdf",
+              "pages": 10
+            }
+          ],
+          "serviceName": "A4 Full Colour",
+          "paperSize": "a4",
+          "colorMode": "colour",
+          "ratePerPage": 3,
+          "pages": 10,
+          "copies": 2,
+          "total": 60,
+          "status": "Pending Payment",
+          "lifecycleState": "PAYMENT_PENDING",
+          "mpesaRef": "PENDING",
+          "timestamp": "2026-08-30T15:09:39.122Z",
+          "filePurged": false
+        }
+      },
+      "createdAt": 1788102579135,
+      "expiresAt": 1788188979135
+    },
+    "webhook_daraja_ws_CO_20260830180939_2819": {
+      "data": {
+        "processedAt": 1788102579181,
+        "status": "SUCCESS",
+        "receipt": "UHUFWR4OHB"
+      },
+      "createdAt": 1788102579181,
+      "expiresAt": 1788188979181
+    },
+    "ord_1788104900342_cqo9ug": {
+      "data": {
+        "message": "Print job registered successfully.",
+        "order": {
+          "id": "#CP382253",
+          "customer": "Customer 4383",
+          "phone": "0720874383",
+          "fileName": "ChatGPT Image Aug 29, 2026, 02_49_36 AM1.png",
+          "files": [
+            {
+              "name": "ChatGPT Image Aug 29, 2026, 02_49_36 AM1.png",
+              "pages": 1,
+              "size": "0.4 MB",
+              "fileId": "82f1624d-d917-47e2-86c3-fce7d0490df2"
+            }
+          ],
+          "serviceName": "A4 Black & White",
+          "paperSize": "a4",
+          "colorMode": "bw",
+          "ratePerPage": 1,
+          "pages": 1,
+          "copies": 1,
+          "total": 1,
+          "status": "Pending Payment",
+          "lifecycleState": "PAYMENT_PENDING",
+          "mpesaRef": "PENDING",
+          "timestamp": "2026-08-30T15:48:20.363Z",
+          "filePurged": false
+        }
+      },
+      "createdAt": 1788104900373,
+      "expiresAt": 1788191300373
+    },
+    "stk_#CP382253": {
+      "data": {
+        "success": true,
+        "status": "pending",
+        "checkout_request_id": "ws_CO_20260830184820_1635",
+        "merchant_request_id": "29103-99210-1788104900391",
+        "message": "Success. Request accepted for processing",
+        "jobId": "#CP382253",
+        "phone": "254720874383",
+        "amount": 1
+      },
+      "createdAt": 1788104900399,
+      "expiresAt": 1788191300399
+    },
+    "ord_1788104909429_ly1d9n": {
+      "data": {
+        "message": "Print job registered successfully.",
+        "order": {
+          "id": "#CP778889",
+          "customer": "Customer 4383",
+          "phone": "0720874383",
+          "fileName": "ChatGPT Image Aug 29, 2026, 02_49_36 AM1.png",
+          "files": [
+            {
+              "name": "ChatGPT Image Aug 29, 2026, 02_49_36 AM1.png",
+              "pages": 1,
+              "size": "0.4 MB",
+              "fileId": "82f1624d-d917-47e2-86c3-fce7d0490df2"
+            }
+          ],
+          "serviceName": "A4 Black & White",
+          "paperSize": "a4",
+          "colorMode": "bw",
+          "ratePerPage": 1,
+          "pages": 1,
+          "copies": 1,
+          "total": 1,
+          "status": "Pending Payment",
+          "lifecycleState": "PAYMENT_PENDING",
+          "mpesaRef": "PENDING",
+          "timestamp": "2026-08-30T15:48:29.433Z",
+          "filePurged": false
+        }
+      },
+      "createdAt": 1788104909440,
+      "expiresAt": 1788191309440
+    },
+    "stk_#CP778889": {
+      "data": {
+        "success": true,
+        "status": "pending",
+        "checkout_request_id": "ws_CO_20260830184829_9083",
+        "merchant_request_id": "29103-99210-1788104909453",
+        "message": "Success. Request accepted for processing",
+        "jobId": "#CP778889",
+        "phone": "254720874383",
+        "amount": 1
+      },
+      "createdAt": 1788104909461,
+      "expiresAt": 1788191309461
+    },
+    "ord_1788107225722_r67nuq": {
+      "data": {
+        "message": "Print job registered successfully.",
+        "order": {
+          "id": "#CP424511",
+          "customer": "Customer 4383",
+          "phone": "0720874383",
+          "fileName": "ChatGPT Image Aug 29, 2026, 02_49_36 AM4.png",
+          "files": [
+            {
+              "name": "ChatGPT Image Aug 29, 2026, 02_49_36 AM4.png",
+              "pages": 1,
+              "size": "0.3 MB",
+              "fileId": "45fac923-c564-4547-836f-33370bf873f0"
+            }
+          ],
+          "serviceName": "A4 Black & White",
+          "paperSize": "a4",
+          "colorMode": "bw",
+          "ratePerPage": 1,
+          "pages": 1,
+          "copies": 1,
+          "total": 1,
+          "status": "Pending Payment",
+          "lifecycleState": "PAYMENT_PENDING",
+          "mpesaRef": "PENDING",
+          "timestamp": "2026-08-30T16:27:05.719Z",
+          "filePurged": false
+        }
+      },
+      "createdAt": 1788107225726,
+      "expiresAt": 1788193625726
+    },
+    "stk_#CP424511": {
+      "data": {
+        "success": true,
+        "status": "pending",
+        "checkout_request_id": "ws_CO_20260830192705_3201",
+        "merchant_request_id": "29103-99210-1788107225741",
+        "message": "Success. Request accepted for processing",
+        "jobId": "#CP424511",
+        "phone": "254720874383",
+        "amount": 1
+      },
+      "createdAt": 1788107225750,
+      "expiresAt": 1788193625750
+    },
+    "idemp_test_key_1788107601245": {
+      "data": {
+        "success": true,
+        "orderId": "#CP999999"
+      },
+      "createdAt": 1788107601245,
+      "expiresAt": 1788194001245
+    },
+    "test_order_1788107601405": {
+      "data": {
+        "message": "Print job registered successfully.",
+        "order": {
+          "id": "#CP120855",
+          "customer": "Customer 5678",
+          "phone": "0712345678",
+          "fileName": "Project_Design.pdf",
+          "files": [
+            {
+              "name": "Project_Design.pdf",
+              "pages": 10
+            }
+          ],
+          "serviceName": "A4 Full Colour",
+          "paperSize": "a4",
+          "colorMode": "colour",
+          "ratePerPage": 3,
+          "pages": 10,
+          "copies": 2,
+          "total": 60,
+          "status": "Pending Payment",
+          "lifecycleState": "PAYMENT_PENDING",
+          "mpesaRef": "PENDING",
+          "timestamp": "2026-08-30T16:33:21.408Z",
+          "filePurged": false
+        }
+      },
+      "createdAt": 1788107601414,
+      "expiresAt": 1788194001414
+    },
+    "webhook_daraja_ws_CO_20260830193321_6634": {
+      "data": {
+        "processedAt": 1788107601457,
+        "status": "SUCCESS",
+        "receipt": "UHUFWR4OHB"
+      },
+      "createdAt": 1788107601457,
+      "expiresAt": 1788194001457
+    },
+    "ord_1788107718002_zb8qml": {
+      "data": {
+        "message": "Print job registered successfully.",
+        "order": {
+          "id": "#CP232777",
+          "customer": "Customer 4383",
+          "phone": "0720874383",
+          "fileName": "ChatGPT Image Aug 29, 2026, 02_49_36 AM4.png",
+          "files": [
+            {
+              "name": "ChatGPT Image Aug 29, 2026, 02_49_36 AM4.png",
+              "pages": 1,
+              "size": "0.3 MB",
+              "fileId": "722258dd-8bad-4b80-8949-52d7625df680"
+            }
+          ],
+          "serviceName": "A4 Black & White",
+          "paperSize": "a4",
+          "colorMode": "bw",
+          "ratePerPage": 1,
+          "pages": 1,
+          "copies": 1,
+          "total": 1,
+          "status": "Pending Payment",
+          "lifecycleState": "PAYMENT_PENDING",
+          "mpesaRef": "PENDING",
+          "timestamp": "2026-08-30T16:35:18.022Z",
+          "filePurged": false
+        }
+      },
+      "createdAt": 1788107718031,
+      "expiresAt": 1788194118031
+    },
+    "stk_#CP232777": {
+      "data": {
+        "success": true,
+        "status": "pending",
+        "checkout_request_id": "ws_CO_20260830193518_7929",
+        "merchant_request_id": "29103-99210-1788107718051",
+        "message": "Success. Request accepted for processing",
+        "jobId": "#CP232777",
+        "phone": "254720874383",
+        "amount": 1
+      },
+      "createdAt": 1788107718071,
+      "expiresAt": 1788194118071
     }
   },
   "transactions": [
+    {
+      "id": "TXN_1788107601448_G5GBAM",
+      "jobId": "#CP120855",
+      "mpesa_receipt_number": "UHUFWR4OHB",
+      "mpesaReceiptNumber": "UHUFWR4OHB",
+      "amount": 60,
+      "phone": "254712345678",
+      "recordedAt": "2026-08-30T16:33:21.448Z",
+      "status": "SETTLED",
+      "rawCallback": {
+        "Body": {
+          "stkCallback": {
+            "ResultCode": 0,
+            "CheckoutRequestID": "ws_CO_20260830193321_6634",
+            "CallbackMetadata": {
+              "Item": [
+                {
+                  "Name": "MpesaReceiptNumber",
+                  "Value": "UHUFWR4OHB"
+                },
+                {
+                  "Name": "Amount",
+                  "Value": 60
+                },
+                {
+                  "Name": "PhoneNumber",
+                  "Value": 254712345678
+                }
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "TXN_1788102579170_V72RGZ",
+      "jobId": "#CP885531",
+      "mpesa_receipt_number": "UHUFWR4OHB",
+      "mpesaReceiptNumber": "UHUFWR4OHB",
+      "amount": 60,
+      "phone": "254712345678",
+      "recordedAt": "2026-08-30T15:09:39.170Z",
+      "status": "SETTLED",
+      "rawCallback": {
+        "Body": {
+          "stkCallback": {
+            "ResultCode": 0,
+            "CheckoutRequestID": "ws_CO_20260830180939_2819",
+            "CallbackMetadata": {
+              "Item": [
+                {
+                  "Name": "MpesaReceiptNumber",
+                  "Value": "UHUFWR4OHB"
+                },
+                {
+                  "Name": "Amount",
+                  "Value": 60
+                },
+                {
+                  "Name": "PhoneNumber",
+                  "Value": 254712345678
+                }
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "TXN_1788102417196_DBWY0N",
+      "jobId": "#CP332323",
+      "mpesa_receipt_number": "UHUFWR4OHB",
+      "mpesaReceiptNumber": "UHUFWR4OHB",
+      "amount": 5,
+      "phone": "0712345678",
+      "recordedAt": "2026-08-30T15:06:57.196Z",
+      "status": "SETTLED",
+      "rawCallback": {
+        "Body": {
+          "stkCallback": {
+            "MerchantRequestID": "29115-34620561-1",
+            "CheckoutRequestID": "ws_CO_1788102417068_8821",
+            "ResultCode": 0,
+            "ResultDesc": "The service request is processed successfully.",
+            "CallbackMetadata": {
+              "Item": [
+                {
+                  "Name": "Amount",
+                  "Value": 5
+                },
+                {
+                  "Name": "MpesaReceiptNumber",
+                  "Value": "UHUFWR4OHB"
+                },
+                {
+                  "Name": "Balance"
+                },
+                {
+                  "Name": "TransactionDate",
+                  "Value": 20260830123456
+                },
+                {
+                  "Name": "PhoneNumber",
+                  "Value": 254712345678
+                }
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "TXN_1788100045168_2X7S1B",
+      "jobId": "#CP937817",
+      "mpesa_receipt_number": "UHUFWR4OHB",
+      "mpesaReceiptNumber": "UHUFWR4OHB",
+      "amount": 5,
+      "phone": "0712345678",
+      "recordedAt": "2026-08-30T14:27:25.168Z",
+      "status": "SETTLED",
+      "rawCallback": {
+        "Body": {
+          "stkCallback": {
+            "MerchantRequestID": "29115-34620561-1",
+            "CheckoutRequestID": "ws_CO_1788100045164_8821",
+            "ResultCode": 0,
+            "ResultDesc": "The service request is processed successfully.",
+            "CallbackMetadata": {
+              "Item": [
+                {
+                  "Name": "Amount",
+                  "Value": 5
+                },
+                {
+                  "Name": "MpesaReceiptNumber",
+                  "Value": "UHUFWR4OHB"
+                },
+                {
+                  "Name": "Balance"
+                },
+                {
+                  "Name": "TransactionDate",
+                  "Value": 20260830123456
+                },
+                {
+                  "Name": "PhoneNumber",
+                  "Value": 254712345678
+                }
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "TXN_1788100032176_AZZG6V",
+      "jobId": "#CP119066",
+      "mpesa_receipt_number": "UHUFWR4OHB",
+      "mpesaReceiptNumber": "UHUFWR4OHB",
+      "amount": 60,
+      "phone": "254712345678",
+      "recordedAt": "2026-08-30T14:27:12.176Z",
+      "status": "SETTLED",
+      "rawCallback": {
+        "Body": {
+          "stkCallback": {
+            "ResultCode": 0,
+            "CheckoutRequestID": "ws_CO_20260830172712_6185",
+            "CallbackMetadata": {
+              "Item": [
+                {
+                  "Name": "MpesaReceiptNumber",
+                  "Value": "UHUFWR4OHB"
+                },
+                {
+                  "Name": "Amount",
+                  "Value": 60
+                },
+                {
+                  "Name": "PhoneNumber",
+                  "Value": 254712345678
+                }
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "TXN_1788100020018_IIM4VI",
+      "jobId": "#CP275167",
+      "mpesa_receipt_number": "UHUFMTDXMD",
+      "mpesaReceiptNumber": "UHUFMTDXMD",
+      "amount": 6,
+      "phone": "0788888888",
+      "recordedAt": "2026-08-30T14:27:00.018Z",
+      "status": "SETTLED",
+      "rawCallback": {
+        "ResponseCode": "0",
+        "ResultCode": "0",
+        "ResultDesc": "The service request is processed successfully.",
+        "MpesaReceiptNumber": "UHUFMTDXMD",
+        "mpesaReceiptNumber": "UHUFMTDXMD",
+        "ReceiptNumber": "UHUFMTDXMD"
+      }
+    },
+    {
+      "id": "TXN_1788100019984_6RLNM6",
+      "jobId": "#CP381904",
+      "mpesa_receipt_number": "UHUF99XYZ8",
+      "mpesaReceiptNumber": "UHUF99XYZ8",
+      "amount": 5,
+      "phone": "0799999999",
+      "recordedAt": "2026-08-30T14:26:59.984Z",
+      "status": "SETTLED",
+      "rawCallback": {
+        "source": "manual_verification",
+        "verifiedAt": "2026-08-30T14:26:59.984Z"
+      }
+    },
+    {
+      "id": "TXN_1788100019758_T3835Q",
+      "jobId": "#CP167781",
+      "mpesa_receipt_number": "UHUF69V2Q0",
+      "mpesaReceiptNumber": "UHUF69V2Q0",
+      "amount": 3,
+      "phone": "254712345678",
+      "recordedAt": "2026-08-30T14:26:59.758Z",
+      "status": "SETTLED",
+      "rawCallback": {
+        "ResponseCode": "0",
+        "ResultCode": "0",
+        "ResultDesc": "The service request is processed successfully.",
+        "MpesaReceiptNumber": "UHUF69V2Q0",
+        "mpesaReceiptNumber": "UHUF69V2Q0",
+        "ReceiptNumber": "UHUF69V2Q0"
+      }
+    },
+    {
+      "id": "TXN_1788099957008_DHGS1B",
+      "jobId": "#CP146292",
+      "mpesa_receipt_number": "UHUFH8KGK3",
+      "mpesaReceiptNumber": "UHUFH8KGK3",
+      "amount": 3,
+      "phone": "254712345678",
+      "recordedAt": "2026-08-30T14:25:57.008Z",
+      "status": "SETTLED",
+      "rawCallback": {
+        "ResponseCode": "0",
+        "ResultCode": "0",
+        "ResultDesc": "The service request is processed successfully.",
+        "MpesaReceiptNumber": "UHUFH8KGK3",
+        "mpesaReceiptNumber": "UHUFH8KGK3",
+        "ReceiptNumber": "UHUFH8KGK3"
+      }
+    },
+    {
+      "id": "TXN_1788099909478_JW5ZI1",
+      "jobId": "#CP648328",
+      "mpesa_receipt_number": "UHUF8BZHKH",
+      "mpesaReceiptNumber": "UHUF8BZHKH",
+      "amount": 1,
+      "phone": "0720874383",
+      "recordedAt": "2026-08-30T14:25:09.478Z",
+      "status": "SETTLED",
+      "rawCallback": {
+        "ResponseCode": "0",
+        "ResultCode": "0",
+        "ResultDesc": "The service request is processed successfully.",
+        "MpesaReceiptNumber": "UHUF8BZHKH",
+        "mpesaReceiptNumber": "UHUF8BZHKH",
+        "ReceiptNumber": "UHUF8BZHKH"
+      }
+    },
+    {
+      "id": "TXN_1788099894167_KSBNUA",
+      "jobId": "#CP937977",
+      "mpesa_receipt_number": "UHUFAQ5TD7",
+      "mpesaReceiptNumber": "UHUFAQ5TD7",
+      "amount": 3,
+      "phone": "254712345678",
+      "recordedAt": "2026-08-30T14:24:54.167Z",
+      "status": "SETTLED",
+      "rawCallback": {
+        "ResponseCode": "0",
+        "ResultCode": "0",
+        "ResultDesc": "The service request is processed successfully.",
+        "MpesaReceiptNumber": "UHUFAQ5TD7",
+        "mpesaReceiptNumber": "UHUFAQ5TD7",
+        "ReceiptNumber": "UHUFAQ5TD7"
+      }
+    },
+    {
+      "id": "TXN_1788099775045_DOTRGU",
+      "jobId": "#CP299184",
+      "mpesa_receipt_number": "UHUFWR4OHB",
+      "mpesaReceiptNumber": "UHUFWR4OHB",
+      "amount": 60,
+      "phone": "254712345678",
+      "recordedAt": "2026-08-30T14:22:55.045Z",
+      "status": "SETTLED",
+      "rawCallback": {
+        "Body": {
+          "stkCallback": {
+            "ResultCode": 0,
+            "CheckoutRequestID": "ws_CO_20260830172255_2419",
+            "CallbackMetadata": {
+              "Item": [
+                {
+                  "Name": "MpesaReceiptNumber",
+                  "Value": "UHUFWR4OHB"
+                },
+                {
+                  "Name": "Amount",
+                  "Value": 60
+                },
+                {
+                  "Name": "PhoneNumber",
+                  "Value": 254712345678
+                }
+              ]
+            }
+          }
+        }
+      }
+    },
     {
       "id": "TXN_1788099177588_ZAF5L9",
       "jobId": "#CP346397",

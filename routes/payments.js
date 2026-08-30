@@ -331,7 +331,7 @@ router.post('/query-now', async (req, res) => {
 
     if (order.checkoutRequestId) {
       const darajaStatus = await mpesa.querySTKStatus(order.checkoutRequestId);
-      if (darajaStatus && (darajaStatus.ResultCode === '0' || darajaStatus.ResultCode === 0)) {
+      if (darajaStatus && (darajaStatus.ResultCode === '0' || darajaStatus.ResultCode === 0 || darajaStatus.status === 'SUCCESS')) {
         const queriedReceipt = darajaStatus.MpesaReceiptNumber || darajaStatus.mpesaReceiptNumber || darajaStatus.ReceiptNumber;
         if (queriedReceipt) {
           const cleanReceipt = String(queriedReceipt).trim().toUpperCase();
@@ -355,6 +355,29 @@ router.post('/query-now', async (req, res) => {
 
           return res.json({ paid: true, status: 'PAID', mpesa_receipt_number: cleanReceipt, mpesaRef: cleanReceipt });
         }
+
+        // When Daraja query reports success but without receipt number (standard Daraja limitation)
+        if (order.lifecycleState !== 'PAID') {
+          db.updateOrder(order.id, {
+            lifecycleState: 'RECONCILING',
+            status: 'Payment Pending Webhook'
+          });
+          paymentEvents.emit(`payment_${order.id}`, { 
+            paid: false, 
+            status: 'RECONCILING', 
+            message: 'Waiting for M-Pesa PIN authorization...', 
+            jobId: order.id 
+          });
+        }
+        return res.json({ paid: false, status: 'RECONCILING', message: 'Payment authorized on phone. Finalizing receipt from Safaricom...' });
+      } else if (darajaStatus && (darajaStatus.status === 'CANCELLED' || darajaStatus.resultCode === '1032' || darajaStatus.resultCode === 1032)) {
+        db.updateOrder(order.id, { status: 'Payment Cancelled', lifecycleState: 'CANCELLED' });
+        paymentEvents.emit(`payment_${order.id}`, { paid: false, cancelled: true, status: 'CANCELLED', message: darajaStatus.userMessage, jobId: order.id });
+        return res.json({ paid: false, cancelled: true, status: 'CANCELLED', error: darajaStatus.userMessage });
+      } else if (darajaStatus && (darajaStatus.status === 'FAILED' || darajaStatus.status === 'TIMEOUT')) {
+        db.updateOrder(order.id, { status: 'Payment Failed', lifecycleState: 'FAILED' });
+        paymentEvents.emit(`payment_${order.id}`, { paid: false, cancelled: false, status: 'FAILED', message: darajaStatus.userMessage, jobId: order.id });
+        return res.json({ paid: false, status: 'FAILED', error: darajaStatus.userMessage });
       }
     }
 
@@ -520,10 +543,10 @@ router.post('/webhook', (req, res) => {
     }
     if (!matchedOrder && phoneNumber) {
       const cleanPhone = String(phoneNumber).replace(/\D/g, '').slice(-9);
-      matchedOrder = orders.find(o => (o.status === 'Pending Payment' || o.lifecycleState === 'PAYMENT_PENDING') && String(o.phone || '').replace(/\D/g, '').includes(cleanPhone));
+      matchedOrder = orders.find(o => (o.status === 'Pending Payment' || o.status === 'Payment Pending Webhook' || o.lifecycleState === 'PAYMENT_PENDING' || o.lifecycleState === 'RECONCILING') && String(o.phone || '').replace(/\D/g, '').includes(cleanPhone));
     }
     if (!matchedOrder) {
-      matchedOrder = orders.find(o => o.status === 'Pending Payment' || o.lifecycleState === 'PAYMENT_PENDING');
+      matchedOrder = orders.find(o => o.status === 'Pending Payment' || o.status === 'Payment Pending Webhook' || o.lifecycleState === 'PAYMENT_PENDING' || o.lifecycleState === 'RECONCILING');
     }
 
     const finalReceipt = mpesaReceiptNumber || matchedOrder?.mpesaRef;
@@ -541,10 +564,11 @@ router.post('/webhook', (req, res) => {
 
         db.addAuditLog('SUCCESS', `Safaricom Callback Processed: Transaction code ${txRecord.mpesaReceiptNumber} extracted from JSON and committed to DB for Job ${matchedOrder.id}.`);
 
-        // 6. Emit Payment Confirmed Event with the exact transaction code
+        // 6. Emit Payment Confirmed Event with standardized schema
         paymentEvents.emit(`payment_${matchedOrder.id}`, { 
           paid: true, 
-          status: 'Ready', 
+          status: 'PAID', 
+          mpesa_receipt_number: txRecord.mpesaReceiptNumber,
           mpesaRef: txRecord.mpesaReceiptNumber, 
           jobId: matchedOrder.id,
           paidAt: txRecord.recordedAt

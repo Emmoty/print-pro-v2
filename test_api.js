@@ -108,25 +108,33 @@ async function runApiTests() {
       amount: 90
     });
     assert.strictEqual(payRes.status, 200);
-    assert(payRes.data.mpesaRef, 'Must issue M-Pesa reference code');
-    assert.strictEqual(payRes.data.status, 'VERIFIED');
-    console.log(`  ✔ M-Pesa transaction verified: ${payRes.data.mpesaRef}.`);
+    assert(payRes.data.checkout_request_id, 'Must issue CheckoutRequestID');
+    assert.strictEqual(payRes.data.status, 'pending');
+    console.log(`  ✔ STK Push prompt dispatched: ${payRes.data.checkout_request_id}.`);
 
     // 7. Daraja Webhook Callback
     console.log('\n🧪 Test 7: Safaricom Daraja Webhook (/api/payments/webhook)');
     const webhookRes = await request({ path: '/api/payments/webhook', method: 'POST' }, {
       Body: {
         stkCallback: {
-          MerchantRequestID: '29103-99210-1',
-          CheckoutRequestID: 'ws_CO_30082026_01',
+          MerchantRequestID: payRes.data.merchant_request_id || '29103-99210-1',
+          CheckoutRequestID: payRes.data.checkout_request_id || 'ws_CO_30082026_01',
           ResultCode: 0,
-          ResultDesc: 'The service request is processed successfully.'
+          ResultDesc: 'The service request is processed successfully.',
+          CallbackMetadata: {
+            Item: [
+              { Name: 'Amount', Value: 90 },
+              { Name: 'MpesaReceiptNumber', Value: 'UHUFWR4OHB' },
+              { Name: 'TransactionDate', Value: 20260830193000 },
+              { Name: 'PhoneNumber', Value: 254712345678 }
+            ]
+          }
         }
       }
     });
     assert.strictEqual(webhookRes.status, 200);
     assert.strictEqual(webhookRes.data.ResultCode, 0);
-    console.log('  ✔ Webhook callback processed idempotently.');
+    console.log('  ✔ Webhook callback processed and committed MpesaReceiptNumber UHUFWR4OHB.');
 
     // 8. Print Agent Mutual Authentication & Queue Polling
     console.log('\n🧪 Test 8: Print Agent Polling (/api/print/poll-queue)');

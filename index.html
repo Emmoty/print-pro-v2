@@ -462,6 +462,32 @@
                 </div>
               </div>
             </div>
+
+            <!-- Non-blocking Reconciling Overlay -->
+            <div id="reconciliationOverlay" class="reconciliation-overlay hidden">
+              <div class="reconciliation-card">
+                <div class="reconciliation-icon-badge">
+                  <i data-lucide="shield-check" style="width: 28px; height: 28px; color: var(--mpesa-green);"></i>
+                </div>
+                <h3 class="reconciliation-title">Payment Authorized</h3>
+                <p class="reconciliation-subtext">
+                  Verifying receipt with Safaricom in the background. Printing will start immediately upon confirmation.
+                </p>
+                <div class="reconciliation-spinner"></div>
+                
+                <!-- Manual Code Fallback Section (Appears if receipt is delayed) -->
+                <div id="reconciliationManualSection" class="reconciliation-manual-section hidden">
+                  <p class="reconciliation-manual-prompt">
+                    Received M-Pesa SMS? Enter your code below for instant confirmation:
+                  </p>
+                  <div class="reconciliation-input-group">
+                    <input type="text" id="reconciliationManualInput" placeholder="e.g. UHUFWR4OHB" maxlength="12" class="reconciliation-input" autocomplete="off" />
+                    <button id="submitReconciliationCodeBtn" class="btn-reconciliation-submit">Verify</button>
+                  </div>
+                  <div id="reconciliationManualError" class="reconciliation-error hidden"></div>
+                </div>
+              </div>
+            </div>
           </div>
 
           <!-- ==========================================
