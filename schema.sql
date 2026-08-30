@@ -128,9 +128,24 @@ CREATE TABLE IF NOT EXISTS idempotency_keys (
   expires_at TIMESTAMP WITH TIME ZONE
 );
 
+CREATE TABLE IF NOT EXISTS transactions (
+  id VARCHAR(64) PRIMARY KEY,
+  job_id VARCHAR(64),
+  mpesa_receipt_number VARCHAR(128) NOT NULL,
+  amount NUMERIC(10, 2) NOT NULL,
+  phone VARCHAR(64),
+  status VARCHAR(32) NOT NULL DEFAULT 'SETTLED',
+  raw_callback JSONB,
+  recorded_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
 -- Performance Indexes
 CREATE INDEX IF NOT EXISTS idx_orders_status ON orders(status);
 CREATE INDEX IF NOT EXISTS idx_orders_timestamp ON orders(timestamp DESC);
 CREATE INDEX IF NOT EXISTS idx_orders_phone ON orders(phone);
 CREATE INDEX IF NOT EXISTS idx_audit_logs_timestamp ON audit_logs(timestamp DESC);
 CREATE INDEX IF NOT EXISTS idx_idempotency_expires ON idempotency_keys(expires_at);
+CREATE INDEX IF NOT EXISTS idx_transactions_job_id ON transactions(job_id);
+CREATE INDEX IF NOT EXISTS idx_transactions_receipt ON transactions(mpesa_receipt_number);
+CREATE INDEX IF NOT EXISTS idx_transactions_recorded_at ON transactions(recorded_at DESC);
