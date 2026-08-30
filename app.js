@@ -1268,58 +1268,7 @@ async function triggerMpesaSTKPush() {
       closeModal(elements.mpesaStkModal);
     };
 
-    // Manual Code Verification Button (Handles SMS entry from phone)
-    const manualCodeInput = document.getElementById('manualMpesaCodeInput');
-    const verifyManualCodeBtn = document.getElementById('verifyManualCodeBtn');
-    const manualCodeMsg = document.getElementById('manualCodeMsg');
-
-    if (manualCodeInput) manualCodeInput.value = '';
-    if (manualCodeMsg) manualCodeMsg.style.display = 'none';
-
-    if (verifyManualCodeBtn && manualCodeInput) {
-      verifyManualCodeBtn.onclick = async () => {
-        const code = manualCodeInput.value.trim().toUpperCase();
-        if (!code || code.length < 5) {
-          if (manualCodeMsg) {
-            manualCodeMsg.textContent = 'Please enter a valid M-Pesa code from your SMS.';
-            manualCodeMsg.style.display = 'block';
-          }
-          return;
-        }
-        verifyManualCodeBtn.disabled = true;
-        verifyManualCodeBtn.textContent = 'Verifying...';
-        try {
-          const res = await fetch('/api/payments/verify-code', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              jobId: state.currentJob.id,
-              mpesaCode: code,
-              phone: state.currentJob.phone
-            })
-          });
-          const data = await res.json();
-          if (res.ok && (data.success || data.mpesaRef)) {
-            handleSuccess(data.mpesaRef);
-          } else {
-            if (manualCodeMsg) {
-              manualCodeMsg.textContent = data.error || 'Verification failed. Please check the code.';
-              manualCodeMsg.style.display = 'block';
-            }
-          }
-        } catch (e) {
-          if (manualCodeMsg) {
-            manualCodeMsg.textContent = 'Network error. Please try again.';
-            manualCodeMsg.style.display = 'block';
-          }
-        } finally {
-          verifyManualCodeBtn.disabled = false;
-          verifyManualCodeBtn.textContent = 'Verify';
-        }
-      };
-    }
-
-    // 4. Real-time Reactive SSE Stream (Instant <10ms confirmation upon Safaricom webhook)
+    // 4. Real-time Reactive SSE Stream (Instant <10ms automatic confirmation upon Safaricom callback)
     if (window.EventSource) {
       try {
         if (window.stkEventSource) window.stkEventSource.close();
