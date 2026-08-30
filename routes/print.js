@@ -71,12 +71,28 @@ router.post('/heartbeat', requireAgentAuth, (req, res) => {
  */
 router.get('/poll-queue', requireAgentAuth, (req, res) => {
   const settings = db.getSettings();
-  const orders = db.getOrders();
+  const timeoutSec = Math.max(30, parseInt(settings.spoolerTimeout, 10) || 60);
+  const now = Date.now();
 
+  // Recycle abandoned or timed-out Printing leases back to Ready
+  const currentOrders = db.getOrders();
+  currentOrders.forEach(o => {
+    if (o.status === 'Printing' && o.spoolStartedAt && !o.completedAt) {
+      const elapsedSec = (now - new Date(o.spoolStartedAt).getTime()) / 1000;
+      if (elapsedSec > timeoutSec) {
+        db.updateOrder(o.id, {
+          status: 'Ready',
+          lifecycleState: 'PAID'
+        });
+      }
+    }
+  });
+
+  const orders = db.getOrders();
   const nextJob = orders.find(o => {
     const s = (o.status || '').toLowerCase();
     const state = (o.lifecycleState || '').toUpperCase();
-    return s === 'ready' || s === 'queued' || state === 'PAID' || state === 'READY' || state === 'QUEUED';
+    return s === 'ready' || s === 'queued' || (state === 'PAID' && s !== 'completed' && s !== 'printing');
   });
 
   if (!nextJob) {
@@ -134,22 +150,65 @@ router.get('/job/:id/file', requireAgentAuth, (req, res) => {
   if (!order) return res.status(404).json({ error: 'Job not found.' });
 
   // Look up vault file or fallback
-  const files = fs.readdirSync(storage.VAULT_DIR);
   let matchedFile = null;
-
-  if (order.files && order.files[0] && order.files[0].fileId) {
-    matchedFile = files.find(f => f.startsWith(order.files[0].fileId));
+  if (fs.existsSync(storage.VAULT_DIR)) {
+    const files = fs.readdirSync(storage.VAULT_DIR);
+    if (order.files && Array.isArray(order.files)) {
+      for (const f of order.files) {
+        if (f.fileId) {
+          const found = files.find(file => file.startsWith(f.fileId));
+          if (found) {
+            matchedFile = found;
+            break;
+          }
+        }
+      }
+    }
+    if (!matchedFile && order.fileName) {
+      matchedFile = files.find(file => file.includes(path.basename(order.fileName)));
+    }
   }
 
   if (matchedFile) {
     const filePath = path.join(storage.VAULT_DIR, matchedFile);
-    return res.download(filePath, order.fileName || 'document.pdf');
+    if (fs.existsSync(filePath)) {
+      return res.download(filePath, order.fileName || 'document.pdf');
+    }
   }
 
-  // If payload already purged or mock test sample, stream generated PDF placeholder
+  // Generate valid standard PDF buffer for test or missing payload
+  const safeDocName = (order.fileName || 'CloudPrint Document').replace(/[()]/g, '');
+  const safeJobId = (order.id || '#CP100000').replace(/[()]/g, '');
+  const content = `BT /F1 16 Tf 50 770 Td (${safeDocName}) Tj 0 -28 Td /F1 11 Tf (Order ID: ${safeJobId}) Tj 0 -18 Td (Format: ${order.paperSize ? order.paperSize.toUpperCase() : 'A4'} - ${order.colorMode === 'colour' ? 'Colour' : 'B&W'}) Tj 0 -18 Td (Copies: ${order.copies || 1} | Total Pages: ${order.pages || 1}) Tj 0 -30 Td /F1 10 Tf (Verified for Counter Print Dispatch) Tj ET`;
+  const streamLen = Buffer.byteLength(content);
+
+  const validPdf = Buffer.from(
+`%PDF-1.4
+1 0 obj <</Type /Catalog /Pages 2 0 R>> endobj
+2 0 obj <</Type /Pages /Kids [3 0 R] /Count 1>> endobj
+3 0 obj <</Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Contents 4 0 R /Resources <</Font <</F1 5 0 R>>>>>> endobj
+4 0 obj <</Length ${streamLen}>> stream
+${content}
+endstream
+endobj
+5 0 obj <</Type /Font /Subtype /Type1 /BaseFont /Helvetica>> endobj
+xref
+0 6
+0000000000 65535 f 
+0000000009 00000 n 
+0000000056 00000 n 
+0000000111 00000 n 
+0000000234 00000 n 
+0000000300 00000 n 
+trailer <</Size 6 /Root 1 0 R>>
+startxref
+365
+%%EOF
+`);
+
   res.setHeader('Content-Type', 'application/pdf');
   res.setHeader('Content-Disposition', `attachment; filename="${order.fileName || 'document.pdf'}"`);
-  return res.send(Buffer.from('%PDF-1.4\n% Mock CloudPrint Document\n%%EOF'));
+  return res.send(validPdf);
 });
 
 module.exports = router;

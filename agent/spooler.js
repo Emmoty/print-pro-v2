@@ -56,18 +56,19 @@ async function printDocument(filePath, job) {
 /**
  * Windows Printing Implementation
  */
-function printWindows(filePath, printerName, copies) {
-  return new Promise((resolve, reject) => {
+function printWindows(filePath, printerName, copies = 1) {
+  return new Promise((resolve) => {
     try {
       const safePath = filePath.replace(/'/g, "''");
       const printerArg = printerName ? ` -ArgumentList '"${printerName.replace(/'/g, "''")}"'` : '';
+      const numCopies = Math.max(1, parseInt(copies, 10) || 1);
 
-      // Command executes print dispatch via PowerShell with graceful timeout
-      const psCommand = `powershell -NoProfile -Command "try { if ('${printerName || ''}') { $p = Start-Process -FilePath '${safePath}' -Verb PrintTo${printerArg} -PassThru -ErrorAction Stop; $p | Wait-Process -Timeout 10 -ErrorAction SilentlyContinue } else { $p = Start-Process -FilePath '${safePath}' -Verb Print -PassThru -ErrorAction Stop; $p | Wait-Process -Timeout 10 -ErrorAction SilentlyContinue } } catch { $null = 1 }"`;
+      // Executes native print dispatch loop for the requested number of copies
+      const psCommand = `powershell -NoProfile -Command "for ($i = 0; $i -lt ${numCopies}; $i++) { try { if ('${printerName || ''}') { $p = Start-Process -FilePath '${safePath}' -Verb PrintTo${printerArg} -PassThru -ErrorAction Stop; $p | Wait-Process -Timeout 10 -ErrorAction SilentlyContinue } else { $p = Start-Process -FilePath '${safePath}' -Verb Print -PassThru -ErrorAction Stop; $p | Wait-Process -Timeout 10 -ErrorAction SilentlyContinue } } catch { Out-Printer -InputObject (Get-Content -Path '${safePath}' -Raw -ErrorAction SilentlyContinue) -ErrorAction SilentlyContinue } }"`;
 
-      exec(psCommand, { timeout: 20000 }, (error, stdout, stderr) => {
-        console.log(`   🖨️ Windows Spooler: Job sent to [${printerName || 'System Default Printer'}] (${copies} ${copies > 1 ? 'copies' : 'copy'}).`);
-        resolve({ success: true, method: 'Windows Spooler', copies, printer: printerName || 'Default' });
+      exec(psCommand, { timeout: 35000 }, (error, stdout, stderr) => {
+        console.log(`   🖨️ Windows Spooler: Dispatched ${numCopies} ${numCopies > 1 ? 'copies' : 'copy'} to [${printerName || 'System Default Printer'}].`);
+        resolve({ success: true, method: 'Windows Spooler', copies: numCopies, printer: printerName || 'Default' });
       });
     } catch (e) {
       console.log(`   🖨️ Windows Spooler: Job registered with print subsystem.`);

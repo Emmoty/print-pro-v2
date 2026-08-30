@@ -827,7 +827,9 @@ async function processFiles(fileList) {
       name: fileName,
       size: fileSize,
       pages: Math.max(1, detectedPages),
-      type: ext
+      type: ext,
+      rawFile: file,
+      fileId: null
     };
 
     state.currentJob.files.push(fileObj);
@@ -838,6 +840,38 @@ async function processFiles(fileList) {
     renderUploadStagingQueue();
     renderReviewFilesList();
     updateCalculations();
+    // Proactively upload staged files to vault in background
+    uploadFilesToVault();
+  }
+}
+
+// Proactive Server Vault Sync for Real Hardware Printing
+async function uploadFilesToVault() {
+  const pendingFiles = (state.currentJob.files || []).filter(f => f.rawFile && !f.fileId);
+  if (pendingFiles.length === 0) return;
+
+  const formData = new FormData();
+  pendingFiles.forEach(f => {
+    formData.append('documents', f.rawFile);
+  });
+
+  try {
+    const res = await fetch('/api/orders/upload', {
+      method: 'POST',
+      body: formData
+    });
+    if (res.ok) {
+      const data = await res.json();
+      if (data && Array.isArray(data.files)) {
+        data.files.forEach((staged, idx) => {
+          if (pendingFiles[idx]) {
+            pendingFiles[idx].fileId = staged.fileId;
+          }
+        });
+      }
+    }
+  } catch (e) {
+    console.warn('Vault upload notice:', e);
   }
 }
 
@@ -1144,12 +1178,22 @@ async function triggerMpesaSTKPush() {
   openModal(elements.mpesaStkModal);
 
   try {
-    // 2. Fast Order Registration
+    // 2. Ensure documents are staged into server vault
+    await uploadFilesToVault();
+
+    // Fast Order Registration
+    const filesPayload = (state.currentJob.files || []).map(f => ({
+      name: f.name,
+      pages: f.pages || 1,
+      size: f.size,
+      fileId: f.fileId || null
+    }));
+
     const createOrderRes = await fetch('/api/orders/create', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        files: state.currentJob.files,
+        files: filesPayload,
         paperSize: state.currentJob.paperSize || 'a4',
         colorMode: state.currentJob.colorMode || 'bw',
         copies: state.currentJob.copies || 1,
