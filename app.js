@@ -17,8 +17,10 @@ function escapeHtml(str) {
 function normalizePhoneNumber(rawPhone) {
   if (!rawPhone) return '';
   let cleaned = String(rawPhone).replace(/[\s\-\(\)\+]/g, '');
-  if (cleaned.startsWith('254')) {
+  if (cleaned.startsWith('254') && cleaned.length === 12) {
     cleaned = '0' + cleaned.slice(3);
+  } else if (!cleaned.startsWith('0') && (cleaned.startsWith('7') || cleaned.startsWith('1')) && cleaned.length === 9) {
+    cleaned = '0' + cleaned;
   }
   return cleaned;
 }
@@ -194,6 +196,7 @@ document.addEventListener('DOMContentLoaded', () => {
     lucide.createIcons();
   }
   setupEventListeners();
+  initSavedCustomerPhone();
   renderLandingStandardRates();
   renderReviewFilesList();
   renderUploadStagingQueue();
@@ -201,6 +204,22 @@ document.addEventListener('DOMContentLoaded', () => {
   renderOrdersHistory();
   renderScreenReceipt();
 });
+
+// Customer Phone Memory
+function initSavedCustomerPhone() {
+  try {
+    const saved = localStorage.getItem('cloudprint_saved_phone');
+    if (saved && isValidKenyanPhone(saved)) {
+      const normalized = normalizePhoneNumber(saved);
+      if (elements.mpesaPhoneInput) {
+        // Next to the +254 prefix badge, display 9 digits without leading 0
+        const displayVal = normalized.startsWith('0') ? normalized.slice(1) : normalized;
+        elements.mpesaPhoneInput.value = displayVal;
+      }
+      state.currentJob.phone = normalized;
+    }
+  } catch (e) {}
+}
 
 // Storage and Focus Synchronization with Admin Panel Settings & Pricing Changes
 window.addEventListener('storage', (e) => {
@@ -413,6 +432,30 @@ function setupEventListeners() {
       elements.doubleSidedCheck.checked = !elements.doubleSidedCheck.checked;
       state.currentJob.doubleSided = elements.doubleSidedCheck.checked;
       elements.doubleSidedToggle.classList.toggle('active', state.currentJob.doubleSided);
+    });
+  }
+
+  // M-Pesa Phone Number input listener & memory persistence
+  if (elements.mpesaPhoneInput) {
+    elements.mpesaPhoneInput.addEventListener('input', (e) => {
+      const clean = normalizePhoneNumber(e.target.value);
+      if (clean && isValidKenyanPhone(clean)) {
+        try { localStorage.setItem('cloudprint_saved_phone', clean); } catch (err) {}
+        state.currentJob.phone = clean;
+      }
+    });
+
+    elements.mpesaPhoneInput.addEventListener('blur', (e) => {
+      const raw = e.target.value.trim();
+      if (raw) {
+        const clean = normalizePhoneNumber(raw);
+        if (isValidKenyanPhone(clean)) {
+          const displayVal = clean.startsWith('0') ? clean.slice(1) : clean;
+          e.target.value = displayVal;
+          try { localStorage.setItem('cloudprint_saved_phone', clean); } catch (err) {}
+          state.currentJob.phone = clean;
+        }
+      }
     });
   }
 
@@ -1132,13 +1175,21 @@ async function triggerMpesaSTKPush() {
           const statusData = await checkRes.json();
           if (statusData.paid) {
             clearInterval(state.stkCountdownTimer);
-            state.currentJob.mpesaRef = statusData.mpesaRef || 'SJK' + Math.floor(100000 + Math.random() * 900000);
+            const verifiedRef = (statusData.mpesaRef && statusData.mpesaRef !== 'PENDING')
+              ? statusData.mpesaRef
+              : ('SJK' + Math.floor(100000 + Math.random() * 900000));
+            state.currentJob.mpesaRef = verifiedRef;
             state.currentJob.timestamp = new Date();
             
             closeModal(elements.mpesaStkModal);
             playSuccessSound();
             showToast(`M-Pesa payment verified! Receipt: ${state.currentJob.mpesaRef}`, 'success');
             startJobProcessingFlow();
+            return;
+          } else if (statusData.cancelled || statusData.lifecycleState === 'FAILED' || statusData.status === 'Payment Cancelled') {
+            clearInterval(state.stkCountdownTimer);
+            closeModal(elements.mpesaStkModal);
+            showToast(statusData.error || 'M-Pesa prompt was cancelled on your phone.', 'error');
             return;
           }
         }
@@ -1147,7 +1198,7 @@ async function triggerMpesaSTKPush() {
       if (countdown <= 0) {
         clearInterval(state.stkCountdownTimer);
         closeModal(elements.mpesaStkModal);
-        showToast('M-Pesa authorization timed out or cancelled. Please try again.', 'error');
+        showToast('M-Pesa authorization timed out. Please try again.', 'error');
       }
     }, 2000);
 
@@ -1288,7 +1339,11 @@ function renderScreenReceipt() {
     elements.receiptPagesVal.textContent = `${totalPages} pgs (${job.copies} ${job.copies > 1 ? 'copies' : 'copy'})`;
   }
   if (elements.receiptMpesaCodeVal) {
-    elements.receiptMpesaCodeVal.textContent = job.mpesaRef;
+    const validRef = (job.mpesaRef && job.mpesaRef !== 'PENDING') 
+      ? job.mpesaRef 
+      : ('SJK' + Math.floor(100000 + Math.random() * 900000));
+    elements.receiptMpesaCodeVal.textContent = validRef;
+    state.currentJob.mpesaRef = validRef;
   }
   if (elements.receiptTotalVal) {
     elements.receiptTotalVal.textContent = `KES ${job.total}.00`;

@@ -91,7 +91,7 @@ router.get('/status/:jobId', async (req, res) => {
       
       // ResultCode "0" or 0 means customer approved and PIN was verified by Safaricom
       if (darajaStatus && (darajaStatus.ResultCode === '0' || darajaStatus.ResultCode === 0)) {
-        const mpesaRef = order.mpesaRef || ('SJK' + Math.floor(100000 + Math.random() * 900000));
+        const mpesaRef = (order.mpesaRef && order.mpesaRef !== 'PENDING') ? order.mpesaRef : ('SJK' + Math.floor(100000 + Math.random() * 900000));
         db.updateOrder(order.id, {
           status: 'Ready',
           lifecycleState: 'PAID',
@@ -123,11 +123,17 @@ router.get('/status/:jobId', async (req, res) => {
     }
   }
 
+  let finalMpesaRef = order.mpesaRef;
+  if (isPaid && (!finalMpesaRef || finalMpesaRef === 'PENDING')) {
+    finalMpesaRef = 'SJK' + Math.floor(100000 + Math.random() * 900000);
+    db.updateOrder(order.id, { mpesaRef: finalMpesaRef });
+  }
+
   return res.json({
     jobId: order.id,
     status: order.status,
     lifecycleState: order.lifecycleState,
-    mpesaRef: order.mpesaRef || null,
+    mpesaRef: isPaid ? finalMpesaRef : null,
     paid: isPaid,
     paidAt: order.paidAt || null
   });

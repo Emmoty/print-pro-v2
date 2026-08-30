@@ -1475,7 +1475,9 @@ html, body {
 }
 
 .phone-input::placeholder {
-  color: var(--text-muted);
+  color: rgba(255, 255, 255, 0.32);
+  font-weight: 500;
+  letter-spacing: 0.5px;
 }
 
 /* Review Total Card */
