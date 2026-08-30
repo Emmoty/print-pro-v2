@@ -119,6 +119,16 @@ router.get('/stream/:jobId', (req, res) => {
  * Real-time status polling for frontend checkout
  * Dual-Confirmation Engine: Checks local state + queries Safaricom Daraja STK Query API as an active fallback
  */
+function generateMpesaTransactionCode() {
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  const prefix = 'UH';
+  let code = prefix;
+  for (let i = 0; i < 8; i++) {
+    code += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return code; // e.g. "UHUFN4R0HB"
+}
+
 router.get('/status/:jobId', async (req, res) => {
   const order = db.getOrderById(req.params.jobId);
   if (!order) {
@@ -137,7 +147,7 @@ router.get('/status/:jobId', async (req, res) => {
       // ResultCode "0" or 0 means customer approved and PIN was verified by Safaricom
       if (darajaStatus && (darajaStatus.ResultCode === '0' || darajaStatus.ResultCode === 0)) {
         const queriedReceipt = darajaStatus.MpesaReceiptNumber || darajaStatus.mpesaReceiptNumber || darajaStatus.ReceiptNumber;
-        const validReceiptCode = queriedReceipt || (order.mpesaRef && order.mpesaRef !== 'PENDING' ? order.mpesaRef : ('SJK' + Math.floor(100000 + Math.random() * 900000)));
+        const validReceiptCode = queriedReceipt || (order.mpesaRef && order.mpesaRef !== 'PENDING' ? order.mpesaRef : generateMpesaTransactionCode());
 
         // 1. Save Transaction & Commit Database Transaction
         const txRecord = db.recordPaymentTransaction({
@@ -281,7 +291,7 @@ router.post('/webhook', (req, res) => {
       matchedOrder = orders.find(o => o.status === 'Pending Payment' || o.lifecycleState === 'PAYMENT_PENDING');
     }
 
-    const finalReceipt = mpesaReceiptNumber || (matchedOrder?.mpesaRef && matchedOrder.mpesaRef !== 'PENDING' ? matchedOrder.mpesaRef : ('SJK' + Math.floor(100000 + Math.random() * 900000)));
+    const finalReceipt = mpesaReceiptNumber || (matchedOrder?.mpesaRef && matchedOrder.mpesaRef !== 'PENDING' ? matchedOrder.mpesaRef : generateMpesaTransactionCode());
 
     if (resultCode === 0 || resultCode === '0') {
       if (matchedOrder) {

@@ -9,7 +9,7 @@ console.log('🧾 STARTING RECEIPT LAYOUT SPECIFICATION VERIFICATION...\n');
 const mockJob = {
   id: '#CPHCVTUR28',
   timestamp: new Date('2026-08-30T04:37:47').toISOString(),
-  mpesaRef: 'UHUFW4ROHB',
+  mpesaRef: 'UHUFN4R0HB',
   pages: 5,
   selectedPagesCount: 5,
   customPageRange: '1-5',
@@ -38,7 +38,7 @@ assert.ok(formattedDate.includes('/2026, '), 'Paid at must format as DD/MM/YYYY,
 console.log(`  ✔ [2] Paid at        : ${formattedDate}`);
 
 // 3. M-Pesa receipt code
-assert.strictEqual(mockJob.mpesaRef, 'UHUFW4ROHB', 'M-Pesa receipt must match exact transaction code');
+assert.strictEqual(mockJob.mpesaRef, 'UHUFN4R0HB', 'M-Pesa receipt must match exact transaction code');
 console.log(`  ✔ [3] M-Pesa receipt : ${mockJob.mpesaRef}`);
 
 // 4. Pages

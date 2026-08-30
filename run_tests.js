@@ -188,7 +188,7 @@ async function runAllTests() {
           CheckoutRequestID: payRes.data.checkoutRequestId,
           CallbackMetadata: {
             Item: [
-              { Name: 'MpesaReceiptNumber', Value: 'SJK492019' },
+              { Name: 'MpesaReceiptNumber', Value: 'UHUFN4R0HB' },
               { Name: 'Amount', Value: 60 },
               { Name: 'PhoneNumber', Value: 254712345678 }
             ]
@@ -198,7 +198,7 @@ async function runAllTests() {
     });
     assert.strictEqual(webhookRes.status, 200);
     const settledOrder = db.getOrderById(orderId);
-    assert.strictEqual(settledOrder.mpesaRef, 'SJK492019');
+    assert.strictEqual(settledOrder.mpesaRef, 'UHUFN4R0HB');
     console.log(`  ✔ Daraja Webhook verified and settled transaction: ${settledOrder.mpesaRef}.`);
 
     // 14. Print Agent Polling

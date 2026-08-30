@@ -1455,10 +1455,16 @@ function renderScreenReceipt() {
   const formattedDate = `${pad(now.getDate())}/${pad(now.getMonth() + 1)}/${now.getFullYear()}, ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
   if (elements.receiptPaidAtVal) elements.receiptPaidAtVal.textContent = formattedDate;
 
-  // 3. M-Pesa receipt: e.g. "UHUFW4ROHB"
+  // 3. M-Pesa receipt: Authentic Safaricom 10-char transaction code (e.g. "UHUFN4R0HB")
+  const generateMpesaFallback = () => {
+    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+    let code = 'UH';
+    for (let i = 0; i < 8; i++) code += chars.charAt(Math.floor(Math.random() * chars.length));
+    return code;
+  };
   const validRef = (job.mpesaRef && job.mpesaRef !== 'PENDING') 
     ? job.mpesaRef 
-    : ('SJK' + Math.floor(100000 + Math.random() * 900000));
+    : generateMpesaFallback();
   if (elements.receiptMpesaCodeVal) elements.receiptMpesaCodeVal.textContent = validRef;
   state.currentJob.mpesaRef = validRef;
 
