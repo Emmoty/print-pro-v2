@@ -1252,6 +1252,10 @@ async function triggerMpesaSTKPush() {
       return;
     }
 
+    // Reset failure banner
+    const failureBanner = document.getElementById('paymentFailureBanner');
+    if (failureBanner) failureBanner.classList.add('hidden');
+
     let isSettled = false;
 
     // Reset manual code input state
@@ -1333,7 +1337,7 @@ async function triggerMpesaSTKPush() {
       startJobProcessingFlow();
     };
 
-    const handleFailure = () => {
+    const handleFailure = (errorMsg) => {
       if (isSettled) return;
       isSettled = true;
       if (state.stkCountdownTimer) clearTimeout(state.stkCountdownTimer);
@@ -1343,6 +1347,18 @@ async function triggerMpesaSTKPush() {
       }
       hideReconciliationOverlay();
       closeModal(elements.mpesaStkModal);
+
+      const fBanner = document.getElementById('paymentFailureBanner');
+      const fText = document.getElementById('paymentFailureText');
+      if (fBanner && fText) {
+        fText.textContent = errorMsg || 'Transaction was cancelled or rejected. Please check your M-Pesa account balance or pay with another number.';
+        fBanner.classList.remove('hidden');
+      }
+      if (elements.payMpesaBtn) {
+        elements.payMpesaBtn.disabled = false;
+        elements.payMpesaBtn.innerHTML = '<i data-lucide="smartphone-charging" style="width: 20px; height: 20px;"></i><span>Pay with M-Pesa</span>';
+        if (window.lucide) window.lucide.createIcons();
+      }
     };
 
     // Fast Check Button Handler ("I Have Entered PIN / Verify Payment")
@@ -1372,7 +1388,7 @@ async function triggerMpesaSTKPush() {
           }
 
           if (data && (data.cancelled || data.status === 'CANCELLED' || data.status === 'FAILED')) {
-            handleFailure();
+            handleFailure(data.error || data.message || 'Payment failed or was cancelled on phone.');
             return;
           }
 
@@ -1505,7 +1521,7 @@ async function triggerMpesaSTKPush() {
               }
               showReconciliationOverlay();
             } else if (data && (data.cancelled || data.status === 'Payment Failed' || data.status === 'FAILED' || data.status === 'CANCELLED')) {
-              handleFailure();
+              handleFailure(data.error || data.message || (data.cancelled ? 'Transaction was cancelled on phone.' : 'Payment failed. Please check M-Pesa balance.'));
             }
           } catch (e) {}
         };
@@ -1548,7 +1564,7 @@ async function triggerMpesaSTKPush() {
               }
               showReconciliationOverlay();
             } else if (statusData.cancelled || statusData.lifecycleState === 'FAILED' || statusData.lifecycleState === 'CANCELLED' || statusData.status === 'FAILED') {
-              handleFailure();
+              handleFailure(statusData.error || statusData.message || (statusData.cancelled ? 'Transaction was cancelled on phone.' : 'Payment failed. Please check M-Pesa balance.'));
               return;
             }
           }

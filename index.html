@@ -388,6 +388,15 @@
               <span class="total-amount" id="reviewTotalAmount">KES 30</span>
             </div>
 
+            <!-- Payment Failure Alert Banner -->
+            <div id="paymentFailureBanner" class="payment-failure-banner hidden" style="background: rgba(239, 68, 68, 0.12); border: 1px solid rgba(239, 68, 68, 0.35); border-radius: var(--radius-md); padding: 10px 14px; margin-bottom: 12px; display: flex; align-items: flex-start; gap: 8px;">
+              <i data-lucide="alert-circle" style="width: 18px; height: 18px; color: #ef4444; flex-shrink: 0; margin-top: 1px;"></i>
+              <div style="font-size: 0.78rem; color: #fca5a5; line-height: 1.4;">
+                <strong style="color: #ffffff; display: block; margin-bottom: 2px;">Payment Not Completed</strong>
+                <span id="paymentFailureText">Transaction was cancelled or rejected. Please check your M-Pesa account balance or pay with another number.</span>
+              </div>
+            </div>
+
             <!-- Pay with M-Pesa Button -->
             <button class="btn-mpesa-pay" id="payMpesaBtn">
               <i data-lucide="smartphone-charging" style="width: 20px; height: 20px;"></i>

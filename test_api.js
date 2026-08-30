@@ -136,8 +136,65 @@ async function runApiTests() {
     assert.strictEqual(webhookRes.data.ResultCode, 0);
     console.log('  ✔ Webhook callback processed and committed MpesaReceiptNumber UHUFWR4OHB.');
 
-    // 8. Print Agent Mutual Authentication & Queue Polling
-    console.log('\n🧪 Test 8: Print Agent Polling (/api/print/poll-queue)');
+    // 8. Insufficient Funds & Failure Handling
+    console.log('\n🧪 Test 8: Insufficient Funds Webhook Handling (ResultCode: 1)');
+    const failOrderRes = await request({ path: '/api/orders/create', method: 'POST' }, {
+      files: [{ name: 'Test.pdf', pages: 1 }],
+      paperSize: 'a4',
+      colorMode: 'bw',
+      copies: 1,
+      phone: '0711223344',
+      idempotencyKey: 'test_fail_order_' + Date.now()
+    });
+    const failJobId = failOrderRes.data.order.id;
+
+    const failPayRes = await request({ path: '/api/payments/stk-push', method: 'POST' }, {
+      jobId: failJobId,
+      phone: '0711223344',
+      amount: 1
+    });
+
+    const failWebhookRes = await request({ path: '/api/payments/webhook', method: 'POST' }, {
+      Body: {
+        stkCallback: {
+          MerchantRequestID: failPayRes.data.merchant_request_id,
+          CheckoutRequestID: failPayRes.data.checkout_request_id,
+          ResultCode: 1,
+          ResultDesc: 'The balance is insufficient for the transaction.'
+        }
+      }
+    });
+    assert.strictEqual(failWebhookRes.status, 200);
+
+    const failStatus = await request({ path: `/api/payments/${encodeURIComponent(failJobId)}/status`, method: 'GET' });
+    assert.strictEqual(failStatus.data.paid, false);
+    assert.strictEqual(failStatus.data.status, 'FAILED');
+    console.log('  ✔ Insufficient funds correctly handled: Order marked FAILED.');
+
+    // 9. Manual SMS Receipt Code Claiming
+    console.log('\n🧪 Test 9: Manual SMS Receipt Code Verification (/api/payments/verify-code)');
+    const manualOrderRes = await request({ path: '/api/orders/create', method: 'POST' }, {
+      files: [{ name: 'ReceiptTest.pdf', pages: 2 }],
+      paperSize: 'a4',
+      colorMode: 'colour',
+      copies: 1,
+      phone: '0722334455',
+      idempotencyKey: 'test_manual_order_' + Date.now()
+    });
+    const manualJobId = manualOrderRes.data.order.id;
+
+    const verifyCodeRes = await request({ path: '/api/payments/verify-code', method: 'POST' }, {
+      jobId: manualJobId,
+      code: 'UHUF99CODE',
+      phone: '0722334455'
+    });
+    assert.strictEqual(verifyCodeRes.status, 200);
+    assert.strictEqual(verifyCodeRes.data.paid, true);
+    assert.strictEqual(verifyCodeRes.data.mpesa_receipt_number, 'UHUF99CODE');
+    console.log('  ✔ Manual SMS receipt code verified and claimed.');
+
+    // 10. Print Agent Mutual Authentication & Queue Polling
+    console.log('\n🧪 Test 10: Print Agent Polling (/api/print/poll-queue)');
     const agentPoll = await request({
       path: '/api/print/poll-queue',
       method: 'GET',
@@ -149,8 +206,8 @@ async function runApiTests() {
     assert.strictEqual(agentPoll.status, 200);
     console.log('  ✔ Authenticated print agent polled queue successfully.');
 
-    // 9. Admin Overview & RBAC Verification
-    console.log('\n🧪 Test 9: Admin Overview KPI API (/api/admin/overview)');
+    // 11. Admin Overview & RBAC Verification
+    console.log('\n🧪 Test 11: Admin Overview KPI API (/api/admin/overview)');
     const adminOverview = await request({
       path: '/api/admin/overview',
       method: 'GET',
